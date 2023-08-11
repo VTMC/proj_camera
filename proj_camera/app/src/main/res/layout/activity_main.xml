@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:elevation="2dp"
+    android:fadingEdge="vertical"
+    tools:context=".MainActivity">
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/viewFinder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="0dp">
+
+    </androidx.camera.view.PreviewView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/resolutionLayout"
+        android:layout_width="350dp"
+        android:layout_height="500dp"
+        android:alpha="0.8"
+        android:background="#FFFFFF"
+
+        android:visibility="gone"
+
+        app:layout_constraintBottom_toBottomOf="@+id/zoomBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/viewFinder">
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Resolution"
+            android:textSize="20dp"
+
+            android:textStyle="bold"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <RadioGroup
+            android:id="@+id/resRadioGrouup"
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView3">
+
+            <RadioButton
+                android:id="@+id/radioMax"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:text="Max Resolution" />
+
+            <RadioButton
+                android:id="@+id/radio38402160"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="2160*3840" />
+
+            <RadioButton
+                android:id="@+id/radio25601440"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1440*2560" />
+
+            <RadioButton
+                android:id="@+id/radio19201080"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1080*1920" />
+
+            <RadioButton
+                android:id="@+id/radio1280720"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="720*1280" />
+
+            <RadioButton
+                android:id="@+id/radio640480"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="480*640" />
+
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="saveType"
+            android:textSize="20dp"
+            android:textStyle="bold"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/resRadioGrouup" />
+
+        <RadioGroup
+            android:id="@+id/typeRadioGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView2">
+
+            <RadioButton
+                android:id="@+id/radioJPEG"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="JPEG" />
+
+            <RadioButton
+                android:id="@+id/radioPNG"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="PNG" />
+
+            <RadioButton
+                android:id="@+id/radioHEIC"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="HEIC" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="saveType(RAW)"
+            android:textSize="20dp"
+            android:textStyle="bold"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/typeRadioGroup" />
+
+        <RadioGroup
+            android:id="@+id/typeRadioGroupRaw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView4">
+
+            <RadioButton
+                android:id="@+id/radioDNG"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                android:text="DNG" />
+
+            <RadioButton
+                android:id="@+id/radioARW"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARW" />
+
+            <RadioButton
+                android:id="@+id/radioCRW"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="CRW" />
+
+            <RadioButton
+                android:id="@+id/radioNEF"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="NEF" />
+
+            <RadioButton
+                android:id="@+id/radioRAW"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RAW" />
+        </RadioGroup>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!--줌 배율 텍스트뷰-->
+    <TextView
+        android:id="@+id/viewZoomRatio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+
+        android:background="#FFFFFF"
+        android:text="zoomRatio"
+        android:textSize="20dp"
+        android:textStyle="bold"
+
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--줌 바 레이아웃-->
+    <LinearLayout
+        android:id="@+id/zoomBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#80FFFFFF"
+        android:elevation="10dp"
+        android:orientation="horizontal"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/moreBtnSetting"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/zoomPer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:elevation="10dp"
+
+            android:text="ZoomRatio"
+            android:textColor="#000000"
+
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <SeekBar
+            android:id="@+id/zoomSeekBar"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+
+            android:layout_weight="9"
+            android:elevation="10dp" />
+
+
+    </LinearLayout>
+
+    <!--더보기 설정 레이아웃-->
+    <LinearLayout
+        android:id="@+id/moreBtnSetting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="10dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+
+        android:visibility="invisible"
+
+        app:layout_constraintBottom_toTopOf="@+id/imageCaptureBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/timerBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_marginLeft="5dp"
+
+            android:text="Timer" />
+
+        <!--<Button
+            android:id="@+id/advancedBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_marginLeft="5dp"
+
+            android:text="advanced" /> -->
+
+        <Button
+            android:id="@+id/resolutionBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_marginLeft="5dp"
+
+            android:text="resolution" />
+
+        <Button
+            android:id="@+id/zoomBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_marginLeft="5dp"
+
+
+            android:text="zoom" />
+
+    </LinearLayout>
+
+    <!--타이머 버튼 레이아웃-->
+    <LinearLayout
+        android:id="@+id/timerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="10dp"
+        android:gravity="center"
+
+        android:orientation="horizontal"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/zoomBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+
+        <Button
+            android:id="@+id/noTimerBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_marginLeft="5dp"
+
+            android:text="X" />
+
+        <Button
+            android:id="@+id/s3TimerBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_marginLeft="5dp"
+
+            android:text="3s" />
+
+        <Button
+            android:id="@+id/s5TimerBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_marginLeft="5dp"
+
+            android:text="5s" />
+
+        <Button
+            android:id="@+id/s10TimerBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_marginLeft="5dp"
+
+            android:text="10s" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/timerTxtLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_margin="20dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+
+            android:paddingHorizontal="20dp"
+            android:text="Timer"
+
+            android:textAlignment="center"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/timerTxt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:background="#FFFFFF"
+            android:text="0"
+            android:textAlignment="center"
+            android:textSize="50sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/advancedLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:alpha="0.8"
+        android:background="#FFFFFF"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ISO"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/isoPer"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+
+                android:gravity="center"
+                android:text="0"
+                android:textSize="20dp"
+
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/isoSpinner"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="IRIS"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/irisPer"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+
+                android:gravity="center"
+                android:text="0"
+                android:textSize="20dp"
+
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/irisSpinner"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SHUTTER SPEED"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/s_sPer"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+
+                android:gravity="center"
+                android:text="0"
+                android:textSize="20dp"
+
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/s_sSpinner"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <ImageButton
+        android:id="@+id/imageCaptureBtn"
+        style="@android:style/Widget.Holo.ImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:contentDescription="imageCaptureBtn"
+        app:layout_constraintBottom_toBottomOf="@+id/viewFinder"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/camera" />
+
+    <Button
+        android:id="@+id/torchAutoBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/torchAutoOn"
+
+        app:layout_constraintEnd_toStartOf="@+id/imageCaptureBtn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/torchBtn" />
+
+    <Button
+        android:id="@+id/torchBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/torchOn"
+        app:layout_constraintEnd_toStartOf="@+id/imageCaptureBtn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/moreBtnSetting" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/horizontal_grip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="711dp" />
+
+    <ImageButton
+        android:id="@+id/changeCameraBtn"
+        style="@android:style/Widget.Holo.ImageButton"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginStart="20dp"
+        android:contentDescription="changeCameraBtn"
+        app:layout_constraintBottom_toBottomOf="@+id/imageCaptureBtn"
+        app:layout_constraintStart_toEndOf="@+id/imageCaptureBtn"
+        app:layout_constraintTop_toTopOf="@+id/imageCaptureBtn"
+        app:srcCompat="@drawable/rotate_edited" />
+
+    <ImageButton
+        android:id="@+id/moreSettingBtn"
+        style="@android:style/Widget.Holo.ImageButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="15dp"
+        android:contentDescription="moreSettingBtn"
+        app:layout_constraintBottom_toBottomOf="@+id/imageCaptureBtn"
+        app:layout_constraintStart_toEndOf="@+id/changeCameraBtn"
+        app:layout_constraintTop_toTopOf="@+id/imageCaptureBtn"
+        app:srcCompat="@drawable/more_edited" />
+
+    <View
+        android:id="@+id/flashView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFFFFF"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/viewFinder"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

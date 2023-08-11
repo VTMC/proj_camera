@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">proj_camera</string>
+    <string name="take_photo">TAKE PHOTO</string>
+    <string name="torchOn">FLASH ON</string>
+    <string name="torchOff">FLASH OFF</string>
+    <string name="torchAutoOn">AUTO ON</string>
+    <string name="torchAutoOff">AUTO OFF</string>
+</resources>

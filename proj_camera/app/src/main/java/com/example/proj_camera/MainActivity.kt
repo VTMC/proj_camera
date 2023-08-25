@@ -504,7 +504,6 @@ class MainActivity : AppCompatActivity() {
         val contentValues = ContentValues().apply{
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, imageType)
-            //put(MediaStore.MediaColumns.CAPTURE_FRAMERATE, ImageFormat.YUV_444_888)
             //put(MediaStore.MediaColumns.COMPOSER, ImageFormat.RAW12)
             //put(MediaStore.MediaColumns.DATA, ImageFormat.RAW12)
             if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P){
@@ -580,7 +579,6 @@ class MainActivity : AppCompatActivity() {
             CameraSelector.LENS_FACING_FRONT
         }else{
             CameraSelector.LENS_FACING_BACK
-
         }
         startCamera()
     }

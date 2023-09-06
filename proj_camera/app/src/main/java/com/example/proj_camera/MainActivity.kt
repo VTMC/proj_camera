@@ -4,10 +4,19 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentProvider
 import android.content.ContentValues
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.ImageFormat
+import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CameraMetadata
+import android.hardware.camera2.CaptureRequest
+import android.hardware.camera2.CaptureResult
+import android.hardware.camera2.DngCreator
+import android.hardware.camera2.TotalCaptureResult
 import android.icu.text.ListFormatter.Width
 import android.media.Image
 import android.opengl.Visibility
@@ -29,6 +38,7 @@ import android.view.animation.AnimationUtils
 import android.widget.RadioButton
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraControl
@@ -40,6 +50,7 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_ZERO_SHUTTER_LAG
+import androidx.camera.core.ImageCapture.ERROR_INVALID_CAMERA
 import androidx.camera.core.ImageCapture.FLASH_MODE_AUTO
 import androidx.camera.core.ImageCapture.FLASH_MODE_OFF
 import androidx.camera.core.ImageCapture.FLASH_MODE_ON
@@ -47,11 +58,17 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.core.TorchState
+import androidx.camera.core.internal.CameraUseCaseAdapter
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import com.example.proj_camera.databinding.ActivityMainBinding
+import java.io.FileOutputStream
+import java.io.IOException
 import java.lang.reflect.Parameter
+import java.nio.file.Files.createFile
 import java.security.Policy.Parameters
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -97,6 +114,7 @@ class MainActivity : AppCompatActivity() {
     private var flashAutoOn : Boolean = false
 
     //imageType 변수 선언
+    private var onRaw : Boolean = false
     private var imageType : String = "image/jpeg"
 
     //cameraSettings
@@ -141,9 +159,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         //뷰 바인딩
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
@@ -155,6 +175,14 @@ class MainActivity : AppCompatActivity() {
         }else{
             //아닐 경우 실행
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+        }
+
+        //RAW 페이지로 이동하기 위한 버튼 클릭 설정
+        viewBinding.changeRawBtn.setOnClickListener{
+            onPause()
+
+            val intent = Intent(this, RawActivity::class.java)
+            startActivity(intent)
         }
 
         //사진 찍기 버튼을 위한 Listener 설정
@@ -429,8 +457,10 @@ class MainActivity : AppCompatActivity() {
                     txtImageType = "HEIC"
                 }
             }
+
             if(viewBinding.radioJPEG.isChecked || viewBinding.radioPNG.isChecked || viewBinding.radioHEIC.isChecked){
                 Toast.makeText(this, "${txtImageType} 선택됨", Toast.LENGTH_SHORT).show()
+                onRaw = false
                 viewBinding.typeRadioGroupRaw.clearCheck()
             }
         }
@@ -438,6 +468,7 @@ class MainActivity : AppCompatActivity() {
         viewBinding.typeRadioGroupRaw.setOnCheckedChangeListener{
             radioGroup, i -> when(i){
                 R.id.radioDNG -> {
+
                     imageType = "image/x-adobe-dng"
                     txtImageType = "DNG"
                 }
@@ -462,6 +493,7 @@ class MainActivity : AppCompatActivity() {
                     viewBinding.radioCRW.isChecked || viewBinding.radioNEF.isChecked ||
                     viewBinding.radioRAW.isChecked){
                 Toast.makeText(this, "${txtImageType} 선택됨", Toast.LENGTH_SHORT).show()
+                onRaw = true
                 viewBinding.typeRadioGroup.clearCheck()
             }
         }
@@ -488,8 +520,6 @@ class MainActivity : AppCompatActivity() {
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
-
-
     //사진을 찍게 되면 실행하는 함수
     private fun takePhoto(){
 
@@ -501,6 +531,7 @@ class MainActivity : AppCompatActivity() {
         //이미지를 보관할 MediaStore 콘텐츠 값을 만든다. 이름이 고유로 표시되도록 타임스탬프를 활용
         val name = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA)
             .format(System.currentTimeMillis())
+
         val contentValues = ContentValues().apply{
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, imageType)
@@ -519,6 +550,7 @@ class MainActivity : AppCompatActivity() {
                                      MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                                      contentValues)
                             .build()
+
         //사진이 찍힌 후 이미지 캡처 리스너를 설정
         /*imageCapture 객체에서 takePicture() 함수를 호출, outputOptions, 실행자, 이미지가 저장될 때
         * 콜백을 전달.*/
@@ -542,6 +574,7 @@ class MainActivity : AppCompatActivity() {
                     }, 500)
 
                     val msg = "사진 촬영 성공 : ${output.savedUri}"
+                    Log.d("KSM", "outputURI : ${output.savedUri}")
                     Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
                     Log.d(TAG, msg)
                 }
@@ -585,6 +618,10 @@ class MainActivity : AppCompatActivity() {
 
     //카메라가 시작되면 실행하는 함수
     private fun startCamera(){
+//        var cameraId  = getCameraId(this@MainActivity, lensfacing)
+//
+//        Log.d("KSM", cameraId)
+
         //ProcessCameraProvider 인스턴스 생성. 카메라 생명주기를 소유자와 바인딩하는데 사용.
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -679,6 +716,18 @@ class MainActivity : AppCompatActivity() {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
+    override fun onResume(){
+        super.onResume()
+
+        cameraExecutor = Executors.newSingleThreadExecutor()
+    }
+
+    override fun onPause(){
+        super.onPause()
+
+        cameraExecutor.shutdown()
+    }
+
     //어플이 꺼지게 될 경우에 사용하기 위한 함수
     override fun onDestroy() {
         super.onDestroy()
@@ -692,14 +741,17 @@ class MainActivity : AppCompatActivity() {
         //파일 이름 포맷을 나타냄
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
         //퍼미션에 대한 코드 번호를 나타냄
-        private const val REQUEST_CODE_PERMISSIONS = 10
+        const val REQUEST_CODE_PERMISSIONS = 10
         //필요로 하는 퍼미션을 리스트로 나타냄
-        private val REQUIRED_PERMISSIONS = mutableListOf(
+        val REQUIRED_PERMISSIONS = mutableListOf(
             Manifest.permission.CAMERA
         ).apply{
             if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.P){
                 add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }.toTypedArray()
+
+        /** Helper class used as a data holder for each selectable camera format item */
+        private data class FormatItem(val title: String, val cameraId: String, val format: Int)
     }
 }

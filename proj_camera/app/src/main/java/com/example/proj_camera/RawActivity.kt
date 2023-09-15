@@ -2,8 +2,8 @@ package com.example.proj_camera
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.Context
-import android.content.Context.CAMERA_SERVICE
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.ImageFormat
@@ -16,58 +16,40 @@ import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.CaptureResult
 import android.hardware.camera2.DngCreator
 import android.hardware.camera2.TotalCaptureResult
-import android.icu.lang.UCharacter.GraphemeClusterBreak.L
-import android.media.ExifInterface
 import android.media.Image
 import android.media.ImageReader
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
-import android.provider.CalendarContract.Instances
 import android.provider.MediaStore
-import android.util.AttributeSet
 import android.util.Log
-import android.util.Size
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.Camera
-import androidx.camera.core.CameraControl
-import androidx.camera.core.CameraInfo
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.example.android.camera.utils.OrientationLiveData
 import com.example.android.camera.utils.computeExifOrientation
 import com.example.android.camera.utils.getPreviewOutputSize
-import com.example.proj_camera.MainActivity.Companion.REQUEST_CODE_PERMISSIONS
-import com.example.proj_camera.MainActivity.Companion.REQUIRED_PERMISSIONS
 import com.example.proj_camera.databinding.RawActivityBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.Closeable
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
-import java.nio.file.Files.createFile
-import java.security.AccessController.getContext
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeoutException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -112,12 +94,13 @@ class RawActivity : AppCompatActivity() {
     //당사 매개 변수로 구성된 진행 중인 [Camera Capture Session]에 대한 내부 참조
     private lateinit var session: CameraCaptureSession
 
-    /** Live data listener for changes in the device orientation relative to the camera */
+    /** Live data listener for changes in the device orientation relative to the camera
+     *  > 카메라와 관련된 장치 방향 변경에 대한 라이브 데이터 수신기
+     * */
     private lateinit var relativeOrientation: OrientationLiveData
 
-//    /** Live data listener for changes in the device orientation relative to the camera */
-//    //카메라와 관련된 장치 방향 변경에 대한 라이브 데이터 수신기
-//    private lateinit var relativeOrientation: OrientationLiveData
+    //outputUri를 저장할 변수
+    private var outputUri : Uri ?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -140,6 +123,8 @@ class RawActivity : AppCompatActivity() {
                 Log.d("KSM", i.toString())
                 if(i.format == ImageFormat.RAW_SENSOR){
                     rawCameraInfo = i
+                }else{
+                    onPause()
                 }
             }
         }
@@ -180,10 +165,9 @@ class RawActivity : AppCompatActivity() {
 
         relativeOrientation = OrientationLiveData(this, characteristics!!).apply{
             observe(this@RawActivity, Observer { orientation ->
-                //제공된 카메라 ID에 해당하는 '카메라 특성'을 불러오는 characteristics
-                characteristics = cameraManager.getCameraCharacteristics(cameraId!!)
                 Log.d("KSM", "Orientation changed $orientation ")
-                Log.d("KSM", "Camera Characteristics : ${characteristics.toString()}")
+//                characteristics.Key(CaptureResult.LENS_POSE_ROTATION, relativeOrientation)
+                Log.d("KSM", "Camera Characteristics ORIENTATION : ${characteristics!![CameraCharacteristics.SENSOR_ORIENTATION]}")
             })
         }
 
@@ -196,17 +180,6 @@ class RawActivity : AppCompatActivity() {
 
     }
 
-    private fun getOutputDirectory(): File {
-        val mediaDir = externalMediaDirs.firstOrNull()?.let {
-            File(it, "CameraProj-Image RAW").apply { mkdirs() }
-//            File("/storage/emulated/0/Android/media/Pictures","CameraProj-Image").apply { mkdirs() }
-        }
-//        Log.d("KSM", "mediaDir : ${mediaDir}")
-//        Log.d("KSM", "mediaDir.exists() : ${mediaDir?.exists()}")
-        return if (mediaDir != null && mediaDir.exists())
-            mediaDir else filesDir
-    }
-
     //카메라가 시작되면 실행하는 함수
     private fun startCamera() = lifecycleScope.launch(Dispatchers.Main){
         camera2 = openCamera(cameraManager, rawCameraInfo!!.cameraId, cameraHandler)
@@ -214,7 +187,6 @@ class RawActivity : AppCompatActivity() {
         val size = characteristics!!.get(
             CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
             .getOutputSizes(rawCameraInfo!!.format).maxByOrNull{it.height*it.width}!!
-
         Log.d("KSM", "Size : ${size}")
 
         imageReader = ImageReader.newInstance(
@@ -227,10 +199,12 @@ class RawActivity : AppCompatActivity() {
 
         session = createCaptureSession(camera2!!, targets, cameraHandler)
 
-        val captureRequest = camera2!!.createCaptureRequest(
-            CameraDevice.TEMPLATE_PREVIEW).apply{addTarget(viewBinding.rawViewFinder.holder.surface)}
+        val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
+                addTarget(viewBinding.rawViewFinder.holder.surface)
+            }
 
         session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+
 
         //캡처버튼을 클릭했을 경우
         viewBinding.imageCaptureBtn.setOnClickListener{
@@ -248,17 +222,17 @@ class RawActivity : AppCompatActivity() {
                 takePhoto().use { result ->
                     Log.d("KSM", "Result received: $result")
 
-                    // Save the result to disk
-                    val output = saveResult(result)
+                    // Save the result to disk - 이전의 흔적 (이미지 저장)
+//                    val output = saveResult(result) - 이전의 흔적 (이미지 저장)
 
-                    Log.d("KSM", "Image saved: ${output.absolutePath}")
-
+                    outputUri = saveResult(result)
+//                    Log.d("KSM", "Image saved: ${output.absolutePath}") - 이전의 흔적 (이미지 저장)
                 }
             }
 
             it.post{
                 it.isEnabled = true
-                Toast.makeText(this@RawActivity, "Image Captured! \n It will take some time to get image", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@RawActivity, "Image Captured! \n  location:${outputUri.toString()}", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -282,7 +256,12 @@ class RawActivity : AppCompatActivity() {
         }, imageReaderHandler)
 
         val captureRequest = session.device.createCaptureRequest(
-            CameraDevice.TEMPLATE_STILL_CAPTURE).apply { addTarget(imageReader.surface) }
+            CameraDevice.TEMPLATE_STILL_CAPTURE).apply {
+                addTarget(imageReader.surface)
+            }
+
+        Log.d("KSM", "captureRequest's JPEG_ORIENTATION : ${captureRequest.get(CaptureRequest.JPEG_ORIENTATION)}")
+
         session.capture(captureRequest.build(), object : CameraCaptureSession.CaptureCallback() {
 
             override fun onCaptureCompleted(
@@ -291,6 +270,7 @@ class RawActivity : AppCompatActivity() {
                 result: TotalCaptureResult
             ) {
                 super.onCaptureCompleted(session, request, result)
+
                 val resultTimestamp = result.get(CaptureResult.SENSOR_TIMESTAMP)
                 Log.d("KSM", "Capture result received: $resultTimestamp")
 
@@ -427,31 +407,62 @@ class RawActivity : AppCompatActivity() {
     }
 
     /** Helper function used to save a [CombinedCaptureResult] into a [File] */
-    private suspend fun saveResult(result: CombinedCaptureResult): File = suspendCoroutine { cont ->
+    private suspend fun saveResult(result: CombinedCaptureResult) = suspendCoroutine { cont ->
         when (result.format) {
             // When the format is RAW we use the DngCreator utility library
             ImageFormat.RAW_SENSOR -> {
+                Log.d("KSM", "result's metadata orientation : ${result.metadata.get(CaptureResult.JPEG_ORIENTATION)}")
+
                 val dngCreator = DngCreator(characteristics!!, result.metadata)
 
                 try {
-                    //디렉토리 설정
-                    outputDirectory = getOutputDirectory()
-                    Log.d("KSM", "outputDirectory : ${outputDirectory}")
+//                    outputDirectory = getOutputDirectory() - 이전의 흔적 (이미지 저장)
+
                     val timestamp = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA).format(System.currentTimeMillis())
-                    val fileName = "RAW_$timestamp.dng"
+//                    val fileName = "RAW_$timestamp.dng" - 이전의 흔적 (이미지 저장)
+                    val fileName = "RAW_$timestamp"
+
+                    //디렉토리 설정 (현재 - MediaStore 활용)
+                    val contentValues = ContentValues().apply{
+                        put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                        put(MediaStore.Images.Media.MIME_TYPE, "image/x-adobe-dng")
+                        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P){
+                            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraProj-Image RAW")
+                        }
+                    }
+
+                    val resolver = this.contentResolver
+                    val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+                    Log.d("KSM", "outputDirectory : ${uri}")
+
+                    /** 이전의 흔적 (이미지 저장)
                     val output = File(outputDirectory, fileName)
-
-
-//                    val outputFile = File("Pictures/CameraProj-Image", fileName)
-
-//                    Log.d("KSM", "OutputFile.parent : ${output.parent}")
                     Log.d("KSM", "OutputFile.path : ${output.path}")
+                    **/
 
+                    //사진 회전
+                    dngCreator.setOrientation(result.orientation)
+
+                    uri?.let{imageUri ->
+                        val outputStream = resolver.openOutputStream(imageUri)
+                        if (outputStream != null) {
+                            dngCreator.writeImage(outputStream, result.image)
+                        }else{
+                            Log.d("KSM", "Image Write Wrong!!!!")
+                        }
+                        outputStream?.close()
+                    }
+
+                    /** 이전의 흔적 (이미지 저장)
                     FileOutputStream(output).use {
                         dngCreator.writeImage(it, result.image)
                     }
+                    **/
 
-                    cont.resume(output)
+
+                    cont.resume(uri)
+//                    cont.resume(output) - 이전의 흔적 (이미지 저장)
                 } catch (exc: IOException) {
                     Log.e("KSM", "Unable to write DNG image to file", exc)
                     cont.resumeWithException(exc)
@@ -467,7 +478,19 @@ class RawActivity : AppCompatActivity() {
         }
     }
 
-    //camera2
+    /** 이전의 흔적 (이미지 저장)
+//    private fun getOutputDirectory(): File {
+//        val mediaDir = externalMediaDirs.firstOrNull()?.let {
+//            File(it, "CameraProj-Image RAW").apply { mkdirs() }
+////            File("/storage/emulated/0/Android/media/Pictures","CameraProj-Image").apply { mkdirs() }
+//        }
+//
+////        Log.d("KSM", "mediaDir : ${mediaDir}")
+////        Log.d("KSM", "mediaDir.exists() : ${mediaDir?.exists()}")
+//        return if (mediaDir != null && mediaDir.exists())
+//            mediaDir else filesDir
+//    }**/
+
     override fun onPause(){
         super.onPause()
 
@@ -476,7 +499,6 @@ class RawActivity : AppCompatActivity() {
         }catch(exc: Throwable){
             Log.e("KSM", "Error closing camera", exc)
         }
-
     }
 
     override fun onDestroy() {

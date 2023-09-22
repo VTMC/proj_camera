@@ -6,32 +6,53 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
 import android.graphics.ImageFormat
+import android.graphics.Matrix
+import android.graphics.Rect
+import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
+import android.hardware.camera2.CameraExtensionCharacteristics
+import android.hardware.camera2.CameraExtensionSession
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
 import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.CaptureResult
 import android.hardware.camera2.DngCreator
 import android.hardware.camera2.TotalCaptureResult
+import android.hardware.camera2.params.ExtensionSessionConfiguration
+import android.hardware.camera2.params.MeteringRectangle
+import android.hardware.camera2.params.OutputConfiguration
+import android.media.ExifInterface
 import android.media.Image
 import android.media.ImageReader
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
+import android.util.Size
+import android.view.MotionEvent
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.TorchState
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.CameraController
+import androidx.coordinatorlayout.widget.CoordinatorLayout.Behavior.setTag
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
@@ -39,13 +60,18 @@ import androidx.lifecycle.lifecycleScope
 import com.example.android.camera.utils.OrientationLiveData
 import com.example.android.camera.utils.computeExifOrientation
 import com.example.android.camera.utils.getPreviewOutputSize
+import com.example.proj_camera.MainActivity.Companion.REQUEST_CODE_PERMISSIONS
+import com.example.proj_camera.MainActivity.Companion.REQUIRED_PERMISSIONS
 import com.example.proj_camera.databinding.RawActivityBinding
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.Closeable
 import java.io.File
 import java.io.IOException
+import java.nio.ByteBuffer
+import java.nio.file.Files.setAttribute
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.ArrayBlockingQueue
@@ -73,7 +99,7 @@ class RawActivity : AppCompatActivity() {
 
     private var characteristics : CameraCharacteristics ?= null
 
-    private lateinit var outputDirectory: File
+//    private lateinit var outputDirectory: File
 
     /** Readers used as buffers for camera still shots */
     private lateinit var imageReader: ImageReader
@@ -102,6 +128,98 @@ class RawActivity : AppCompatActivity() {
     //outputUri를 저장할 변수
     private var outputUri : Uri ?= null
 
+    //previewSize를 저장
+    private lateinit var previewSize: Size
+
+    //Torch상태를 저장
+    private var torchState: Boolean = false
+
+//    //previewSurface 변수 설정
+//    private lateinit var previewSurface: Surface
+//    //현재 camera extension session 변수
+//    private lateinit var cameraExtensionSession: CameraExtensionSession
+//    //현재 extension type과 index를 추적
+//    private var currentExtension = -1
+//    //extensions를 도와주기 위한 리스트
+//    private val supportedExtensions = ArrayList<Int>()
+//    //현재 CameraDevice를 위한 Camera extension characteristics 변수
+//    private lateinit var extensionCharacteristics: CameraExtensionCharacteristics
+//
+//    //시간 초과 후 자동 포커스 취소 디스패치에 사용
+//    private val tapToFocusTimeoutHandler = Handler(Looper.getMainLooper())
+
+//    //사소한 캡쳐콜백 생성
+//    private val captureCallbacks: CameraExtensionSession.ExtensionCaptureCallback =
+//        @RequiresApi(Build.VERSION_CODES.S)
+//        object : CameraExtensionSession.ExtensionCaptureCallback() {
+//            override fun onCaptureStarted(
+//                session: CameraExtensionSession, request: CaptureRequest,
+//                timestamp: Long
+//            ) {
+//                Log.v("KSM", "onCaptureStarted ts: $timestamp")
+//            }
+//
+//            override fun onCaptureProcessStarted(
+//                session: CameraExtensionSession,
+//                request: CaptureRequest
+//            ) {
+//                Log.v("KSM", "onCaptureProcessStarted")
+//            }
+//
+//            override fun onCaptureResultAvailable(
+//                session: CameraExtensionSession,
+//                request: CaptureRequest,
+//                result: TotalCaptureResult
+//            ) {
+//                Log.v("KSM", "onCaptureResultAvailable")
+//                if (request.tag == AUTO_FOCUS_TAG) {
+//                    Log.v("KSM", "Auto focus region requested")
+//
+//                    // Consider listening for auto focus state such as auto focus locked
+//                    cameraExtensionSession.stopRepeating()
+//                    val autoFocusRegions = request.get(CaptureRequest.CONTROL_AF_REGIONS)
+//                    submitRequest(
+//                        CameraDevice.TEMPLATE_PREVIEW,
+//                        previewSurface,
+//                        true,
+//                    ) { builder ->
+//                        builder.apply {
+//                            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO)
+//                            set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_IDLE)
+//                            set(CaptureRequest.CONTROL_AF_REGIONS, autoFocusRegions)
+//                        }
+//                    }
+//
+//                    queueAutoFocusReset()
+//                }
+//            }
+//
+//            override fun onCaptureFailed(
+//                session: CameraExtensionSession,
+//                request: CaptureRequest
+//            ) {
+//                Log.v("KSM", "onCaptureProcessFailed")
+//            }
+//
+//            override fun onCaptureSequenceCompleted(
+//                session: CameraExtensionSession,
+//                sequenceId: Int
+//            ) {
+//                Log.v("KSM", "onCaptureProcessSequenceCompleted: $sequenceId")
+//            }
+//
+//            override fun onCaptureSequenceAborted(
+//                session: CameraExtensionSession,
+//                sequenceId: Int
+//            ) {
+//                Log.v("KSM", "onCaptureProcessSequenceAborted: $sequenceId")
+//            }
+//        }
+
+    //zoom관련 변수
+    private var zoomRatio: Float = 1.0f
+
+//    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -123,13 +241,25 @@ class RawActivity : AppCompatActivity() {
                 Log.d("KSM", i.toString())
                 if(i.format == ImageFormat.RAW_SENSOR){
                     rawCameraInfo = i
+                    Log.d("KSM", "RAW EXIST!!!!")
                 }else{
                     onPause()
                 }
             }
         }
 
-        viewBinding.rawViewFinder.holder.addCallback(object : SurfaceHolder.Callback {
+//        extensionCharacteristics = cameraManager.getCameraExtensionCharacteristics(cameraId!!)
+//        supportedExtensions.addAll(extensionCharacteristics.supportedExtensions)
+//        if(currentExtension == -1){
+//            currentExtension = supportedExtensions[0]
+//        }
+
+//        if(currentExtension == -1){
+//            currentExtension = supportedExtensions[0]
+//            currentExtension = 0
+//        }
+
+         viewBinding.rawViewFinder.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
 
             override fun surfaceChanged(
@@ -140,17 +270,69 @@ class RawActivity : AppCompatActivity() {
 
             override fun surfaceCreated(holder: SurfaceHolder) {
                 // Selects appropriate preview size and configures view finder
-                val previewSize = getPreviewOutputSize(
+                previewSize = getPreviewOutputSize(
                     viewBinding.rawViewFinder.display,
                     characteristics!!,
                     SurfaceHolder::class.java
                 )
+
                 Log.d("KSM", "View finder size: ${viewBinding.rawViewFinder.width} x ${viewBinding.rawViewFinder.height}")
                 Log.d("KSM", "Selected preview size: $previewSize")
                 viewBinding.rawViewFinder.setAspectRatio(
-                    previewSize.width,
-                    previewSize.height
+                    previewSize!!.width,
+                    previewSize!!.height
                 )
+
+                //Surface need API Level 29 (Android 10.0)
+//                previewSurface = Surface(viewBinding.rawViewFinder.surfaceControl)
+
+                //OutputConfiguration need API Level 24 (Android 7.0)
+//                val outputConfig = ArrayList<OutputConfiguration>()
+//                outputConfig.add(OutputConfiguration(viewBinding.rawViewFinder.holder.surface))
+//                outputConfig.add(OutputConfiguration(previewSurface))
+
+//                val extensionConfiguration = ExtensionSessionConfiguration(
+//                currentExtension, outputConfig,
+//                Dispatchers.IO.asExecutor(), object: CameraExtensionSession.StateCallback(){
+//                    override fun onConfigured(session: CameraExtensionSession) {
+//                        cameraExtensionSession = session
+//                        submitRequest(
+//                            CameraDevice.TEMPLATE_PREVIEW,
+//                            previewSurface,
+//                            true
+//                        ){ request ->
+//                            request.apply{
+//                                set(CaptureRequest.CONTROL_ZOOM_RATIO, zoomRatio)
+//                            }
+//                        }
+//                    }
+//
+//                    override fun onConfigureFailed(session: CameraExtensionSession) {
+//                        val text = "ExtensionSessionConfigureFailed"
+//
+//                        Toast.makeText(
+//                            this@RawActivity,
+//                            text,
+//                            Toast.LENGTH_SHORT
+//                        ).show()
+//
+//                        Log.d("KSM", text)
+//
+//                        this@RawActivity.finish()
+//                    }
+//                }
+//            )
+
+//            try{
+//                camera2!!.createExtensionSession(extensionConfiguration)
+//            }catch(e: CameraAccessException){
+//                Toast.makeText(
+//                    this@RawActivity,
+//                    "Failed during extension initialization!",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+//                this@RawActivity.finish()
+//            }
 
                 if(allPermissionGranted()){
                     startCamera()
@@ -163,6 +345,7 @@ class RawActivity : AppCompatActivity() {
             }
         })
 
+        //orientation값을 실시간으로 설정
         relativeOrientation = OrientationLiveData(this, characteristics!!).apply{
             observe(this@RawActivity, Observer { orientation ->
                 Log.d("KSM", "Orientation changed $orientation ")
@@ -171,18 +354,47 @@ class RawActivity : AppCompatActivity() {
             })
         }
 
+        //Torch 버튼
+        viewBinding.torchBtn.setOnClickListener{
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){ //안드로이드 6.0 이상이여야 정상작동
+                viewBinding.torchBtn.isEnabled = true
+                when(torchState){
+                    false -> {
+                        try{
+                            cameraManager.setTorchMode(cameraId!!, true)
+                            viewBinding.torchBtn.background = ContextCompat.getDrawable(this@RawActivity, R.drawable.roundcorner_clicked)
+                            torchState = true
+                        }catch(e: CameraAccessException){
+                            Log.e("KSM", "Torch Error")
+                        }
+
+
+                    }
+                    true -> {
+                        cameraManager.setTorchMode(cameraId!!, false)
+                        viewBinding.torchBtn.background = ContextCompat.getDrawable(this@RawActivity, R.drawable.roundcorner)
+                        torchState = false
+                    }
+                }
+            }else{
+                viewBinding.torchBtn.isEnabled = false
+            }
+        }
+
+        //Normal 카메라 전환 버튼
         viewBinding.changeNormalBtn.setOnClickListener {
             onPause()
 
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
-
     }
 
     //카메라가 시작되면 실행하는 함수
     private fun startCamera() = lifecycleScope.launch(Dispatchers.Main){
         camera2 = openCamera(cameraManager, rawCameraInfo!!.cameraId, cameraHandler)
+
+        Log.d("KSM", "CameraActivated")
 
         val size = characteristics!!.get(
             CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
@@ -236,7 +448,41 @@ class RawActivity : AppCompatActivity() {
             }
         }
 
-        Log.d("KSM", "CameraActivated")
+        //ManualFocus 관련 변수 및 제스처 설정
+        var clickCount: Int = 0
+        var startTime: Long = 0
+        var duration: Long = 0
+        var MAX_DURATION = 300;
+
+        viewBinding.texture.setOnTouchListener(View.OnTouchListener{ v: View, event: MotionEvent ->
+            when(event.action){
+                MotionEvent.ACTION_DOWN -> {
+                    startTime = System.currentTimeMillis()
+                    clickCount++
+
+                    Log.d("KSM", "clickCount:${clickCount} / startTime:${startTime} / duration:${duration}")
+
+                    return@OnTouchListener true
+                }
+                MotionEvent.ACTION_UP -> {
+                    var nowTime = System.currentTimeMillis() - startTime
+                    duration += nowTime
+
+                    if(clickCount >= 2){
+                        if(duration <= MAX_DURATION){
+                            Log.d("KSM", "ManualFocused")
+
+//                            tapToFocus(event)
+                        }else {
+                            clickCount = 0
+                            duration = 0
+                        }
+                    }
+                    return@OnTouchListener true
+                }
+                else -> return@OnTouchListener false
+            }
+        })
     }
 
     private suspend fun takePhoto():
@@ -424,17 +670,32 @@ class RawActivity : AppCompatActivity() {
 
                     //디렉토리 설정 (현재 - MediaStore 활용)
                     val contentValues = ContentValues().apply{
-                        put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
-                        put(MediaStore.Images.Media.MIME_TYPE, "image/x-adobe-dng")
-                        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P){
+                        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P){ //API Level 29 (Android 10.0) 이상
+                            put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                            put(MediaStore.Images.Media.MIME_TYPE, "image/x-adobe-dng")
+    //                        put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
                             put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraProj-Image RAW")
+                        }else{
+//                            val envImageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).absolutePath+"/CameraProj-Image"
+//                            val imagesDir = File(envImageDir)
+//                            if(!imagesDir.exists()){
+//                                imagesDir.mkdir()
+//                            }
+                            val imagesDir = Environment.getExternalStoragePublicDirectory(
+                                Environment.DIRECTORY_PICTURES)
+                            val imageFile = File(imagesDir, "${fileName}.dng")
+                            put(MediaStore.Images.Media.DATA, imageFile.absolutePath)
+                            Log.d("KSM", "image Path : ${imagesDir.absolutePath}")
                         }
+//                        else{ //Under API Level 29 (Android 10.0), Api Level 1부터 가능
+//                            put(MediaStore.Images.Media.DATA, "/storage/emulated/0/Pictures/CameraProj-Image RAW/${fileName}.dng")
+//                        }
                     }
 
                     val resolver = this.contentResolver
                     val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 
-                    Log.d("KSM", "outputDirectory : ${uri}")
+                    Log.d("KSM", "outputDirectory : ${uri!!.path}")
 
                     /** 이전의 흔적 (이미지 저장)
                     val output = File(outputDirectory, fileName)
@@ -446,13 +707,29 @@ class RawActivity : AppCompatActivity() {
 
                     uri?.let{imageUri ->
                         val outputStream = resolver.openOutputStream(imageUri)
+
+
                         if (outputStream != null) {
                             dngCreator.writeImage(outputStream, result.image)
+//                            try{
+//                                val exif = ExifInterface(dngImage)
+//                            }
                         }else{
                             Log.d("KSM", "Image Write Wrong!!!!")
                         }
+
+                        try{
+                            val exif = ExifInterface("/storage/emulated/0/Pictures/CameraProj-Image RAW/${fileName}.dng")
+//                            exif.setAttribute(ExifInterface.TAG_DATETIME, timestamp)
+                            Log.d("KSM", "Exif : ${exif.getAttribute(ExifInterface.TAG_DATETIME)}")
+                        }catch(exc: IOException){
+                            Log.e("KSM", "Error writing EXIF", exc)
+                        }
+
                         outputStream?.close()
                     }
+
+
 
                     /** 이전의 흔적 (이미지 저장)
                     FileOutputStream(output).use {
@@ -491,6 +768,149 @@ class RawActivity : AppCompatActivity() {
 //            mediaDir else filesDir
 //    }**/
 
+//    @RequiresApi(Build.VERSION_CODES.S)
+//    private fun tapToFocus(event:MotionEvent): Boolean{
+//        if(!hasAutoFocusMeteringSupport()){
+//            return false
+//        }
+//
+////        cameraExtensionSession.stopRepeating()
+//        session.stopRepeating()
+////        cancelPendingAutoFocus()
+//        startAutoFocus(meteringRectancle(event))
+//
+//        return true
+//    }
+
+//    //스마트폰에서 auto focus metering을 지원하는지를 확인하기 위한 함수
+//    private fun hasAutoFocusMeteringSupport(): Boolean{
+//        if(characteristics!!.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) == 0){
+//            return false
+//        }
+//
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+//            val availableExtensionRequestKeys = extensionCharacteristics.getAvailableCaptureRequestKeys(currentExtension)
+//            return availableExtensionRequestKeys.contains(CaptureRequest.CONTROL_AF_TRIGGER) &&
+//                    availableExtensionRequestKeys.contains(CaptureRequest.CONTROL_AF_MODE) &&
+//                    availableExtensionRequestKeys.contains(CaptureRequest.CONTROL_AF_REGIONS)
+//        }
+//
+//        return false
+//    }
+
+//    //연속 사진 모드에서 자동 포커스를 다시 시작하는 대기열 작업. (정해진 시간이 지나면 오토포커스가 풀림)
+//    @RequiresApi(Build.VERSION_CODES.S)
+//    private fun queueAutoFocusReset(){
+////        tapToFocusTimeoutHandler.postDelayed({
+//        cameraHandler.postDelayed({
+//            Log.v("KSM", "Rest auto focus back to continuous picture")
+//            cameraExtensionSession.stopRepeating()
+//
+//            submitRequest(
+//                CameraDevice.TEMPLATE_PREVIEW,
+//                previewSurface,
+//                true
+//            ){builder ->
+//                builder.apply{
+//                    set(
+//                        CaptureRequest.CONTROL_AF_MODE,
+//                        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
+//                    )
+//                }
+//            }
+//
+//        }, AUTO_FOCUS_TIMEOUT_MILLIS)
+//    }
+
+//    //AutoFocus를 진행하기 위한 위치 좌표 설정
+//    private fun meteringRectancle(event: MotionEvent): MeteringRectangle{
+//        val sensorOrientation = relativeOrientation.value!!
+//        val sensorSize = characteristics!!.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)!!
+//
+//        val halfMeteringRectWidth = (METERING_RECTANGLE_SIZE * sensorSize.width()) / 2
+//        val halfMeteringRectHeight = (METERING_RECTANGLE_SIZE * sensorSize.height()) / 2
+//
+//        //[x,y]좌표를 [0,1] 스케일에 맞춰서 변경
+//        val normalizedPoint = floatArrayOf(event.x / previewSize!!.height, event.y / previewSize!!.width)
+//
+//        //센서 구역을 통해 좌표로 찍혀진 정상화된 좌표를 크기 조절 혹은 회전
+//        Matrix().apply{
+//            postRotate(-sensorOrientation.toFloat(), 0.5f, 0.5f)
+//            postScale(sensorSize.width().toFloat(), sensorSize.height().toFloat())
+//            mapPoints(normalizedPoint)
+//        }
+//
+//        val meteringRegion = Rect(
+//            (normalizedPoint[0] - halfMeteringRectWidth).toInt().coerceIn(0, sensorSize.width()),
+//            (normalizedPoint[1] - halfMeteringRectHeight).toInt().coerceIn(0, sensorSize.height()),
+//            (normalizedPoint[0] + halfMeteringRectWidth).toInt().coerceIn(0, sensorSize.width()),
+//            (normalizedPoint[1] + halfMeteringRectHeight).toInt().coerceIn(0, sensorSize.height())
+//        )
+//
+//        return MeteringRectangle(meteringRegion, MeteringRectangle.METERING_WEIGHT_MAX)
+//    }
+
+//    @RequiresApi(Build.VERSION_CODES.S)
+//    private fun startAutoFocus(meteringRectangle: MeteringRectangle){
+//        submitRequest(
+//            CameraDevice.TEMPLATE_PREVIEW,
+//            previewSurface,
+//            false
+//        ){ request ->
+//            request.apply{
+//                set(CaptureRequest.CONTROL_AF_REGIONS, arrayOf(meteringRectangle))
+//                set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO)
+//                set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_START)
+//                setTag(AUTO_FOCUS_TAG)
+//            }
+//        }
+////        val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
+////            set(CaptureRequest.CONTROL_AF_REGIONS, arrayOf(meteringRectangle))
+////            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO)
+////            set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_START)
+////            setTag(AUTO_FOCUS_TAG)
+////        }
+////
+////        session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+//    }
+//
+////    private fun cancelPendingAutoFocus(){
+////
+////    }
+
+//    @RequiresApi(Build.VERSION_CODES.S)
+//    private fun submitRequest(
+//        templateType: Int,
+//        target: Surface,
+//        isRepeating: Boolean,
+//        block: (captureRequest: CaptureRequest.Builder) -> CaptureRequest.Builder){
+//        try{
+//            val captureBuilder = camera2!!.createCaptureRequest(templateType).apply{
+//                addTarget(target)
+//                block(this)
+//            }
+//            if(isRepeating){
+//                cameraExtensionSession.setRepeatingRequest(
+//                    captureBuilder.build(),
+//                    Dispatchers.IO.asExecutor(),
+//                    captureCallbacks
+//                )
+//            }else{
+//                cameraExtensionSession.capture(
+//                    captureBuilder.build(),
+//                    Dispatchers.IO.asExecutor(),
+//                    captureCallbacks
+//                )
+//            }
+//        }catch(e: CameraAccessException){
+//            Toast.makeText(
+//                this@RawActivity,
+//                "Camera failed to submit capture request!",
+//                Toast.LENGTH_SHORT
+//            ).show()
+//        }
+//    }
+
     override fun onPause(){
         super.onPause()
 
@@ -525,7 +945,7 @@ class RawActivity : AppCompatActivity() {
             }
         }.toTypedArray()
 
-        //Camera2 Project
+        //Camera2 Basic 참고
         private fun enumerateCameras(cameraManager: CameraManager) : List<RawActivity.Companion.FormatItem>{
             val availableCameras: MutableList<RawActivity.Companion.FormatItem> = mutableListOf()
 
@@ -600,6 +1020,12 @@ class RawActivity : AppCompatActivity() {
 
         /** Helper class used as a data holder for each selectable camera format item */
         private data class FormatItem(val title: String, val cameraId: String, val format: Int)
+
+        //Camera2 Extension 참고
+        //METERING_RECTANGLE_SIZE 초기값 설정
+        private const val METERING_RECTANGLE_SIZE = 0.15f
+        private const val AUTO_FOCUS_TAG = "auto_focus_tag"
+        private const val AUTO_FOCUS_TIMEOUT_MILLIS = 5_000L
     }
 }
 

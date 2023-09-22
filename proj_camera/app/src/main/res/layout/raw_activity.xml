@@ -18,11 +18,10 @@
 <!--        android:layout_height="match_parent"-->
 <!--        android:foreground="@android:color/transparent"/>-->
 
-    <View
-        android:id="@+id/overlay"
+    <TextureView
+        android:id="@+id/texture"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:foreground="@android:color/transparent" />
+        android:layout_height="match_parent" />
 
     <ImageButton
         android:id="@+id/imageCaptureBtn"
@@ -36,6 +35,20 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/camera" />
+
+    <ImageButton
+        android:id="@+id/torchBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="25dp"
+        android:padding="5dp"
+        android:background="@drawable/roundcorner"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.048"
+        app:layout_constraintStart_toEndOf="@+id/imageCaptureBtn"
+        app:srcCompat="@drawable/flashlight" />
 
     <Button
         android:id="@+id/changeNormalBtn"
@@ -57,6 +70,8 @@
         android:background="#FFFFFF"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/overlay"
+        app:layout_constraintEnd_toEndOf="@+id/rawViewFinder"
         app:layout_constraintStart_toStartOf="parent" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

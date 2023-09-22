@@ -23,6 +23,7 @@ import android.opengl.Visibility
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -39,6 +40,7 @@ import android.widget.RadioButton
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraControl
@@ -64,7 +66,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import com.example.proj_camera.RawActivity.Companion.REQUEST_CODE_PERMISSIONS
+import com.example.proj_camera.RawActivity.Companion.REQUIRED_PERMISSIONS
 import com.example.proj_camera.databinding.ActivityMainBinding
+import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.lang.reflect.Parameter
@@ -179,10 +184,29 @@ class MainActivity : AppCompatActivity() {
 
         //RAW 페이지로 이동하기 위한 버튼 클릭 설정
         viewBinding.changeRawBtn.setOnClickListener{
-            onPause()
+            val cameraManager = this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
 
-            val intent = Intent(this, RawActivity::class.java)
-            startActivity(intent)
+            val cameraId = getCameraId(this@MainActivity, lensfacing)
+
+            val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
+
+            if(cameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)!!
+                    .contains(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW) &&
+                cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!.outputFormats
+                    .contains(ImageFormat.RAW_SENSOR)){
+                onPause()
+
+                val intent = Intent(this, RawActivity::class.java)
+                startActivity(intent)
+            }else{
+                AlertDialog.Builder(this).run{
+                    setTitle("Error")
+                    setIcon(android.R.drawable.ic_dialog_alert)
+                    setMessage("This Smartphone doesn't support RAW")
+                    setPositiveButton("OK", null)
+                    show()
+                }
+            }
         }
 
         //사진 찍기 버튼을 위한 Listener 설정
@@ -285,7 +309,7 @@ class MainActivity : AppCompatActivity() {
         var clickCount : Int = 0
         var startTime : Long = 0
         var duration: Long = 0
-        val MAX_DURATION = 500;
+        val MAX_DURATION = 300;
 
         //viewer 수동 초점 설정 및 Pinch 줌 설정
         //수동 초점을 더블 탭을 해야 가능, 줌은 두 손가락을 통해 pinch 제스처를 취해야함.
@@ -533,13 +557,23 @@ class MainActivity : AppCompatActivity() {
             .format(System.currentTimeMillis())
 
         val contentValues = ContentValues().apply{
-            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
-            put(MediaStore.MediaColumns.MIME_TYPE, imageType)
-            //put(MediaStore.MediaColumns.COMPOSER, ImageFormat.RAW12)
-            //put(MediaStore.MediaColumns.DATA, ImageFormat.RAW12)
             if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P){
+                put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+                put(MediaStore.MediaColumns.MIME_TYPE, imageType)
+                //put(MediaStore.MediaColumns.COMPOSER, ImageFormat.RAW12)
+                //put(MediaStore.MediaColumns.DATA, ImageFormat.RAW12)
                 put(MediaStore.Images.Media.RELATIVE_PATH
                     ,"Pictures/CameraProj-Image")
+            }else{
+//                val envImageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).absolutePath+"/CameraProj-Image"
+//                val imagesDir = File(envImageDir)
+//                if(!imagesDir.exists()){
+//                    imagesDir.mkdir()
+//                }
+                val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                val imageFile = File(imagesDir, "${name}.jpg")
+                put(MediaStore.Images.Media.DATA, imageFile.absolutePath)
+                Log.d("KSM", "image Path : ${imagesDir.absolutePath}")
             }
         }
 
@@ -716,6 +750,17 @@ class MainActivity : AppCompatActivity() {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
+    private fun getCameraId(context: Context, facing: Int) : String{
+        val manager = context.getSystemService(CAMERA_SERVICE) as CameraManager
+
+        return manager.cameraIdList.first{
+            manager
+                .getCameraCharacteristics(it)
+                .get(CameraCharacteristics.LENS_FACING) == facing
+        }
+    }
+
+
     override fun onResume(){
         super.onResume()
 
@@ -750,6 +795,74 @@ class MainActivity : AppCompatActivity() {
                 add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }.toTypedArray()
+
+        //Camera2
+            private fun enumerateCameras(cameraManager: CameraManager) : List<MainActivity.Companion.FormatItem>{
+                val availableCameras: MutableList<MainActivity.Companion.FormatItem> = mutableListOf()
+
+                //GET list of all compatible cameras
+                val cameraIds = cameraManager.cameraIdList.filter{
+                    val characteristics = cameraManager.getCameraCharacteristics(it)
+                    val capabilities = characteristics.get(
+                        CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
+                    capabilities?.contains(
+                        CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
+                    ) ?: false
+                }
+
+                // Iterate over the list of cameras and return all the compatible ones
+                cameraIds.forEach { id ->
+                    val characteristics = cameraManager.getCameraCharacteristics(id)
+                    val orientation = lensOrientationString(
+                        characteristics.get(CameraCharacteristics.LENS_FACING)!!
+                    )
+
+                    // Query the available capabilities and output formats
+                    val capabilities = characteristics.get(
+                        CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)!!
+                    val outputFormats = characteristics.get(
+                        CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!.outputFormats
+
+                    // All cameras *must* support JPEG output so we don't need to check characteristics
+                    availableCameras.add(
+                        MainActivity.Companion.FormatItem(
+                            "$orientation JPEG ($id)", id, ImageFormat.JPEG
+                        )
+                    )
+
+                    // Return cameras that support RAW capability
+                    if (capabilities.contains(
+                            CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW) &&
+                        outputFormats.contains(ImageFormat.RAW_SENSOR)) {
+                        availableCameras.add(
+                            MainActivity.Companion.FormatItem(
+                                "$orientation RAW ($id)", id, ImageFormat.RAW_SENSOR
+                            )
+                        )
+                    }
+
+                    // Return cameras that support JPEG DEPTH capability
+                    if (capabilities.contains(
+                            CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT) &&
+                        outputFormats.contains(ImageFormat.DEPTH_JPEG)) {
+                        availableCameras.add(
+                            MainActivity.Companion.FormatItem(
+                                "$orientation DEPTH ($id)", id, ImageFormat.DEPTH_JPEG
+                            )
+                        )
+                    }
+                }
+
+                return availableCameras
+            }
+
+        /** Helper function used to convert a lens orientation enum into a human-readable string */
+        private fun lensOrientationString(value: Int) = when(value) {
+            CameraCharacteristics.LENS_FACING_BACK -> "Back"
+            CameraCharacteristics.LENS_FACING_FRONT -> "Front"
+            CameraCharacteristics.LENS_FACING_EXTERNAL -> "External"
+            else -> "Unknown"
+        }
 
         /** Helper class used as a data holder for each selectable camera format item */
         private data class FormatItem(val title: String, val cameraId: String, val format: Int)

@@ -190,6 +190,10 @@ class MainActivity : AppCompatActivity() {
 
             val cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId)
 
+            val cameraList = enumerateCameras(cameraManager)
+
+            Log.d("KSM", "Camera List : ${cameraList}")
+
             if(cameraCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)!!
                     .contains(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW) &&
                 cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!.outputFormats
@@ -199,10 +203,25 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent(this, RawActivity::class.java)
                 startActivity(intent)
             }else{
+                var alertText = "This Smartphone doesn't support Raw Image \n"
+                for(i in cameraList){
+                    alertText += "카메라 : ${i.title} / "
+
+                    alertText += "카메라 ID : ${i.cameraId} / "
+
+                    if(i.format == ImageFormat.JPEG){
+                        alertText += "지원 이미지 포맷 : JPEG \n"
+                    }else if(i.format === ImageFormat.RAW_SENSOR){
+                        alertText += "지원 이미지 포맷 : DNG \n"
+                    }else{
+                        alertText += "지원 이미지 포맷 : 기타 \n"
+                    }
+                }
+
                 AlertDialog.Builder(this).run{
                     setTitle("Error")
                     setIcon(android.R.drawable.ic_dialog_alert)
-                    setMessage("This Smartphone doesn't support RAW")
+                    setMessage(alertText)
                     setPositiveButton("OK", null)
                     show()
                 }
@@ -570,10 +589,14 @@ class MainActivity : AppCompatActivity() {
 //                if(!imagesDir.exists()){
 //                    imagesDir.mkdir()
 //                }
-                val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                val imageFile = File(imagesDir, "${name}.jpg")
+                val imageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).absolutePath+"/CameraProj-Image"
+                val imageDirFile = File(imageDir)
+                if(!imageDirFile.exists()){
+                    imageDirFile.mkdirs()
+                }
+                val imageFile = File(imageDirFile, "${name}.jpg")
                 put(MediaStore.Images.Media.DATA, imageFile.absolutePath)
-                Log.d("KSM", "image Path : ${imagesDir.absolutePath}")
+                Log.d("KSM", "image Path : ${imageFile.absolutePath}")
             }
         }
 
@@ -594,7 +617,7 @@ class MainActivity : AppCompatActivity() {
             object : ImageCapture.OnImageSavedCallback{
                 //이미지 캡처에 실패했을 경우, 오류 사례를 추가하여 실패했음을 기록
                 override fun onError(exc: ImageCaptureException) {
-                    Log.e(TAG, "사진 촬영 실패 : ${exc.message}", exc)
+                    Log.e("KSM", "사진 촬영 실패 : ${exc.message}", exc)
                 }
 
                 //사진이 성공적으로 촬영이 됐다면, 앞서 만든 파일을 저장, 사용자에게 토스트메시지로 알림

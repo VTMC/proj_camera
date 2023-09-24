@@ -219,7 +219,7 @@ class RawActivity : AppCompatActivity() {
                             viewBinding.torchBtn.background = ContextCompat.getDrawable(this@RawActivity, R.drawable.roundcorner_clicked)
                             torchState = true
                         }catch(e: CameraAccessException){
-                            Log.e("KSM", "Torch Error")
+                            Log.e("KSM", "Torch Error", e)
                         }
 
 

@@ -235,12 +235,15 @@ class RawActivity : AppCompatActivity() {
             }
         }
 
-        //Normal 카메라 전환 버튼
-        viewBinding.changeNormalBtn.setOnClickListener {
-            onPause()
-
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+        try{
+            //Normal 카메라 전환 버튼
+            viewBinding.changeNormalBtn.setOnClickListener {
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+            }
+        }catch(exc: Exception){
+            Log.e("KSM", "ChangeNormalBtn Intent Error!!", exc)
         }
     }
 
@@ -641,7 +644,7 @@ class RawActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        cameraExecutor.shutdown()
+//        cameraExecutor.shutdown()
         //camera2
         cameraThread.quitSafely()
         imageReaderThread.quitSafely()
@@ -662,18 +665,6 @@ class RawActivity : AppCompatActivity() {
                 add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }.toTypedArray()
-
-        //dng이미지 로드 함수
-//        object ImageUtils{
-//            fun loadDngImage(inputStream: InputStream): Image {
-//                val dngBuffer = ByteBuffer.wrap(inputStream.readBytes())
-//                val imageReader = ImageReader.newInstance(
-//                    dngBuffer,
-//                    dngBuffer.remaining()
-//                )
-//                return imageReader.acquireNextImage()
-//            }
-//        }
 
         //Camera2 Basic 참고
         private fun enumerateCameras(cameraManager: CameraManager) : List<RawActivity.Companion.FormatItem>{

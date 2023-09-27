@@ -21,6 +21,7 @@ import android.icu.text.ListFormatter.Width
 import android.media.Image
 import android.opengl.Visibility
 import android.os.Build
+import android.os.Build.VERSION_CODES.R
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
@@ -165,7 +166,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -198,10 +198,13 @@ class MainActivity : AppCompatActivity() {
                     .contains(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW) &&
                 cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!.outputFormats
                     .contains(ImageFormat.RAW_SENSOR)){
-                onPause()
-
-                val intent = Intent(this, RawActivity::class.java)
-                startActivity(intent)
+                try{
+                    val intent = Intent(this, RawActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                }catch(e: Exception){
+                    Log.e("KSM", "changeRawBtn Intent Error!", e)
+                }
             }else{
                 var alertText = "This Smartphone doesn't support Raw Image \n"
                 for(i in cameraList){
@@ -425,7 +428,7 @@ class MainActivity : AppCompatActivity() {
         viewBinding.resRadioGrouup.setOnCheckedChangeListener{
             radioGroup, i ->
                 when(i){
-                    R.id.radio640480 -> {
+                    com.example.proj_camera.R.id.radio640480 -> {
                         if(flashAutoOn == true) captureFlag = 3
                         else captureFlag = 2
 
@@ -433,7 +436,7 @@ class MainActivity : AppCompatActivity() {
                         imageHeight = 640
                         startCamera()
                     }
-                    R.id.radio1280720 -> {
+                    com.example.proj_camera.R.id.radio1280720 -> {
                         if(flashAutoOn == true) captureFlag = 3
                         else captureFlag = 2
 
@@ -441,7 +444,7 @@ class MainActivity : AppCompatActivity() {
                         imageHeight = 1280
                         startCamera()
                     }
-                    R.id.radio19201080 -> {
+                    com.example.proj_camera.R.id.radio19201080 -> {
                         if(flashAutoOn == true) captureFlag = 3
                         else captureFlag = 2
 
@@ -449,7 +452,7 @@ class MainActivity : AppCompatActivity() {
                         imageHeight = 1920
                         startCamera()
                     }
-                    R.id.radio25601440 -> {
+                    com.example.proj_camera.R.id.radio25601440 -> {
                         if(flashAutoOn == true) captureFlag = 3
                         else captureFlag = 2
 
@@ -457,7 +460,7 @@ class MainActivity : AppCompatActivity() {
                         imageHeight = 2560
                         startCamera()
                     }
-                    R.id.radio38402160 -> {
+                    com.example.proj_camera.R.id.radio38402160 -> {
                         if(flashAutoOn == true) captureFlag = 3
                         else captureFlag = 2
 
@@ -465,7 +468,7 @@ class MainActivity : AppCompatActivity() {
                         imageHeight = 3840
                         startCamera()
                     }
-                    R.id.radioMax -> {
+                    com.example.proj_camera.R.id.radioMax -> {
                         if(flashAutoOn == true) captureFlag = 1
                         else captureFlag = 0
 
@@ -487,15 +490,15 @@ class MainActivity : AppCompatActivity() {
         //저장할 사진 타입 선택 가능
         viewBinding.typeRadioGroup.setOnCheckedChangeListener{
             radioGroup, i -> when(i){
-                R.id.radioJPEG -> {
+                com.example.proj_camera.R.id.radioJPEG -> {
                     imageType = "image/jpeg"
                     txtImageType = "JPEG"
                 }
-                R.id.radioPNG -> {
+                com.example.proj_camera.R.id.radioPNG -> {
                     imageType = "image/png"
                     txtImageType = "PNG"
                 }
-                R.id.radioHEIC -> {
+                com.example.proj_camera.R.id.radioHEIC -> {
                     imageType = "image/heic"
                     txtImageType = "HEIC"
                 }
@@ -510,24 +513,24 @@ class MainActivity : AppCompatActivity() {
 
         viewBinding.typeRadioGroupRaw.setOnCheckedChangeListener{
             radioGroup, i -> when(i){
-                R.id.radioDNG -> {
+                com.example.proj_camera.R.id.radioDNG -> {
 
                     imageType = "image/x-adobe-dng"
                     txtImageType = "DNG"
                 }
-                R.id.radioARW -> {
+                com.example.proj_camera.R.id.radioARW -> {
                     imageType = "image/x-sony-arw"
                     txtImageType = "ARW"
                 }
-                R.id.radioCRW -> {
+                com.example.proj_camera.R.id.radioCRW -> {
                     imageType = "image/x-canon-crw"
                     txtImageType = "CRW"
                 }
-                R.id.radioNEF -> {
+                com.example.proj_camera.R.id.radioNEF -> {
                     imageType = "image/x-nikon-nef"
                     txtImageType = "NEF"
                 }
-                R.id.radioRAW -> {
+                com.example.proj_camera.R.id.radioRAW -> {
                     imageType = "image/x-pananonic-raw"
                     txtImageType = "RAW"
                 }
@@ -624,7 +627,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     //찍는 모션을 보이기 위해 만든 애니메이션
                     viewBinding.flashView.visibility = View.VISIBLE
-                    val flashAni = AnimationUtils.loadAnimation(this@MainActivity,R.anim.alpha_anim)
+                    val flashAni = AnimationUtils.loadAnimation(this@MainActivity,com.example.proj_camera.R.anim.alpha_anim)
                     viewBinding.flashView.startAnimation(flashAni)
                     Handler().postDelayed({
                         viewBinding.flashView.visibility = View.GONE
@@ -783,7 +786,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onResume(){
         super.onResume()
 
@@ -799,6 +801,7 @@ class MainActivity : AppCompatActivity() {
     //어플이 꺼지게 될 경우에 사용하기 위한 함수
     override fun onDestroy() {
         super.onDestroy()
+
         cameraExecutor.shutdown()
     }
 

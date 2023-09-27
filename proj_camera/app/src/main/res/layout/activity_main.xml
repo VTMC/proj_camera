@@ -398,106 +398,106 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/advancedLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:alpha="0.8"
-        android:background="#FFFFFF"
-        android:orientation="vertical"
-        android:visibility="gone">
+<!--    <LinearLayout-->
+<!--        android:id="@+id/advancedLayout"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:alpha="0.8"-->
+<!--        android:background="#FFFFFF"-->
+<!--        android:orientation="vertical"-->
+<!--        android:visibility="visible">-->
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="horizontal">-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ISO"
-                android:textSize="20dp"
-                android:textStyle="bold" />
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="ISO"-->
+<!--                android:textSize="20dp"-->
+<!--                android:textStyle="bold" />-->
 
-            <TextView
-                android:id="@+id/isoPer"
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
+<!--            <TextView-->
+<!--                android:id="@+id/isoPer"-->
+<!--                android:layout_width="50dp"-->
+<!--                android:layout_height="wrap_content"-->
 
-                android:gravity="center"
-                android:text="0"
-                android:textSize="20dp"
+<!--                android:gravity="center"-->
+<!--                android:text="0"-->
+<!--                android:textSize="20dp"-->
 
-                android:textStyle="bold" />
+<!--                android:textStyle="bold" />-->
 
-            <Spinner
-                android:id="@+id/isoSpinner"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-        </LinearLayout>
+<!--            <Spinner-->
+<!--                android:id="@+id/isoSpinner"-->
+<!--                android:layout_width="fill_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_weight="1" />-->
+<!--        </LinearLayout>-->
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="horizontal">-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="IRIS"
-                android:textSize="20dp"
-                android:textStyle="bold" />
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="IRIS"-->
+<!--                android:textSize="20dp"-->
+<!--                android:textStyle="bold" />-->
 
-            <TextView
-                android:id="@+id/irisPer"
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
+<!--            <TextView-->
+<!--                android:id="@+id/irisPer"-->
+<!--                android:layout_width="50dp"-->
+<!--                android:layout_height="wrap_content"-->
 
-                android:gravity="center"
-                android:text="0"
-                android:textSize="20dp"
+<!--                android:gravity="center"-->
+<!--                android:text="0"-->
+<!--                android:textSize="20dp"-->
 
-                android:textStyle="bold" />
+<!--                android:textStyle="bold" />-->
 
-            <Spinner
-                android:id="@+id/irisSpinner"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-        </LinearLayout>
+<!--            <Spinner-->
+<!--                android:id="@+id/irisSpinner"-->
+<!--                android:layout_width="fill_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_weight="1" />-->
+<!--        </LinearLayout>-->
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="horizontal">-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="SHUTTER SPEED"
-                android:textSize="20dp"
-                android:textStyle="bold" />
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="SHUTTER SPEED"-->
+<!--                android:textSize="20dp"-->
+<!--                android:textStyle="bold" />-->
 
-            <TextView
-                android:id="@+id/s_sPer"
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
+<!--            <TextView-->
+<!--                android:id="@+id/s_sPer"-->
+<!--                android:layout_width="50dp"-->
+<!--                android:layout_height="wrap_content"-->
 
-                android:gravity="center"
-                android:text="0"
-                android:textSize="20dp"
+<!--                android:gravity="center"-->
+<!--                android:text="0"-->
+<!--                android:textSize="20dp"-->
 
-                android:textStyle="bold" />
+<!--                android:textStyle="bold" />-->
 
-            <Spinner
-                android:id="@+id/s_sSpinner"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-        </LinearLayout>
+<!--            <Spinner-->
+<!--                android:id="@+id/s_sSpinner"-->
+<!--                android:layout_width="fill_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_weight="1" />-->
+<!--        </LinearLayout>-->
 
-    </LinearLayout>
+<!--    </LinearLayout>-->
 
 
     <ImageButton

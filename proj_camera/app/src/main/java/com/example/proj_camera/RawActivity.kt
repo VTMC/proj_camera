@@ -48,6 +48,7 @@ import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.TorchState
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -208,30 +209,51 @@ class RawActivity : AppCompatActivity() {
             })
         }
 
-        //Torch 버튼
+        //Torch 버튼 설정.
         viewBinding.torchBtn.setOnClickListener{
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){ //안드로이드 6.0 이상이여야 정상작동
-                viewBinding.torchBtn.isEnabled = true
-                when(torchState){
-                    false -> {
-                        try{
-                            cameraManager.setTorchMode(cameraId!!, true)
-                            viewBinding.torchBtn.background = ContextCompat.getDrawable(this@RawActivity, R.drawable.roundcorner_clicked)
-                            torchState = true
-                        }catch(e: CameraAccessException){
-                            Log.e("KSM", "Torch Error", e)
+            Log.d("KSM", "Torch Pressed!!")
+            viewBinding.torchBtn.isEnabled = true
+            when(torchState){
+                false -> {
+                    Log.d("KSM", "Torch On")
+                    try{
+                        /*cameraManager.setTorchMode(cameraId!!, true)
+                        viewBinding.torchBtn.background = ContextCompat.getDrawable(this@RawActivity, R.drawable.roundcorner_clicked)
+                        torchState = true*/
+                        session.stopRepeating()
+
+                        val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
+                            addTarget(viewBinding.rawViewFinder.holder.surface)
                         }
 
+                        captureRequest.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
 
+                        session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+
+                    }catch(e: CameraAccessException){
+                        Log.e("KSM", "Torch Error", e)
                     }
-                    true -> {
-                        cameraManager.setTorchMode(cameraId!!, false)
-                        viewBinding.torchBtn.background = ContextCompat.getDrawable(this@RawActivity, R.drawable.roundcorner)
-                        torchState = false
-                    }
+
+                    viewBinding.torchBtn.background = ContextCompat.getDrawable(this@RawActivity, R.drawable.roundcorner_clicked)
+                    torchState = true
                 }
-            }else{
-                viewBinding.torchBtn.isEnabled = false
+                true -> {
+                    Log.d("KSM", "Torch Off")
+                    try{
+                        session.stopRepeating()
+
+                        val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
+                            addTarget(viewBinding.rawViewFinder.holder.surface)
+                        }
+
+                        session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+                    }catch(e: CameraAccessException){
+                        Log.e("KSM", "Torch Error", e)
+                    }
+
+                    viewBinding.torchBtn.background = ContextCompat.getDrawable(this@RawActivity, R.drawable.roundcorner)
+                    torchState = false
+                }
             }
         }
 
@@ -305,12 +327,13 @@ class RawActivity : AppCompatActivity() {
             }
         }
 
-        //ManualFocus 관련 변수 및 제스처 설정
+        //AutoFocus 관련 변수 및 제스처 설정
         var clickCount: Int = 0
         var startTime: Long = 0
         var duration: Long = 0
-        var MAX_DURATION = 300;
+        var MAX_DURATION = 200;
 
+        //두 번 터치하게 되면, AutoFocus 진행.
         viewBinding.texture.setOnTouchListener(View.OnTouchListener{ v: View, event: MotionEvent ->
             when(event.action){
                 MotionEvent.ACTION_DOWN -> {
@@ -329,7 +352,13 @@ class RawActivity : AppCompatActivity() {
                         if(duration <= MAX_DURATION){
                             Log.d("KSM", "ManualFocused")
 
-//                            tapToFocus(event)
+                            try{
+                                cancelAutoFocus()
+                                startAutoFocus(meteringRectangle(event))
+                            }catch(e: CameraAccessException){
+                                Log.e("KSM", "AutoFocusError!", e)
+                                Toast.makeText(this@RawActivity, "This device doesn't support AutoFocus" ,Toast.LENGTH_SHORT).show()
+                            }
                         }else {
                             clickCount = 0
                             duration = 0
@@ -533,11 +562,6 @@ class RawActivity : AppCompatActivity() {
     //                        put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
                             put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraProj-Image Raw")
                         }else{
-//                            val envImageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).absolutePath+"/CameraProj-Image"
-//                            val imagesDir = File(envImageDir)
-//                            if(!imagesDir.exists()){
-//                                imagesDir.mkdir()
-//                            }
                             val imageDir = Environment.getExternalStoragePublicDirectory(
                                 Environment.DIRECTORY_PICTURES).absolutePath + "/CameraProj-Image Raw"
                             val imageDirFile = File(imageDir)
@@ -548,9 +572,6 @@ class RawActivity : AppCompatActivity() {
                             put(MediaStore.Images.Media.DATA, imageFile.absolutePath)
                             Log.d("KSM", "image Path : ${imageFile.absolutePath}")
                         }
-//                        else{ //Under API Level 29 (Android 10.0), Api Level 1부터 가능
-//                            put(MediaStore.Images.Media.DATA, "/storage/emulated/0/Pictures/CameraProj-Image RAW/${fileName}.dng")
-//                        }
                     }
 
                     val resolver = this.contentResolver
@@ -572,28 +593,12 @@ class RawActivity : AppCompatActivity() {
 
                         if (outputStream != null) {
                             dngCreator.writeImage(outputStream, result.image)
-//                            try{
-//                                val exif = ExifInterface(dngImage)
-//                            }
                         }else{
                             Log.d("KSM", "Image Write Wrong!!!!")
                         }
 
                         outputStream?.close()
                     }
-
-                    //Dng to JPEG
-//                    val pictureDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-//                        .absolutePath+"/CameraProj-Image Raw"
-//                    val dngSource = File(pictureDir, "${fileName}.dng").inputStream()
-//                    val jpegFile = File(pictureDir, "${fileName}.jpg")
-//                    val jpegOutput = FileOutputStream(jpegFile)
-//
-//                    val dngImage = ImageUtils.loadDngImage(dngSource)
-//                    val dngCreator = DngCreator(dngImage)
-//
-//                    Log.d("KSM", "dngSource : ${jpegFile.absolutePatho}")
-
 
                     /** 이전의 흔적 (이미지 저장)
                     FileOutputStream(output).use {
@@ -631,6 +636,75 @@ class RawActivity : AppCompatActivity() {
 //        return if (mediaDir != null && mediaDir.exists())
 //            mediaDir else filesDir
 //    }**/
+
+    //터치한 위치를 간단하게 정규화 시키는 함수
+    private fun meteringRectangle(event: MotionEvent): MeteringRectangle {
+        val sensorOrientation = characteristics!!.get(CameraCharacteristics.SENSOR_ORIENTATION)!!
+        val sensorSize = characteristics!!.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)!!
+
+        val halfMeteringRectWidth = (METERING_RECTANGLE_SIZE * sensorSize.width()) / 2
+        val halfMeteringRectHeight = (METERING_RECTANGLE_SIZE * sensorSize.height()) / 2
+
+        //[x,y] 터치 포인트를 뷰포인트를 [0,1]로 맞춰서 정상화
+        val normalizedPoint = floatArrayOf(event.x / previewSize.height, event.y / previewSize.width)
+
+        Matrix().apply{
+            postRotate(-sensorOrientation.toFloat(), 0.5f, 0.5f)
+            postScale(sensorSize.width().toFloat(), sensorSize.height().toFloat())
+            mapPoints(normalizedPoint)
+        }
+
+        val meteringRegion = Rect(
+            (normalizedPoint[0] - halfMeteringRectWidth).toInt().coerceIn(0, sensorSize.width()),
+            (normalizedPoint[1] - halfMeteringRectHeight).toInt().coerceIn(0, sensorSize.height()),
+            (normalizedPoint[0] + halfMeteringRectWidth).toInt().coerceIn(0, sensorSize.width()),
+            (normalizedPoint[1] + halfMeteringRectHeight).toInt().coerceIn(0, sensorSize.height())
+        )
+
+        return MeteringRectangle(meteringRegion, MeteringRectangle.METERING_WEIGHT_MAX)
+    }
+
+    //AutoFocus를 진행하는 함수
+    private fun startAutoFocus(meteringRectangle: MeteringRectangle){
+        session.stopRepeating()
+
+        val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
+            addTarget(viewBinding.rawViewFinder.holder.surface)
+        }
+
+        captureRequest.apply{
+            set(CaptureRequest.CONTROL_AF_REGIONS, arrayOf(meteringRectangle))
+            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO)
+            set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+            if(torchState == true){
+                set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
+            }
+            //setTag(AUTO_FOCUS_TAG)
+        }
+
+        session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+
+        Toast.makeText(this@RawActivity, "Focused : ${meteringRectangle.x} / ${meteringRectangle.y}" ,Toast.LENGTH_SHORT).show()
+    }
+
+    //이전에 설정해놓은 AutoFocus를 해제
+    private fun cancelAutoFocus(){
+        session.stopRepeating()
+
+        val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
+            addTarget(viewBinding.rawViewFinder.holder.surface)
+        }
+
+        captureRequest.apply{
+            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO)
+            set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+            if(torchState == true){
+                set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
+            }
+        }
+
+        session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+    }
 
     override fun onPause(){
         super.onPause()
@@ -749,4 +823,3 @@ class RawActivity : AppCompatActivity() {
         private const val AUTO_FOCUS_TIMEOUT_MILLIS = 5_000L
     }
 }
-

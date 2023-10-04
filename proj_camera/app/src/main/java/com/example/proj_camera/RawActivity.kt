@@ -318,6 +318,15 @@ class RawActivity : AppCompatActivity() {
 
                     outputUri = saveResult(result)
 //                    Log.d("KSM", "Image saved: ${output.absolutePath}") - 이전의 흔적 (이미지 저장)
+
+                    //촬영 후 다시 자동 AF 모드로 설정
+                    session.stopRepeating()
+                    captureRequest.apply{
+                        set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+                    }
+                    session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+
+
                 }
             }
 
@@ -350,11 +359,13 @@ class RawActivity : AppCompatActivity() {
 
                     if(clickCount >= 2){
                         if(duration <= MAX_DURATION){
-                            Log.d("KSM", "ManualFocused")
+//                            Log.d("KSM", "ManualFocused")
 
                             try{
                                 cancelAutoFocus()
                                 startAutoFocus(meteringRectangle(event))
+
+                                clickCount = 0
                             }catch(e: CameraAccessException){
                                 Log.e("KSM", "AutoFocusError!", e)
                                 Toast.makeText(this@RawActivity, "This device doesn't support AutoFocus" ,Toast.LENGTH_SHORT).show()
@@ -393,6 +404,16 @@ class RawActivity : AppCompatActivity() {
             }
 
         Log.d("KSM", "captureRequest's JPEG_ORIENTATION : ${captureRequest.get(CaptureRequest.JPEG_ORIENTATION)}")
+
+        //autoFocus 진행했다면 정해진 AF_REGIONS를 값으로 저장
+        val autoFocusRegion = captureRequest.get(CaptureRequest.CONTROL_AF_REGIONS)
+
+        //맞춰진 Focus를 captureRequest에 적용.
+        captureRequest.apply{
+            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF)
+            set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE)
+            set(CaptureRequest.CONTROL_AF_REGIONS, autoFocusRegion)
+        }
 
         session.capture(captureRequest.build(), object : CameraCaptureSession.CaptureCallback() {
 
@@ -679,16 +700,19 @@ class RawActivity : AppCompatActivity() {
             if(torchState == true){
                 set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
             }
-            //setTag(AUTO_FOCUS_TAG)
+            setTag(AUTO_FOCUS_TAG)
         }
 
         session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
 
+        Log.d("KSM", "AutoFocused")
         Toast.makeText(this@RawActivity, "Focused : ${meteringRectangle.x} / ${meteringRectangle.y}" ,Toast.LENGTH_SHORT).show()
     }
 
     //이전에 설정해놓은 AutoFocus를 해제
     private fun cancelAutoFocus(){
+        Handler(Looper.getMainLooper()).removeCallbacksAndMessages(null)
+
         session.stopRepeating()
 
         val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
@@ -696,7 +720,7 @@ class RawActivity : AppCompatActivity() {
         }
 
         captureRequest.apply{
-            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO)
+            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF)
             set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
             if(torchState == true){
                 set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
@@ -704,6 +728,8 @@ class RawActivity : AppCompatActivity() {
         }
 
         session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+
+        Log.d("KSM", "AutoFocus Cancelled")
     }
 
     override fun onPause(){

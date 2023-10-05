@@ -1,5 +1,6 @@
 package com.example.proj_camera
 
+import Utils.ZoomUtil
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentValues
@@ -41,6 +42,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
@@ -137,6 +139,20 @@ class RawActivity : AppCompatActivity() {
     //Torch상태를 저장
     private var torchState: Boolean = false
 
+    //ZoomRatio 초기 변수
+//    private var zoomRatio: Float = ZoomUtil().minZoom()
+//
+//    //ZoomGesture 변수
+//    private val zoomGetstureListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+//        override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+//            val captureRequest = setCaptureRequest()
+//
+//            captureRequest.set(CaptureRequest.CONTROL_ZOOM_RATIO, zoomRatio)
+//
+//            session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+//        }
+//    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -217,14 +233,7 @@ class RawActivity : AppCompatActivity() {
                 false -> {
                     Log.d("KSM", "Torch On")
                     try{
-                        /*cameraManager.setTorchMode(cameraId!!, true)
-                        viewBinding.torchBtn.background = ContextCompat.getDrawable(this@RawActivity, R.drawable.roundcorner_clicked)
-                        torchState = true*/
-                        session.stopRepeating()
-
-                        val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
-                            addTarget(viewBinding.rawViewFinder.holder.surface)
-                        }
+                        val captureRequest = setCaptureRequest()
 
                         captureRequest.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
 
@@ -240,11 +249,7 @@ class RawActivity : AppCompatActivity() {
                 true -> {
                     Log.d("KSM", "Torch Off")
                     try{
-                        session.stopRepeating()
-
-                        val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
-                            addTarget(viewBinding.rawViewFinder.holder.surface)
-                        }
+                        val captureRequest = setCaptureRequest()
 
                         session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
                     }catch(e: CameraAccessException){
@@ -317,7 +322,17 @@ class RawActivity : AppCompatActivity() {
 //                    val output = saveResult(result) - 이전의 흔적 (이미지 저장)
 
                     outputUri = saveResult(result)
-//                    Log.d("KSM", "Image saved: ${output.absolutePath}") - 이전의 흔적 (이미지 저장)
+//                    Log.d("KSM", "Image saved: ${outputUri.toString()}") //- 이전의 흔적 (이미지 저장)
+
+                    val cursor = contentResolver.query(outputUri!!, null, null, null, null)
+                    cursor!!.moveToNext()
+                    val path = cursor.getString(cursor.getColumnIndex("_data") ?: 0)
+
+                    Log.d("KSM", "outputDirectory : ${path}")
+
+                    val dng_bitmap = BitmapFactory.decodeFile(path)
+
+                    
 
                     //촬영 후 다시 자동 AF 모드로 설정
                     session.stopRepeating()
@@ -380,6 +395,11 @@ class RawActivity : AppCompatActivity() {
                 else -> return@OnTouchListener false
             }
         })
+
+
+        //Zoom 관련 변수 및 제스처 설정
+
+
     }
 
     private suspend fun takePhoto():
@@ -410,7 +430,7 @@ class RawActivity : AppCompatActivity() {
 
         //맞춰진 Focus를 captureRequest에 적용.
         captureRequest.apply{
-            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF)
+            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO)
             set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE)
             set(CaptureRequest.CONTROL_AF_REGIONS, autoFocusRegion)
         }
@@ -591,14 +611,11 @@ class RawActivity : AppCompatActivity() {
                             }
                             val imageFile = File(imageDirFile, "${fileName}.dng")
                             put(MediaStore.Images.Media.DATA, imageFile.absolutePath)
-                            Log.d("KSM", "image Path : ${imageFile.absolutePath}")
                         }
                     }
 
                     val resolver = this.contentResolver
                     val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-
-                    Log.d("KSM", "outputDirectory : ${uri!!.path}")
 
                     /** 이전의 흔적 (이미지 저장)
                     val output = File(outputDirectory, fileName)
@@ -687,11 +704,7 @@ class RawActivity : AppCompatActivity() {
 
     //AutoFocus를 진행하는 함수
     private fun startAutoFocus(meteringRectangle: MeteringRectangle){
-        session.stopRepeating()
-
-        val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
-            addTarget(viewBinding.rawViewFinder.holder.surface)
-        }
+        val captureRequest = setCaptureRequest()
 
         captureRequest.apply{
             set(CaptureRequest.CONTROL_AF_REGIONS, arrayOf(meteringRectangle))
@@ -713,11 +726,7 @@ class RawActivity : AppCompatActivity() {
     private fun cancelAutoFocus(){
         Handler(Looper.getMainLooper()).removeCallbacksAndMessages(null)
 
-        session.stopRepeating()
-
-        val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
-            addTarget(viewBinding.rawViewFinder.holder.surface)
-        }
+        val captureRequest = setCaptureRequest()
 
         captureRequest.apply{
             set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF)
@@ -730,6 +739,17 @@ class RawActivity : AppCompatActivity() {
         session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
 
         Log.d("KSM", "AutoFocus Cancelled")
+    }
+
+    //captureRequest 설정 함수
+    private fun setCaptureRequest() : CaptureRequest.Builder {
+        session.stopRepeating()
+
+        val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
+            addTarget(viewBinding.rawViewFinder.holder.surface)
+        }
+
+        return captureRequest
     }
 
     override fun onPause(){

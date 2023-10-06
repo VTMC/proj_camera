@@ -324,15 +324,43 @@ class RawActivity : AppCompatActivity() {
                     outputUri = saveResult(result)
 //                    Log.d("KSM", "Image saved: ${outputUri.toString()}") //- 이전의 흔적 (이미지 저장)
 
+                    //Path를 얻기 위한 과정
                     val cursor = contentResolver.query(outputUri!!, null, null, null, null)
                     cursor!!.moveToNext()
-                    val path = cursor.getString(cursor.getColumnIndex("_data") ?: 0)
+                    val pathName = cursor.getString(cursor.getColumnIndex("_data") ?: 0)
+                    val path = File(pathName).parent
 
-                    Log.d("KSM", "outputDirectory : ${path}")
+                    Log.d("KSM", "outputDirectory pathName : ${pathName}")
+                    Log.d("KSM", "outputDirectory path : ${path}")
 
-                    val dng_bitmap = BitmapFactory.decodeFile(path)
+                    //bitmap으로 뽑아서 PNG로 저장하는 과정
+                    val dng_bitmap = BitmapFactory.decodeFile(pathName)
 
-                    
+                    val timestamp = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA).format(System.currentTimeMillis())
+                    val png_fileName = "/WEBP_$timestamp.webp"
+                    val png_file = File(path+png_fileName)
+
+                    Log.d("KSM", "outputDirectory PNG pathName : ${png_file.absolutePath}")
+
+                    val m_rotate = Matrix()
+
+                    try{
+                        val png_fos = FileOutputStream(png_file)
+
+                        m_rotate.postRotate(relativeOrientation.value!!.toFloat())
+
+                        val rotatedPngBitmap = Bitmap.createBitmap(dng_bitmap, 0, 0, dng_bitmap.width, dng_bitmap.height, m_rotate, true)
+
+                        val compressed = rotatedPngBitmap.compress(Bitmap.CompressFormat.WEBP, 100, png_fos)
+
+                        if(compressed){
+                            Log.d("KSM", "Bitmap compressed!!")
+                        }else{
+                            Log.d("KSM", "Bitmap compressed failed!!")
+                        }
+                    }catch(exc : Exception){
+                        Log.e("KSM", "PNG_Errored!", exc)
+                    }
 
                     //촬영 후 다시 자동 AF 모드로 설정
                     session.stopRepeating()
@@ -340,7 +368,6 @@ class RawActivity : AppCompatActivity() {
                         set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
                     }
                     session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
-
 
                 }
             }
@@ -643,7 +670,6 @@ class RawActivity : AppCompatActivity() {
                         dngCreator.writeImage(it, result.image)
                     }
                     **/
-
 
                     cont.resume(uri)
 //                    cont.resume(output) - 이전의 흔적 (이미지 저장)

@@ -18,6 +18,17 @@
 <!--        android:layout_height="match_parent"-->
 <!--        android:foreground="@android:color/transparent"/>-->
 
+    <View
+        android:id="@+id/border_view"
+        android:layout_width="350dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:background="@drawable/background_drawable"
+        app:layout_constraintBottom_toBottomOf="@+id/rawViewFinder"
+        app:layout_constraintEnd_toEndOf="@+id/rawViewFinder"
+        app:layout_constraintStart_toStartOf="@+id/rawViewFinder"
+        app:layout_constraintTop_toTopOf="@+id/rawViewFinder" />
+
     <TextureView
         android:id="@+id/texture"
         android:layout_width="match_parent"

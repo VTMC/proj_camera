@@ -1,5 +1,6 @@
 package com.example.proj_camera
 
+import Utils.AndroidBmpUtil
 import Utils.ZoomUtil
 import android.Manifest
 import android.annotation.SuppressLint
@@ -337,26 +338,56 @@ class RawActivity : AppCompatActivity() {
                     val dng_bitmap = BitmapFactory.decodeFile(pathName)
 
                     val timestamp = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA).format(System.currentTimeMillis())
-                    val png_fileName = "/WEBP_$timestamp.webp"
-                    val png_file = File(path+png_fileName)
+                    val jpg_fileName = "/JPG_$timestamp.jpg"
+                    val bmp_fileName = "/BMP_$timestamp.bmp"
 
-                    Log.d("KSM", "outputDirectory PNG pathName : ${png_file.absolutePath}")
+                    val jpg_file = File(path+jpg_fileName)
+                    val bmp_path = path+bmp_fileName
+
+                    Log.d("KSM", "outputDirectory PNG pathName : ${jpg_file.absolutePath}")
 
                     val m_rotate = Matrix()
 
                     try{
-                        val png_fos = FileOutputStream(png_file)
+                        val jpg_fos = FileOutputStream(jpg_file)
 
                         m_rotate.postRotate(relativeOrientation.value!!.toFloat())
 
                         val rotatedPngBitmap = Bitmap.createBitmap(dng_bitmap, 0, 0, dng_bitmap.width, dng_bitmap.height, m_rotate, true)
 
-                        val compressed = rotatedPngBitmap.compress(Bitmap.CompressFormat.WEBP, 100, png_fos)
+//                        val rotatedPngBitmap = Bitmap.createBitmap(dng_bitmap, 0, 0, 1080, 1920, m_rotate, true)
+
+//                        val resizePngBitmap = Bitmap.createScaledBitmap(rotatedPngBitmap, viewBinding.rawViewFinder.width, viewBinding.rawViewFinder.height, true)
+//
+//                        val borderViewLeft = viewBinding.border.left
+//                        val borderViewTop = viewBinding.border.top
+//
+//                        val cart_w = viewBinding.border.width
+//                        val cart_h = viewBinding.border.height
+//
+//                        Log.d(TAG, "BorderView Info")
+//                        Log.d(TAG, "x : ${borderViewLeft}")
+//                        Log.d(TAG, "y : ${borderViewTop}")
+//                        Log.d(TAG, "width : ${cart_w}")
+//                        Log.d(TAG, "height : ${cart_h}")
+//
+//
+//                        val cropCartPngBitmap = Bitmap.createBitmap(resizePngBitmap, borderViewLeft, borderViewTop, cart_w, cart_h)
+
+                        val compressed = rotatedPngBitmap.compress(Bitmap.CompressFormat.JPEG, 100, jpg_fos)
+
+                        val saveBmp = AndroidBmpUtil.save(rotatedPngBitmap, bmp_path)
 
                         if(compressed){
-                            Log.d("KSM", "Bitmap compressed!!")
+                            Log.d("KSM", "Bitmap compressed jpg!!")
                         }else{
                             Log.d("KSM", "Bitmap compressed failed!!")
+                        }
+
+                        if(saveBmp){
+                            Log.d("KSM", "Bitmap saved bmp!!")
+                        }else{
+                            Log.d("KSM", "Bitmap saved bmp failed!!")
                         }
                     }catch(exc : Exception){
                         Log.e("KSM", "PNG_Errored!", exc)

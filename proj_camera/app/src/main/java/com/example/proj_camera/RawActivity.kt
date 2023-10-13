@@ -1,7 +1,6 @@
 package com.example.proj_camera
 
 import Utils.AndroidBmpUtil
-import Utils.ZoomUtil
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentValues
@@ -14,6 +13,7 @@ import android.graphics.ImageDecoder
 import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.Rect
+import android.graphics.YuvImage
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraCharacteristics
@@ -36,6 +36,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.FileUtils
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -71,11 +72,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.io.Closeable
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.FileWriter
 import java.io.IOException
 import java.io.InputStream
+import java.io.OutputStream
+import java.io.OutputStreamWriter
 import java.nio.ByteBuffer
 import java.nio.file.Files.setAttribute
 import java.text.SimpleDateFormat
@@ -154,6 +161,7 @@ class RawActivity : AppCompatActivity() {
 //        }
 //    }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -182,6 +190,7 @@ class RawActivity : AppCompatActivity() {
             }
         }
 
+
          viewBinding.rawViewFinder.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
 
@@ -191,6 +200,7 @@ class RawActivity : AppCompatActivity() {
                 width: Int,
                 height: Int) = Unit
 
+            @RequiresApi(Build.VERSION_CODES.O)
             override fun surfaceCreated(holder: SurfaceHolder) {
                 // Selects appropriate preview size and configures view finder
                 previewSize = getPreviewOutputSize(
@@ -276,6 +286,7 @@ class RawActivity : AppCompatActivity() {
     }
 
     //카메라가 시작되면 실행하는 함수
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun startCamera() = lifecycleScope.launch(Dispatchers.Main){
         camera2 = openCamera(cameraManager, rawCameraInfo!!.cameraId, cameraHandler)
 
@@ -329,31 +340,61 @@ class RawActivity : AppCompatActivity() {
                     val cursor = contentResolver.query(outputUri!!, null, null, null, null)
                     cursor!!.moveToNext()
                     val pathName = cursor.getString(cursor.getColumnIndex("_data") ?: 0)
-                    val path = File(pathName).parent
+                    val dng_file = File(pathName)
+                    val path = dng_file.parent
 
                     Log.d("KSM", "outputDirectory pathName : ${pathName}")
                     Log.d("KSM", "outputDirectory path : ${path}")
 
                     //bitmap으로 뽑아서 PNG로 저장하는 과정
-                    val dng_bitmap = BitmapFactory.decodeFile(pathName)
+//                    val dng_bitmap = BitmapFactory.decodeFile(pathName)
+//
+//                    Log.d("KSM", "${dng_bitmap}")
+
+                    /*val dng_bytes = dng_file.readBytes()
+                    val dng_bitmap = BitmapFactory.decodeByteArray(dng_bytes, 0, dng_bytes.size)
+
+                    val dng_imgDec = ImageDecoder.createSource(dng_file)
+                    val dng_bitmap = ImageDecoder.decodeBitmap(dng_imgDec).copy(Bitmap.Config.ARGB_8888, true)*/
+
+                    val dngFis = FileInputStream(dng_file)
+                    val dng_bytes = dngFis.readBytes()
+                    dngFis.close()
+
+//                    var dng_stringArray = emptyArray<String>()
+                    var dng_str = ""
+
+                    for(i in 0..dng_bytes.size){
+                        dng_str += dng_bytes[i].toString()+" "
+                    }
 
                     val timestamp = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA).format(System.currentTimeMillis())
                     val jpg_fileName = "/JPG_$timestamp.jpg"
                     val bmp_fileName = "/BMP_$timestamp.bmp"
 
+                    val txt_fileName = "/Byte_$timestamp.txt"
+
                     val jpg_file = File(path+jpg_fileName)
                     val bmp_path = path+bmp_fileName
+
+                    val txt_file = File(path+txt_fileName)
 
                     Log.d("KSM", "outputDirectory PNG pathName : ${jpg_file.absolutePath}")
 
                     val m_rotate = Matrix()
 
                     try{
-                        val jpg_fos = FileOutputStream(jpg_file)
+//                        val jpg_fos = FileOutputStream(jpg_file)
+                        if(!txt_file.exists()){
+                            txt_file.createNewFile()
+                        }
+                        val txt_writer = FileWriter(txt_file)
+                        txt_writer.write(dng_str)
+                        txt_writer.close()
 
-                        m_rotate.postRotate(relativeOrientation.value!!.toFloat())
-
-                        val rotatedPngBitmap = Bitmap.createBitmap(dng_bitmap, 0, 0, dng_bitmap.width, dng_bitmap.height, m_rotate, true)
+//                        m_rotate.postRotate(relativeOrientation.value!!.toFloat())
+//
+//                        val rotatedPngBitmap = Bitmap.createBitmap(dng_bitmap, 0, 0, dng_bitmap.width, dng_bitmap.height, m_rotate, true)
 
 //                        val rotatedPngBitmap = Bitmap.createBitmap(dng_bitmap, 0, 0, 1080, 1920, m_rotate, true)
 
@@ -374,21 +415,21 @@ class RawActivity : AppCompatActivity() {
 //
 //                        val cropCartPngBitmap = Bitmap.createBitmap(resizePngBitmap, borderViewLeft, borderViewTop, cart_w, cart_h)
 
-                        val compressed = rotatedPngBitmap.compress(Bitmap.CompressFormat.JPEG, 100, jpg_fos)
+//                        val compressed = dng_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, jpg_fos)
+//
+//                        val saveBmp = AndroidBmpUtil.save(dng_bitmap, bmp_path)
 
-                        val saveBmp = AndroidBmpUtil.save(rotatedPngBitmap, bmp_path)
-
-                        if(compressed){
-                            Log.d("KSM", "Bitmap compressed jpg!!")
-                        }else{
-                            Log.d("KSM", "Bitmap compressed failed!!")
-                        }
-
-                        if(saveBmp){
-                            Log.d("KSM", "Bitmap saved bmp!!")
-                        }else{
-                            Log.d("KSM", "Bitmap saved bmp failed!!")
-                        }
+//                        if(compressed){
+//                            Log.d("KSM", "Bitmap compressed jpg!!")
+//                        }else{
+//                            Log.d("KSM", "Bitmap compressed failed!!")
+//                        }
+//
+//                        if(saveBmp){
+//                            Log.d("KSM", "Bitmap saved bmp!!")
+//                        }else{
+//                            Log.d("KSM", "Bitmap saved bmp failed!!")
+//                        }
                     }catch(exc : Exception){
                         Log.e("KSM", "PNG_Errored!", exc)
                     }

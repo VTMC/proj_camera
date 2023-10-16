@@ -64,6 +64,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.example.android.camera.utils.OrientationLiveData
 import com.example.android.camera.utils.computeExifOrientation
+import com.example.android.camera.utils.decodeExifOrientation
 import com.example.android.camera.utils.getPreviewOutputSize
 import com.example.proj_camera.MainActivity.Companion.REQUEST_CODE_PERMISSIONS
 import com.example.proj_camera.MainActivity.Companion.REQUIRED_PERMISSIONS
@@ -73,6 +74,7 @@ import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
+import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.Closeable
 import java.io.File
@@ -93,6 +95,7 @@ import java.util.concurrent.TimeoutException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.max
 
 
 class RawActivity : AppCompatActivity() {
@@ -146,6 +149,20 @@ class RawActivity : AppCompatActivity() {
 
     //Torch상태를 저장
     private var torchState: Boolean = false
+
+    /** Default Bitmap decoding options */
+    private val bitmapOptions = BitmapFactory.Options().apply {
+        inJustDecodeBounds = false
+        // Keep Bitmaps at less than 1 MP
+        if (max(outHeight, outWidth) > DOWNSAMPLE_SIZE) {
+            val scaleFactorX = outWidth / DOWNSAMPLE_SIZE + 1
+            val scaleFactorY = outHeight / DOWNSAMPLE_SIZE + 1
+            inSampleSize = max(scaleFactorX, scaleFactorY)
+        }
+    }
+
+    /** Bitmap transformation derived from passed arguments */
+    private val bitmapTransformation: Matrix by lazy { decodeExifOrientation(relativeOrientation.value?: 0) }
 
     //ZoomRatio 초기 변수
 //    private var zoomRatio: Float = ZoomUtil().minZoom()
@@ -351,46 +368,49 @@ class RawActivity : AppCompatActivity() {
 //
 //                    Log.d("KSM", "${dng_bitmap}")
 
+                    //직접 Bytes로 읽어서 비트맵으로 변환
                     /*val dng_bytes = dng_file.readBytes()
                     val dng_bitmap = BitmapFactory.decodeByteArray(dng_bytes, 0, dng_bytes.size)
 
+                    //imageDecoder 사용
                     val dng_imgDec = ImageDecoder.createSource(dng_file)
                     val dng_bitmap = ImageDecoder.decodeBitmap(dng_imgDec).copy(Bitmap.Config.ARGB_8888, true)*/
 
-                    val dngFis = FileInputStream(dng_file)
-                    val dng_bytes = dngFis.readBytes()
-                    dngFis.close()
+                    //YUVImage 활용
+//                    val dngFis = FileInputStream(dng_file)
+//                    val dng_bytes = dngFis.readBytes()
+//                    dngFis.close()
+//
+//                    val dng_w = dng_bitmap.width
+//                    val dng_h = dng_bitmap.height
+//
+//                    val yuvImage = YuvImage(dng_bytes, ImageFormat.NV21, dng_w, dng_h, null)
 
-//                    var dng_stringArray = emptyArray<String>()
-                    var dng_str = ""
+                    //Camera2Basic 참고
+                    val dng_buf = loadInputBuffer(pathName)
+                    val dng_bitmap = decodeBitmap(dng_buf, 0, dng_buf.size)
 
-                    for(i in 0..dng_bytes.size){
-                        dng_str += dng_bytes[i].toString()+" "
-                    }
 
                     val timestamp = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA).format(System.currentTimeMillis())
                     val jpg_fileName = "/JPG_$timestamp.jpg"
                     val bmp_fileName = "/BMP_$timestamp.bmp"
 
-                    val txt_fileName = "/Byte_$timestamp.txt"
+//                    val txt_fileName = "/Byte_$timestamp.jpg"
 
                     val jpg_file = File(path+jpg_fileName)
                     val bmp_path = path+bmp_fileName
 
-                    val txt_file = File(path+txt_fileName)
+//                    val jpg_yuvimg = File(path+txt_fileName)
 
                     Log.d("KSM", "outputDirectory PNG pathName : ${jpg_file.absolutePath}")
 
                     val m_rotate = Matrix()
 
                     try{
-//                        val jpg_fos = FileOutputStream(jpg_file)
-                        if(!txt_file.exists()){
-                            txt_file.createNewFile()
-                        }
-                        val txt_writer = FileWriter(txt_file)
-                        txt_writer.write(dng_str)
-                        txt_writer.close()
+                        val jpg_fos = FileOutputStream(jpg_file)
+
+//                        val o_s = FileOutputStream(jpg_yuvimg)
+//                        yuvImage.compressToJpeg(Rect(0,0,dng_w, dng_h), 100, o_s)
 
 //                        m_rotate.postRotate(relativeOrientation.value!!.toFloat())
 //
@@ -415,21 +435,21 @@ class RawActivity : AppCompatActivity() {
 //
 //                        val cropCartPngBitmap = Bitmap.createBitmap(resizePngBitmap, borderViewLeft, borderViewTop, cart_w, cart_h)
 
-//                        val compressed = dng_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, jpg_fos)
-//
-//                        val saveBmp = AndroidBmpUtil.save(dng_bitmap, bmp_path)
+                        val compressed = dng_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, jpg_fos)
 
-//                        if(compressed){
-//                            Log.d("KSM", "Bitmap compressed jpg!!")
-//                        }else{
-//                            Log.d("KSM", "Bitmap compressed failed!!")
-//                        }
-//
-//                        if(saveBmp){
-//                            Log.d("KSM", "Bitmap saved bmp!!")
-//                        }else{
-//                            Log.d("KSM", "Bitmap saved bmp failed!!")
-//                        }
+                        val saveBmp = AndroidBmpUtil.save(dng_bitmap, bmp_path)
+
+                        if(compressed){
+                            Log.d("KSM", "Bitmap compressed jpg!!")
+                        }else{
+                            Log.d("KSM", "Bitmap compressed failed!!")
+                        }
+
+                        if(saveBmp){
+                            Log.d("KSM", "Bitmap saved bmp!!")
+                        }else{
+                            Log.d("KSM", "Bitmap saved bmp failed!!")
+                        }
                     }catch(exc : Exception){
                         Log.e("KSM", "PNG_Errored!", exc)
                     }
@@ -850,6 +870,26 @@ class RawActivity : AppCompatActivity() {
         return captureRequest
     }
 
+    private fun loadInputBuffer(filePath : String): ByteArray {
+        val inputFile = File(filePath)
+        return BufferedInputStream(inputFile.inputStream()).let { stream ->
+            ByteArray(stream.available()).also {
+                stream.read(it)
+                stream.close()
+            }
+        }
+    }
+
+    private fun decodeBitmap(buffer: ByteArray, start: Int, length: Int): Bitmap {
+
+        // Load bitmap from given buffer
+        val bitmap = BitmapFactory.decodeByteArray(buffer, start, length, bitmapOptions)
+
+        // Transform bitmap orientation using provided metadata
+        return Bitmap.createBitmap(
+            bitmap, 0, 0, bitmap.width, bitmap.height, bitmapTransformation, true)
+    }
+
     override fun onPause(){
         super.onPause()
 
@@ -959,6 +999,9 @@ class RawActivity : AppCompatActivity() {
 
         /** Helper class used as a data holder for each selectable camera format item */
         private data class FormatItem(val title: String, val cameraId: String, val format: Int)
+
+        /** Maximum size of [Bitmap] decoded */
+        private const val DOWNSAMPLE_SIZE: Int = 1024  // 1MP
 
         //Camera2 Extension 참고
         //METERING_RECTANGLE_SIZE 초기값 설정

@@ -171,11 +171,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //test CPP
-        val nativeTest = dngSDK()
-        val testCppText = nativeTest.testNative()
-
-        Log.d("KSM", "Show Text From CPP : ${testCppText}")
+//        //test CPP
+//        val nativeTest = dngSDK()
+//        val testCppText = nativeTest.testNative()
+//
+//        Log.d("KSM", "Show Text From CPP : ${testCppText}")
 
         //뷰 바인딩
         viewBinding = ActivityMainBinding.inflate(layoutInflater)

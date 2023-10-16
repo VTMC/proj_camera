@@ -16,12 +16,12 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        externalNativeBuild {
-            cmake {
-                cppFlags "-std=c++11", "-Wall"
-                arguments "-DANDROID_STL=c++_static"
-            }
-        }
+//        externalNativeBuild {
+//            cmake {
+//                cppFlags "-std=c++11", "-Wall"
+//                arguments "-DANDROID_STL=c++_static"
+//            }
+//        }
     }
 
     buildTypes {
@@ -43,12 +43,12 @@ android {
     viewBinding{
         enabled = true
     }
-    externalNativeBuild {
-        cmake {
-            path file('src/main/cpp/CMakeLists.txt')
-            version '3.22.1'
-        }
-    }
+//    externalNativeBuild {
+//        cmake {
+//            path file('src/main/cpp/CMakeLists.txt')
+//            version '3.22.1'
+//        }
+//    }
 }
 
 dependencies {

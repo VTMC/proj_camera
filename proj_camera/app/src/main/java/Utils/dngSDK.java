@@ -7,6 +7,10 @@ public class dngSDK {
 
     public native String testNative();
 
-    public native Object DngReadImage();
+    private native void processDNG(String dngFilePath);
+
+    public void readDNG(String dngFilePath){
+        processDNG(dngFilePath);
+    }
 
 }

@@ -18,27 +18,23 @@
 
 #include <jni.h>
 #include <string>
+#include <iostream>
 #include "dngSdk_source/dng_read_image.h"
+#include "dngSdk_source/dng_sdk_limits.h"
 
 
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_Utils_nativeTest_stringFromJNI(JNIEnv *env, jobject thiz) {
-    // TODO: implement stringFromJNI()
-    std::string hello = "Hello from C++";
-    return env->NewStringUTF(hello.c_str());
-}
-
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_Utils_dngSDK_testNative(JNIEnv *env, jobject thiz) {
-    // TODO: implement stringFromJNI()
-    std::string hello = "Hello from C++";
-    return env->NewStringUTF(hello.c_str());
+extern "C"{
+    JNIEXPORT jstring Java_Utils_dngSDK_testNative(JNIEnv *env, jobject thiz) {
+        // TODO: implement stringFromJNI()
+        std::string hello = "Hello from C++";
+        return env->NewStringUTF(hello.c_str());
+    }
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_Utils_dngSDK_DngReadImage(JNIEnv *env, jobject thiz){
-    dng_read_image()
+Java_Utils_dngSDK_processDNG(JNIEnv *env, jobject thiz, jstring dng_file_path) {
+    // TODO: implement processDNG()
+    const char *path = env->GetStringUTFChars(dng_file_path, 0);
+    dng_read_image
 }

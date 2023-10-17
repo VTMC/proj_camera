@@ -97,6 +97,9 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
 
+import Utils.rawSDK
+import android.graphics.Color
+
 
 class RawActivity : AppCompatActivity() {
     private lateinit var viewBinding: RawActivityBinding
@@ -364,22 +367,21 @@ class RawActivity : AppCompatActivity() {
                     Log.d("KSM", "outputDirectory path : ${path}")
 
                     //bitmap으로 뽑아서 PNG로 저장하는 과정
-//                    val dng_bitmap = BitmapFactory.decodeFile(pathName)
-//
+                    val dng_bitmap = BitmapFactory.decodeFile(pathName)
 //                    Log.d("KSM", "${dng_bitmap}")
 
                     //직접 Bytes로 읽어서 비트맵으로 변환
-                    /*val dng_bytes = dng_file.readBytes()
-                    val dng_bitmap = BitmapFactory.decodeByteArray(dng_bytes, 0, dng_bytes.size)
+//                    val dng_bytes = dng_file.readBytes()
+//                    val dng_bitmap = BitmapFactory.decodeByteArray(dng_bytes, 0, dng_bytes.size)
 
                     //imageDecoder 사용
-                    val dng_imgDec = ImageDecoder.createSource(dng_file)
-                    val dng_bitmap = ImageDecoder.decodeBitmap(dng_imgDec).copy(Bitmap.Config.ARGB_8888, true)*/
+//                    val dng_imgDec = ImageDecoder.createSource(dng_file)
+//                    val dng_bitmap = ImageDecoder.decodeBitmap(dng_imgDec).copy(Bitmap.Config.ARGB_8888, true)
 
                     //YUVImage 활용
-//                    val dngFis = FileInputStream(dng_file)
-//                    val dng_bytes = dngFis.readBytes()
-//                    dngFis.close()
+                    val dngFis = FileInputStream(dng_file)
+                    val dng_bytes = dngFis.readBytes()
+                    dngFis.close()
 //
 //                    val dng_w = dng_bitmap.width
 //                    val dng_h = dng_bitmap.height
@@ -387,12 +389,28 @@ class RawActivity : AppCompatActivity() {
 //                    val yuvImage = YuvImage(dng_bytes, ImageFormat.NV21, dng_w, dng_h, null)
 
                     //Camera2Basic 참고
-                    val dng_buf = loadInputBuffer(pathName)
-                    val dng_bitmap = decodeBitmap(dng_buf, 0, dng_buf.size)
+//                    val dng_buf = loadInputBuffer(pathName)
+//                    val dng_bitmap = decodeBitmap(dng_buf, 0, dng_buf.size)
+
+                    //dng SDK 활용 - 사용 불가
+//                    val dng_data = rawSDK().dngFileInputStream(pathName)
+
+                    //fileInputStream
+//                    val buf = ByteArray(1024)
+//                    val baos = ByteArrayOutputStream()
+//
+//                    val fis = FileInputStream(dng_file)
+//                    var bytesRead = fis.read(buf)
+//
+//                    while(bytesRead != -1){
+//                        baos.write(buf, 0, bytesRead)
+//                    }
+//
+//                    baos.toByteArray()
 
 
                     val timestamp = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA).format(System.currentTimeMillis())
-                    val jpg_fileName = "/JPG_$timestamp.jpg"
+                    val jpg_fileName = "/JPEG_$timestamp.jpg"
                     val bmp_fileName = "/BMP_$timestamp.bmp"
 
 //                    val txt_fileName = "/Byte_$timestamp.jpg"
@@ -409,12 +427,17 @@ class RawActivity : AppCompatActivity() {
                     try{
                         val jpg_fos = FileOutputStream(jpg_file)
 
+                        jpg_fos.write(dng_bytes)
+
+
 //                        val o_s = FileOutputStream(jpg_yuvimg)
 //                        yuvImage.compressToJpeg(Rect(0,0,dng_w, dng_h), 100, o_s)
 
-//                        m_rotate.postRotate(relativeOrientation.value!!.toFloat())
+                        m_rotate.postRotate(relativeOrientation.value!!.toFloat())
 //
 //                        val rotatedPngBitmap = Bitmap.createBitmap(dng_bitmap, 0, 0, dng_bitmap.width, dng_bitmap.height, m_rotate, true)
+//
+//                        val patchedBitmap = SetRGBValue(rotatedPngBitmap, 0, 255, 0)
 
 //                        val rotatedPngBitmap = Bitmap.createBitmap(dng_bitmap, 0, 0, 1080, 1920, m_rotate, true)
 
@@ -435,21 +458,21 @@ class RawActivity : AppCompatActivity() {
 //
 //                        val cropCartPngBitmap = Bitmap.createBitmap(resizePngBitmap, borderViewLeft, borderViewTop, cart_w, cart_h)
 
-                        val compressed = dng_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, jpg_fos)
-
-                        val saveBmp = AndroidBmpUtil.save(dng_bitmap, bmp_path)
-
-                        if(compressed){
-                            Log.d("KSM", "Bitmap compressed jpg!!")
-                        }else{
-                            Log.d("KSM", "Bitmap compressed failed!!")
-                        }
-
-                        if(saveBmp){
-                            Log.d("KSM", "Bitmap saved bmp!!")
-                        }else{
-                            Log.d("KSM", "Bitmap saved bmp failed!!")
-                        }
+//                        val compressed = patchedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, jpg_fos)
+//
+//                        val saveBmp = AndroidBmpUtil.save(patchedBitmap, bmp_path)
+//
+//                        if(compressed){
+//                            Log.d("KSM", "Bitmap compressed jpg!!")
+//                        }else{
+//                            Log.d("KSM", "Bitmap compressed failed!!")
+//                        }
+//
+//                        if(saveBmp){
+//                            Log.d("KSM", "Bitmap saved bmp!!")
+//                        }else{
+//                            Log.d("KSM", "Bitmap saved bmp failed!!")
+//                        }
                     }catch(exc : Exception){
                         Log.e("KSM", "PNG_Errored!", exc)
                     }
@@ -754,7 +777,7 @@ class RawActivity : AppCompatActivity() {
                             Log.d("KSM", "Image Write Wrong!!!!")
                         }
 
-                        outputStream?.close()
+//                        outputStream?.close()
                     }
 
                     /** 이전의 흔적 (이미지 저장)
@@ -888,6 +911,57 @@ class RawActivity : AppCompatActivity() {
         // Transform bitmap orientation using provided metadata
         return Bitmap.createBitmap(
             bitmap, 0, 0, bitmap.width, bitmap.height, bitmapTransformation, true)
+    }
+
+    private fun YUV_420_888toNV21(image : Image) : ByteArray{
+        val yBuffer = image.planes[0].buffer
+        val uBuffer = image.planes[1].buffer
+        val vBuffer = image.planes[2].buffer
+
+        val ySize = yBuffer.remaining()
+        val uSize = uBuffer.remaining()
+        val vSize = vBuffer.remaining()
+
+        val nv21 = ByteArray(ySize+uSize+vSize)
+
+        yBuffer.get(nv21, 0, ySize)
+        vBuffer.get(nv21, ySize, vSize)
+        uBuffer.get(nv21, ySize+vSize, uSize);
+
+        return nv21
+    }
+
+    private fun SetRGBValue(src: Bitmap, r_value: Int, g_value: Int, b_value: Int) : Bitmap {
+        val width = src.width
+        val height = src.height
+
+        val bmOut = Bitmap.createBitmap(width, height, src.config)
+
+        for(x in 0 until width){
+            for(y in 0 until height){
+                val pixel = src.getPixel(x,y)
+                var a = Color.alpha(pixel)
+                var r = Color.red(pixel)
+                var g = Color.green(pixel)
+                var b = Color.blue(pixel)
+
+                r += r_value
+                if(r>255){r = 255}
+                else if(r<0){r = 0}
+
+                g += g_value
+                if(g>255){g = 255}
+                else if(g<0){g = 0}
+
+                b += b_value
+                if(b>255){b = 255}
+                else if(b<0){b = 0}
+
+                bmOut.setPixel(x, y, Color.argb(a, r, g, b))
+            }
+        }
+
+        return bmOut
     }
 
     override fun onPause(){

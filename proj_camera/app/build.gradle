@@ -30,6 +30,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    //maven 사용하기 위한 요소
+    buildscript {
+        repositories {
+            maven{
+                url "https://maven.andob.info/repository/open_source"
+            }
+        }
+    }
+
     //JAVA 소스가 필요하기 때문에 사용
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -69,4 +79,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+//    implementation 'ro.andob.androidawt:androidawt'
 }

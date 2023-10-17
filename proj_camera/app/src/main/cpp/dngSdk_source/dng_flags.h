@@ -28,13 +28,13 @@
 // Make sure a platform is defined
 
 #if !(defined(qMacOS) || defined(qWinOS) || defined(qAndroid) || defined(qiPhone) || defined(qLinux) || defined(qWeb))
-#include "RawEnvironment.h"
+//#include "RawEnvironment.h"
 #endif
 
 // This requires a force include or compiler define.  These are the unique platforms.
 
 #if !(defined(qMacOS) || defined(qWinOS) || defined(qAndroid) || defined(qiPhone) || defined(qLinux) || defined(qWeb))
-#error Unable to figure out platform
+//#error Unable to figure out platform
 #endif
 
 /*****************************************************************************/

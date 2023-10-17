@@ -6,13 +6,10 @@
 # Sets the minimum CMake version required for this project.
 cmake_minimum_required(VERSION 3.22.1)
 
-set( CPP_FILES
-        proj_camera.cpp,
-        dngSdk_lib.cpp)
+set(CPP_FILES proj_camera.cpp)
 
-#set(pathPROJECT D:/studyProj_android/proj_camera_updated/proj_camera)
-#
-#set(pathDNGSDK ${pathPROJECT}/proj_camera/app/src/main/cpp/dngSdk_source)
+#set(pathPROJECT D:/studyProj_android/proj_camera_updated/proj_camera/proj_camera)
+#set(pathLIBRAW ${pathPROJECT}/app/src/main/cpp)
 
 # Declares the project name. The project name can be accessed via ${ PROJECT_NAME},
 # Since this is the top level CMakeLists.txt, the project name is also accessible
@@ -36,8 +33,7 @@ project("proj_camera")
 add_library(${CMAKE_PROJECT_NAME} SHARED
 
         # List C/C++ source files with relative paths to this CMakeLists.txt.
-        proj_camera.cpp
-        )
+        proj_camera.cpp)
 
 #add_library(dngSdk_source SHARED dngSdk_source)
 

@@ -1,29 +1,16 @@
 package com.example.proj_camera
 
-import Utils.dngSDK
-import Utils.nativeTest
+import Utils.rawSDK
 import android.Manifest
-import android.annotation.SuppressLint
-import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.Cursor
 import android.graphics.ImageFormat
-import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
-import android.hardware.camera2.CaptureRequest
-import android.hardware.camera2.CaptureResult
-import android.hardware.camera2.DngCreator
-import android.hardware.camera2.TotalCaptureResult
-import android.icu.text.ListFormatter.Width
-import android.media.Image
-import android.opengl.Visibility
 import android.os.Build
-import android.os.Build.VERSION_CODES.R
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
@@ -36,51 +23,28 @@ import android.util.Size
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.RadioButton
 import android.widget.SeekBar
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraControl
 import androidx.camera.core.CameraInfo
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.FocusMeteringAction
-import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
-import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
-import androidx.camera.core.ImageCapture.CAPTURE_MODE_ZERO_SHUTTER_LAG
-import androidx.camera.core.ImageCapture.ERROR_INVALID_CAMERA
 import androidx.camera.core.ImageCapture.FLASH_MODE_AUTO
-import androidx.camera.core.ImageCapture.FLASH_MODE_OFF
-import androidx.camera.core.ImageCapture.FLASH_MODE_ON
 import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.core.TorchState
-import androidx.camera.core.internal.CameraUseCaseAdapter
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
-import com.example.proj_camera.RawActivity.Companion.REQUEST_CODE_PERMISSIONS
-import com.example.proj_camera.RawActivity.Companion.REQUIRED_PERMISSIONS
 import com.example.proj_camera.databinding.ActivityMainBinding
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.lang.reflect.Parameter
-import java.nio.file.Files.createFile
-import java.security.Policy.Parameters
 import java.text.SimpleDateFormat
 import java.util.Locale
-import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.concurrent.thread
@@ -172,7 +136,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
 //        //test CPP
-//        val nativeTest = dngSDK()
+//        val nativeTest = rawSDK()
 //        val testCppText = nativeTest.testNative()
 //
 //        Log.d("KSM", "Show Text From CPP : ${testCppText}")

@@ -371,6 +371,11 @@ class RawActivity : AppCompatActivity() {
 
                     //bitmap으로 뽑아서 PNG로 저장하는 과정
                     val dng_bitmap = BitmapFactory.decodeFile(pathName)
+
+                    val dng_buf = ByteBuffer.allocate(dng_bitmap.byteCount)
+                    dng_bitmap.copyPixelsToBuffer(dng_buf)
+                    val dng_byte = dng_buf.array()
+
 //                    Log.d("KSM", "${dng_bitmap}")
 
                     //직접 Bytes로 읽어서 비트맵으로 변환
@@ -411,9 +416,9 @@ class RawActivity : AppCompatActivity() {
 //
 //                    baos.toByteArray()
 
-                    val libraw = LibRaw.newInstance()
-
-                    val dng_bitmap = libraw.decodeBitmap(pathName, null)
+//                    val libraw = LibRaw.newInstance()
+//
+//                    val dng_bitmap = libraw.decodeBitmap(pathName, null)
 
                     val timestamp = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA).format(System.currentTimeMillis())
                     val jpg_fileName = "/JPG_$timestamp.jpg"
@@ -434,7 +439,7 @@ class RawActivity : AppCompatActivity() {
                     try{
                         val fos = FileOutputStream(bmp_file)
 //
-                        fos.write(dng_bitmap)
+                        fos.write(dng_byte)
 
 
 //                        val o_s = FileOutputStream(jpg_yuvimg)

@@ -34,8 +34,19 @@ android {
     //maven 사용하기 위한 요소
     buildscript {
         repositories {
+            google()
+            mavenCentral()
+
             maven{
-                url "https://maven.andob.info/repository/open_source"
+                url = "https://maven.andob.info/repository/open_source"
+            }
+
+            maven{
+                url = "https://maven.pkg.github.com/dburckh/AndroidLibRaw"
+//                credentials{
+//                    username = System.getenv("GPR_USER")
+////                    password = System.getenv("GPR_API_KEY")
+//                }
             }
         }
     }
@@ -61,7 +72,15 @@ android {
 //    }
 }
 
+
+
 dependencies {
+//    implementation 'androidx.test:monitor:1.6.1'
+//    implementation 'org.testng:testng:6.9.6'
+
+//    implementation 'org.testng:testng:6.9.6'
+//    implementation project(path: ':app')
+
     //cameraX 항목 추가
     def camerax_version = "1.1.0-beta01"
     implementation "androidx.camera:camera-core:1.2.3"
@@ -80,5 +99,10 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
-//    implementation 'ro.andob.androidawt:androidawt'
+    //android Glide
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+
+    //android LibRaw
+//    implementation 'com.homesoft.android:libraw:2.0.4'
+    implementation 'androidx.test.ext:junit:1.1.5'
 }

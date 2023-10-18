@@ -99,6 +99,7 @@ import kotlin.math.max
 
 import Utils.rawSDK
 import android.graphics.Color
+import libraw.src.main.java.com.homesoft.photo.libraw.LibRaw
 
 
 class RawActivity : AppCompatActivity() {
@@ -366,6 +367,8 @@ class RawActivity : AppCompatActivity() {
                     Log.d("KSM", "outputDirectory pathName : ${pathName}")
                     Log.d("KSM", "outputDirectory path : ${path}")
 
+
+
                     //bitmap으로 뽑아서 PNG로 저장하는 과정
                     val dng_bitmap = BitmapFactory.decodeFile(pathName)
 //                    Log.d("KSM", "${dng_bitmap}")
@@ -379,9 +382,9 @@ class RawActivity : AppCompatActivity() {
 //                    val dng_bitmap = ImageDecoder.decodeBitmap(dng_imgDec).copy(Bitmap.Config.ARGB_8888, true)
 
                     //YUVImage 활용
-                    val dngFis = FileInputStream(dng_file)
-                    val dng_bytes = dngFis.readBytes()
-                    dngFis.close()
+//                    val dngFis = FileInputStream(dng_file)
+//                    val dng_bytes = dngFis.readBytes()
+//                    dngFis.close()
 //
 //                    val dng_w = dng_bitmap.width
 //                    val dng_h = dng_bitmap.height
@@ -408,14 +411,18 @@ class RawActivity : AppCompatActivity() {
 //
 //                    baos.toByteArray()
 
+                    val libraw = LibRaw.newInstance()
+
+                    val dng_bitmap = libraw.decodeBitmap(pathName, null)
 
                     val timestamp = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA).format(System.currentTimeMillis())
-                    val jpg_fileName = "/JPEG_$timestamp.jpg"
+                    val jpg_fileName = "/JPG_$timestamp.jpg"
                     val bmp_fileName = "/BMP_$timestamp.bmp"
 
 //                    val txt_fileName = "/Byte_$timestamp.jpg"
 
                     val jpg_file = File(path+jpg_fileName)
+                    val bmp_file = File(path+bmp_fileName)
                     val bmp_path = path+bmp_fileName
 
 //                    val jpg_yuvimg = File(path+txt_fileName)
@@ -425,15 +432,15 @@ class RawActivity : AppCompatActivity() {
                     val m_rotate = Matrix()
 
                     try{
-                        val jpg_fos = FileOutputStream(jpg_file)
-
-                        jpg_fos.write(dng_bytes)
+                        val fos = FileOutputStream(bmp_file)
+//
+                        fos.write(dng_bitmap)
 
 
 //                        val o_s = FileOutputStream(jpg_yuvimg)
 //                        yuvImage.compressToJpeg(Rect(0,0,dng_w, dng_h), 100, o_s)
 
-                        m_rotate.postRotate(relativeOrientation.value!!.toFloat())
+//                        m_rotate.postRotate(relativeOrientation.value!!.toFloat())
 //
 //                        val rotatedPngBitmap = Bitmap.createBitmap(dng_bitmap, 0, 0, dng_bitmap.width, dng_bitmap.height, m_rotate, true)
 //
@@ -458,9 +465,9 @@ class RawActivity : AppCompatActivity() {
 //
 //                        val cropCartPngBitmap = Bitmap.createBitmap(resizePngBitmap, borderViewLeft, borderViewTop, cart_w, cart_h)
 
-//                        val compressed = patchedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, jpg_fos)
+//                        val compressed = dng_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, jpg_fos)
 //
-//                        val saveBmp = AndroidBmpUtil.save(patchedBitmap, bmp_path)
+//                        val saveBmp = AndroidBmpUtil.save(dng_bitmap, bmp_path)
 //
 //                        if(compressed){
 //                            Log.d("KSM", "Bitmap compressed jpg!!")
@@ -730,6 +737,10 @@ class RawActivity : AppCompatActivity() {
 
                 val dngCreator = DngCreator(characteristics!!, result.metadata)
 
+                //yuvImagePart
+//                val convertedImage = YUV_420_888toNV21(result.image)
+//                val yuvImage = YuvImage(convertedImage, result.format, result.image.width, result.image.height, null)
+
                 try {
 //                    outputDirectory = getOutputDirectory() - 이전의 흔적 (이미지 저장)
 
@@ -742,7 +753,7 @@ class RawActivity : AppCompatActivity() {
                         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P){ //API Level 29 (Android 10.0) 이상
                             put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
                             put(MediaStore.Images.Media.MIME_TYPE, "image/x-adobe-dng")
-    //                        put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+//                            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg") //yuvImage
                             put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraProj-Image Raw")
                         }else{
                             val imageDir = Environment.getExternalStoragePublicDirectory(
@@ -752,6 +763,7 @@ class RawActivity : AppCompatActivity() {
                                 imageDirFile.mkdirs()
                             }
                             val imageFile = File(imageDirFile, "${fileName}.dng")
+//                            val imageFile = File(imageDirFile, "${fileName}.jpg") //yuvImage
                             put(MediaStore.Images.Media.DATA, imageFile.absolutePath)
                         }
                     }
@@ -770,9 +782,11 @@ class RawActivity : AppCompatActivity() {
                     uri?.let{imageUri ->
                         val outputStream = resolver.openOutputStream(imageUri)
 
-
                         if (outputStream != null) {
                             dngCreator.writeImage(outputStream, result.image)
+
+                            //yuvImage
+//                            yuvImage.compressToJpeg(Rect(0,0,result.image.width, result.image.height), 100, outputStream)
                         }else{
                             Log.d("KSM", "Image Write Wrong!!!!")
                         }

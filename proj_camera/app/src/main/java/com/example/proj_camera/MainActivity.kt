@@ -1,6 +1,5 @@
 package com.example.proj_camera
 
-import Utils.rawSDK
 import android.Manifest
 import android.content.ContentValues
 import android.content.Context

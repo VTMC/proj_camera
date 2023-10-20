@@ -9,34 +9,26 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.ImageDecoder
 import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.Rect
-import android.graphics.YuvImage
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
-import android.hardware.camera2.CameraExtensionCharacteristics
-import android.hardware.camera2.CameraExtensionSession
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
 import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.CaptureResult
 import android.hardware.camera2.DngCreator
 import android.hardware.camera2.TotalCaptureResult
-import android.hardware.camera2.params.ExtensionSessionConfiguration
 import android.hardware.camera2.params.MeteringRectangle
-import android.hardware.camera2.params.OutputConfiguration
-import android.media.ExifInterface
 import android.media.Image
 import android.media.ImageReader
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.FileUtils
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -44,7 +36,6 @@ import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
 import android.view.MotionEvent
-import android.view.ScaleGestureDetector
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
@@ -52,12 +43,7 @@ import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.TorchState
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.CameraController
-import androidx.coordinatorlayout.widget.CoordinatorLayout.Behavior.setTag
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
@@ -66,27 +52,15 @@ import com.example.android.camera.utils.OrientationLiveData
 import com.example.android.camera.utils.computeExifOrientation
 import com.example.android.camera.utils.decodeExifOrientation
 import com.example.android.camera.utils.getPreviewOutputSize
-import com.example.proj_camera.MainActivity.Companion.REQUEST_CODE_PERMISSIONS
-import com.example.proj_camera.MainActivity.Companion.REQUIRED_PERMISSIONS
 import com.example.proj_camera.databinding.RawActivityBinding
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.json.JSONObject
 import java.io.BufferedInputStream
-import java.io.ByteArrayOutputStream
 import java.io.Closeable
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.FileWriter
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.io.OutputStreamWriter
-import java.nio.ByteBuffer
-import java.nio.file.Files.setAttribute
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.ArrayBlockingQueue
@@ -97,9 +71,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
 
-import Utils.rawSDK
 import android.graphics.Color
-import libraw.src.main.java.com.homesoft.photo.libraw.LibRaw
 
 
 class RawActivity : AppCompatActivity() {
@@ -372,9 +344,9 @@ class RawActivity : AppCompatActivity() {
                     //bitmap으로 뽑아서 PNG로 저장하는 과정
                     val dng_bitmap = BitmapFactory.decodeFile(pathName)
 
-                    val dng_buf = ByteBuffer.allocate(dng_bitmap.byteCount)
-                    dng_bitmap.copyPixelsToBuffer(dng_buf)
-                    val dng_byte = dng_buf.array()
+//                    val dng_buf = ByteBuffer.allocate(dng_bitmap.byteCount)
+//                    dng_bitmap.copyPixelsToBuffer(dng_buf)
+//                    val dng_byte = dng_buf.array()
 
 //                    Log.d("KSM", "${dng_bitmap}")
 
@@ -404,31 +376,26 @@ class RawActivity : AppCompatActivity() {
 //                    val dng_data = rawSDK().dngFileInputStream(pathName)
 
                     //fileInputStream
-//                    val buf = ByteArray(1024)
 //                    val baos = ByteArrayOutputStream()
 //
 //                    val fis = FileInputStream(dng_file)
-//                    var bytesRead = fis.read(buf)
-//
-//                    while(bytesRead != -1){
-//                        baos.write(buf, 0, bytesRead)
-//                    }
-//
-//                    baos.toByteArray()
+//                    var bytesRead = fis.read()
+//                    val dng_bytes = dng_file.readBytes()
+
+
 
 //                    val libraw = LibRaw.newInstance()
 //
 //                    val dng_bitmap = libraw.decodeBitmap(pathName, null)
 
                     val timestamp = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA).format(System.currentTimeMillis())
+
                     val jpg_fileName = "/JPG_$timestamp.jpg"
-                    val bmp_fileName = "/BMP_$timestamp.bmp"
-
-//                    val txt_fileName = "/Byte_$timestamp.jpg"
-
                     val jpg_file = File(path+jpg_fileName)
-                    val bmp_file = File(path+bmp_fileName)
+
+                    val bmp_fileName = "/BMP_$timestamp.bmp"
                     val bmp_path = path+bmp_fileName
+                    val bmp_file = File(path+bmp_fileName)
 
 //                    val jpg_yuvimg = File(path+txt_fileName)
 
@@ -437,9 +404,8 @@ class RawActivity : AppCompatActivity() {
                     val m_rotate = Matrix()
 
                     try{
-                        val fos = FileOutputStream(bmp_file)
-//
-                        fos.write(dng_byte)
+                        val fos = FileOutputStream(jpg_file)
+//                        fos.write(dng_byte)
 
 
 //                        val o_s = FileOutputStream(jpg_yuvimg)
@@ -470,23 +436,51 @@ class RawActivity : AppCompatActivity() {
 //
 //                        val cropCartPngBitmap = Bitmap.createBitmap(resizePngBitmap, borderViewLeft, borderViewTop, cart_w, cart_h)
 
-//                        val compressed = dng_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, jpg_fos)
-//
-//                        val saveBmp = AndroidBmpUtil.save(dng_bitmap, bmp_path)
-//
-//                        if(compressed){
-//                            Log.d("KSM", "Bitmap compressed jpg!!")
-//                        }else{
-//                            Log.d("KSM", "Bitmap compressed failed!!")
-//                        }
-//
-//                        if(saveBmp){
-//                            Log.d("KSM", "Bitmap saved bmp!!")
-//                        }else{
-//                            Log.d("KSM", "Bitmap saved bmp failed!!")
-//                        }
+                        val compressed = dng_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+
+                        val saveBmp = AndroidBmpUtil.save(dng_bitmap, bmp_path)
+
+                        if(compressed){
+                            Log.d("KSM", "Bitmap compressed jpg!!")
+                        }else{
+                            Log.d("KSM", "Bitmap compressed failed!!")
+                        }
+
+                        if(saveBmp){
+                            Log.d("KSM", "Bitmap saved bmp!!")
+                        }else{
+                            Log.d("KSM", "Bitmap saved bmp failed!!")
+                        }
                     }catch(exc : Exception){
                         Log.e("KSM", "PNG_Errored!", exc)
+                    }
+
+                    //jpg_android bitmap 비교
+                    val jpg_bitmap = BitmapFactory.decodeFile(jpg_file.absolutePath)
+
+                    val jpg_str = difRGB(dng_bitmap, jpg_bitmap)
+                    try{
+                        val jpgTxt_file = File(jpg_file.parent+"JPGTXT_$timestamp.txt")
+                        val fos = FileOutputStream(jpgTxt_file)
+                        fos.write(jpg_str.toByteArray())
+                        fos.close()
+                        Log.d("KSM", "JPG_TXT SAVED!")
+                    }catch(e : IOException){
+                        Log.e("KSM", "JPG_TXT ERROR!!!", e)
+                    }
+
+                    //bmp_android bitmap 비교
+                    val bmp_bitmap = BitmapFactory.decodeFile(bmp_file.absolutePath)
+
+                    val bmp_str = difRGB(dng_bitmap, bmp_bitmap)
+                    try{
+                        val bmpTxt_file = File(bmp_file.parent+"BMPTXT_$timestamp.txt")
+                        val fos = FileOutputStream(bmpTxt_file)
+                        fos.write(bmp_str.toByteArray())
+                        fos.close()
+                        Log.d("KSM", "BMP_TXT SAVED!")
+                    }catch(e : IOException){
+                        Log.e("KSM", "BMP_TXT ERROR!!!", e)
                     }
 
                     //촬영 후 다시 자동 AF 모드로 설정
@@ -950,37 +944,35 @@ class RawActivity : AppCompatActivity() {
         return nv21
     }
 
-    private fun SetRGBValue(src: Bitmap, r_value: Int, g_value: Int, b_value: Int) : Bitmap {
-        val width = src.width
-        val height = src.height
+    private fun difRGB(bmp1 : Bitmap, bmp2 : Bitmap) : String {
+        var outputStr = ""
 
-        val bmOut = Bitmap.createBitmap(width, height, src.config)
+        for (i in 0 until(bmp1.width)){
+            for(j in 0 until(bmp1.height)){
+                val bmp1RGB = bmp1.getPixel(i, j)
+                val bmp2RGB = bmp2.getPixel(i, j)
 
-        for(x in 0 until width){
-            for(y in 0 until height){
-                val pixel = src.getPixel(x,y)
-                var a = Color.alpha(pixel)
-                var r = Color.red(pixel)
-                var g = Color.green(pixel)
-                var b = Color.blue(pixel)
+                val a1 = Color.alpha(bmp1RGB)
+                val a2 = Color.alpha(bmp2RGB)
+                val r1 = Color.red(bmp1RGB)
+                val r2 = Color.red(bmp2RGB)
+                val g1 = Color.green(bmp1RGB)
+                val g2 = Color.green(bmp2RGB)
+                val b1 = Color.blue(bmp1RGB)
+                val b2 = Color.blue(bmp2RGB)
 
-                r += r_value
-                if(r>255){r = 255}
-                else if(r<0){r = 0}
+                val difA = a1-a2
+                val difR = r1-r2
+                val difG = g1-g2
+                val difB = b1-b2
 
-                g += g_value
-                if(g>255){g = 255}
-                else if(g<0){g = 0}
-
-                b += b_value
-                if(b>255){b = 255}
-                else if(b<0){b = 0}
-
-                bmOut.setPixel(x, y, Color.argb(a, r, g, b))
+                val str = "pos[$i, $j] diffrence ARGB = [$difA, $difR, $difG, $difB]\n"
+                Log.d("KSM", "${str}")
+                outputStr += str
             }
         }
 
-        return bmOut
+        return outputStr
     }
 
     override fun onPause(){

@@ -3,26 +3,85 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+import org.apache.tools.ant.taskdefs.condition.Os
+
+def getNdkBuildPath() {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+    def command = properties.getProperty('ndk.dir')
+
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        command += "\\ndk-build.cmd"
+    } else {
+        command += "/ndk-build"
+    }
+
+    return command
+}
+
 android {
     namespace 'com.example.proj_camera'
     compileSdk 33
 
     defaultConfig {
         applicationId "com.example.proj_camera"
-        minSdk 21
+        minSdk 26
         targetSdk 33
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
 
-//        externalNativeBuild {
-//            cmake {
-//                cppFlags "-std=c++11", "-Wall"
-//                arguments "-DANDROID_STL=c++_static"
-//            }
-//        }
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++11", "-Wall"
+                arguments "-DANDROID_STL=c++_static"
+            }
+        }
+
+        ndk.abiFilters 'armeabi-v7a', 'arm64-v8a'
     }
+
+    externalNativeBuild {
+        cmake {
+            path file('CMakeLists.txt')
+        }
+    }
+
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES']
+        }
+    }
+
+    sourceSets.main {
+        jniLibs.srcDirs 'src/main/libs', 'src/main/jni/libimxdmabuffer', 'src/main/jni/libimxvpuapi'
+        jni.srcDirs = []
+    }
+
+    ext {
+        nativeDebuggable = true
+    }
+
+    task buildNative(type: Exec, description: 'Compile JNI source via NDK') {
+        if (nativeDebuggable) {
+            commandLine getNdkBuildPath(), 'NDK_DEBUG=1', '-C', file('src/main').absolutePath
+        } else {
+            commandLine getNdkBuildPath(), '-C', file('src/main').absolutePath
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        compileTask -> compileTask.dependsOn buildNative
+    }
+
+    task cleanNative(type: Exec, description: 'Clean native objs and lib') {
+        commandLine getNdkBuildPath(), '-C', file('src/main').absolutePath, 'clean'
+    }
+
+    clean.dependsOn 'cleanNative'
 
     buildTypes {
         release {
@@ -56,9 +115,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
 
     //뷰 바인딩을 위한 코드
     viewBinding{
@@ -69,6 +125,9 @@ android {
 //            path file('src/main/cpp/CMakeLists.txt')
 //            version '3.22.1'
 //        }
+////        ndkBuild{
+////            path file('src/main/cpp/libraw-0.21.1/Android.mk')
+////        }
 //    }
 }
 
@@ -105,4 +164,12 @@ dependencies {
     //android LibRaw
 //    implementation 'com.homesoft.android:libraw:2.0.4'
     implementation 'androidx.test.ext:junit:1.1.5'
+
+
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+//    compileOnly files('libs/classes.jar')
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }

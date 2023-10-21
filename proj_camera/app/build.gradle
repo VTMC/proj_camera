@@ -34,61 +34,61 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
 
-        externalNativeBuild {
-            cmake {
-                cppFlags "-std=c++11", "-Wall"
-                arguments "-DANDROID_STL=c++_static"
-            }
-        }
+//        externalNativeBuild {
+//            cmake {
+//                cppFlags "-std=c++11", "-Wall"
+//                arguments "-DANDROID_STL=c++_static"
+//            }
+//        }
 
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a'
     }
 
-    externalNativeBuild {
-        cmake {
-            path file('CMakeLists.txt')
-        }
-    }
-
-    packagingOptions {
-        resources {
-            excludes += ['META-INF/DEPENDENCIES']
-        }
-    }
-
-    sourceSets.main {
-        jniLibs.srcDirs 'src/main/libs', 'src/main/jni/libimxdmabuffer', 'src/main/jni/libimxvpuapi'
-        jni.srcDirs = []
-    }
-
-    ext {
-        nativeDebuggable = true
-    }
-
-    task buildNative(type: Exec, description: 'Compile JNI source via NDK') {
-        if (nativeDebuggable) {
-            commandLine getNdkBuildPath(), 'NDK_DEBUG=1', '-C', file('src/main').absolutePath
-        } else {
-            commandLine getNdkBuildPath(), '-C', file('src/main').absolutePath
-        }
-    }
-
-    tasks.withType(JavaCompile) {
-        compileTask -> compileTask.dependsOn buildNative
-    }
-
-    task cleanNative(type: Exec, description: 'Clean native objs and lib') {
-        commandLine getNdkBuildPath(), '-C', file('src/main').absolutePath, 'clean'
-    }
-
-    clean.dependsOn 'cleanNative'
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
+//    externalNativeBuild {
+//        cmake {
+//            path file('CMakeLists.txt')
+//        }
+//    }
+//
+//    packagingOptions {
+//        resources {
+//            excludes += ['META-INF/DEPENDENCIES']
+//        }
+//    }
+//
+//    sourceSets.main {
+//        jniLibs.srcDirs 'src/main/libs', 'src/main/jni/libimxdmabuffer', 'src/main/jni/libimxvpuapi'
+//        jni.srcDirs = []
+//    }
+//
+//    ext {
+//        nativeDebuggable = true
+//    }
+//
+//    task buildNative(type: Exec, description: 'Compile JNI source via NDK') {
+//        if (nativeDebuggable) {
+//            commandLine getNdkBuildPath(), 'NDK_DEBUG=1', '-C', file('src/main').absolutePath
+//        } else {
+//            commandLine getNdkBuildPath(),  '-C', file('src/main').absolutePath
+//        }
+//    }
+//
+//    tasks.withType(JavaCompile) {
+//        compileTask -> compileTask.dependsOn buildNative
+//    }
+//
+//    task cleanNative(type: Exec, description: 'Clean native objs and lib') {
+//        commandLine getNdkBuildPath(), '-C', file('src/main').absolutePath, 'clean'
+//    }
+//
+//    clean.dependsOn 'cleanNative'
+//
+//    buildTypes {
+//        release {
+//            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+//        }
+//    }
 
     //maven 사용하기 위한 요소
     buildscript {
@@ -112,8 +112,8 @@ android {
 
     //JAVA 소스가 필요하기 때문에 사용
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     //뷰 바인딩을 위한 코드

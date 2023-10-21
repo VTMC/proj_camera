@@ -74,8 +74,8 @@
 
 project("jni libraries")
 cmake_minimum_required(VERSION 3.4.1)
-set(LOCAL_PATH "src/main/jni/libraw-0.21.1")
-#set(LOCAL_PATH "D:/studyProj_android/proj_camera_updated/proj_camera/proj_camera/app/src/main/jni/libraw-0.21.1")
+#set(LOCAL_PATH "src/main/jni/libraw-0.21.1")
+set(LOCAL_PATH "F:/Android_Project/proj_camera/proj_camera/proj_camera/app/src/main/jni/libraw-0.21.1")
 set(CMAKE_CXX_FLAGS "-DANDROID_ABI=armeabi-v7a -DLIBRAW_NOTHREADS -D_LARGEFILE_SOURCE -fno-rtti -fexceptions -D_FILE_OFFSET_BITS=64 -D__USE_FILE_OFFSET64 -DLIBRAW_OWN_SWAB")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/src/main/libs/${ANDROID_ABI})
 set(LOCAL_SRC_FILES ${LOCAL_PATH}/src/libraw_c_api.cpp ${LOCAL_PATH}/src/libraw_datastream.cpp ${LOCAL_PATH}/src/decoders/canon_600.cpp ${LOCAL_PATH}/src/decoders/crx.cpp

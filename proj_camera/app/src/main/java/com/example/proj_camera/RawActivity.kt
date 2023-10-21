@@ -339,10 +339,15 @@ class RawActivity : AppCompatActivity() {
                     Log.d("KSM", "outputDirectory pathName : ${pathName}")
                     Log.d("KSM", "outputDirectory path : ${path}")
 
-
-
                     //bitmap으로 뽑아서 PNG로 저장하는 과정
                     val dng_bitmap = BitmapFactory.decodeFile(pathName)
+
+                    //색 측정할 픽셀 위치 설정
+                    val pixel_x = (dng_bitmap.width) / 2
+                    val pixel_y = (dng_bitmap.height) / 2
+
+                    val dng_str = getRGB(dng_bitmap, pixel_x, pixel_y)
+                    Log.d("KSM", "DNG RGB : $dng_str")
 
 //                    val dng_buf = ByteBuffer.allocate(dng_bitmap.byteCount)
 //                    dng_bitmap.copyPixelsToBuffer(dng_buf)
@@ -411,9 +416,9 @@ class RawActivity : AppCompatActivity() {
 //                        val o_s = FileOutputStream(jpg_yuvimg)
 //                        yuvImage.compressToJpeg(Rect(0,0,dng_w, dng_h), 100, o_s)
 
-//                        m_rotate.postRotate(relativeOrientation.value!!.toFloat())
+//                        m_rotate.postRotate((relativeOrientation.value?:90).toFloat())
 //
-//                        val rotatedPngBitmap = Bitmap.createBitmap(dng_bitmap, 0, 0, dng_bitmap.width, dng_bitmap.height, m_rotate, true)
+//                        val rotated_bitmap = Bitmap.createBitmap(dng_bitmap, 0, 0, dng_bitmap.width, dng_bitmap.height, m_rotate, true)
 //
 //                        val patchedBitmap = SetRGBValue(rotatedPngBitmap, 0, 255, 0)
 
@@ -458,30 +463,14 @@ class RawActivity : AppCompatActivity() {
                     //jpg_android bitmap 비교
                     val jpg_bitmap = BitmapFactory.decodeFile(jpg_file.absolutePath)
 
-                    val jpg_str = difRGB(dng_bitmap, jpg_bitmap)
-                    try{
-                        val jpgTxt_file = File(jpg_file.parent+"JPGTXT_$timestamp.txt")
-                        val fos = FileOutputStream(jpgTxt_file)
-                        fos.write(jpg_str.toByteArray())
-                        fos.close()
-                        Log.d("KSM", "JPG_TXT SAVED!")
-                    }catch(e : IOException){
-                        Log.e("KSM", "JPG_TXT ERROR!!!", e)
-                    }
+                    val jpg_str = getRGB(jpg_bitmap, pixel_x, pixel_y)
+                    Log.d("KSM", "JPG RGB : $jpg_str")
 
                     //bmp_android bitmap 비교
                     val bmp_bitmap = BitmapFactory.decodeFile(bmp_file.absolutePath)
 
-                    val bmp_str = difRGB(dng_bitmap, bmp_bitmap)
-                    try{
-                        val bmpTxt_file = File(bmp_file.parent+"BMPTXT_$timestamp.txt")
-                        val fos = FileOutputStream(bmpTxt_file)
-                        fos.write(bmp_str.toByteArray())
-                        fos.close()
-                        Log.d("KSM", "BMP_TXT SAVED!")
-                    }catch(e : IOException){
-                        Log.e("KSM", "BMP_TXT ERROR!!!", e)
-                    }
+                    val bmp_str = getRGB(bmp_bitmap, pixel_x, pixel_y)
+                    Log.d("KSM", "BMP RGB : $bmp_str")
 
                     //촬영 후 다시 자동 AF 모드로 설정
                     session.stopRepeating()
@@ -944,35 +933,18 @@ class RawActivity : AppCompatActivity() {
         return nv21
     }
 
-    private fun difRGB(bmp1 : Bitmap, bmp2 : Bitmap) : String {
-        var outputStr = ""
+    private fun getRGB(bmp1 : Bitmap, x : Int, y : Int) : String {
 
-        for (i in 0 until(bmp1.width)){
-            for(j in 0 until(bmp1.height)){
-                val bmp1RGB = bmp1.getPixel(i, j)
-                val bmp2RGB = bmp2.getPixel(i, j)
+        val bmp1RGB = bmp1.getPixel(x, y)
 
-                val a1 = Color.alpha(bmp1RGB)
-                val a2 = Color.alpha(bmp2RGB)
-                val r1 = Color.red(bmp1RGB)
-                val r2 = Color.red(bmp2RGB)
-                val g1 = Color.green(bmp1RGB)
-                val g2 = Color.green(bmp2RGB)
-                val b1 = Color.blue(bmp1RGB)
-                val b2 = Color.blue(bmp2RGB)
+        val a = Color.alpha(bmp1RGB)
+        val r = Color.red(bmp1RGB)
+        val g = Color.green(bmp1RGB)
+        val b = Color.blue(bmp1RGB)
 
-                val difA = a1-a2
-                val difR = r1-r2
-                val difG = g1-g2
-                val difB = b1-b2
+        val str = "pos[$x, $y] diffrence ARGB = [$a, $r, $g, $b]\n"
 
-                val str = "pos[$i, $j] diffrence ARGB = [$difA, $difR, $difG, $difB]\n"
-                Log.d("KSM", "${str}")
-                outputStr += str
-            }
-        }
-
-        return outputStr
+        return str
     }
 
     override fun onPause(){

@@ -31,6 +31,7 @@
 #include "unprocessed_raw.h"
 #include <jni.h>
 #include <android/log.h>
+#include <jni.h>
 
 extern "C"
 JNIEXPORT jstring Java_Utils_libRaw_testNative(JNIEnv *env, jobject thiz) {
@@ -430,4 +431,52 @@ Java_com_example_proj_1camera_RawActivity_dngToTiff(JNIEnv *env, jobject thiz, j
     RawProcessor.recycle();
 //    delete RawProcessor;
     return 0;
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL Java_com_example_proj_1camera_RawActivity_getRGB(JNIEnv * env, jobject thiz,
+                                                                           jint x, jint y, jstring path) {
+    // TODO: implement getRGB()
+
+    const char *path_str = env->GetStringUTFChars(path, 0);
+
+    __android_log_print(
+            ANDROID_LOG_DEBUG,
+    "KSM",
+    "In C++ From Path : %s\n", path_str,
+    0);
+
+    Libraw RawProcessor;
+
+    int ret;
+
+    #define imgdata RawProcessor.imgdata.image
+
+    __android_log_print(
+            ANDROID_LOG_INFO,
+            "KSM",
+            "Try to Open File... \n");
+
+    //file opening
+    if((ret = RawProcessor.open_file(path_str)) !== LIBRAW_SUCCESS){
+        __android_log_print(
+                ANDROID_LOG_ERROR,
+                "KSM",
+                "File Open Error %s : %s\n", path_str, libraw_strerror(ret));
+    }
+
+    __android_log_print(
+            ANDROID_LOG_INFO,
+            "KSM",
+            "Try to Unpack File... \n");
+
+    if((ret = RawProcessor.unpack()) !== LIBRAW_SUCCESS){
+        __android_log_print(
+                ANDROID_LOG_ERROR,
+                "KSM",
+                "File Unpack Error %s : %s\n", path_str, libraw_strerror(ret));
+    }
+
+    //get Middle Point Pixel RGB by Libraw
+
 }

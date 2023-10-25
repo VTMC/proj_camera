@@ -83,6 +83,8 @@ class RawActivity : AppCompatActivity() {
 
     external fun unprocessed_raw(argv: Array<String>, toPath: String) : Int
 
+    external fun getRGB(x : Int, y : Int, path : String) : String
+
     private lateinit var viewBinding: RawActivityBinding
 
     private lateinit var cameraExecutor: ExecutorService
@@ -420,22 +422,19 @@ class RawActivity : AppCompatActivity() {
 
                     Log.d("KSM", "tiff path in Kotlin : ${tiff_path}")
 
-                    val ac_str = arrayOf("-v", "-T", "${pathName}")
-                    val resultTiff = simple_dcraw(ac_str, tiff_path)
-//                    lifecycleScope.launch(Dispatchers.Main){
-//                        //libraw
-////                        Log.d("KSM", "TESTING --- ${lib()}")
-//                        val ac_str = arrayOf("-v", "-T", "${pathName}")
-//                        val resultTiff = simple_dcraw(ac_str, tiff_path)
-////                        val resultTiff = simple_dcraw2(ac_str)
-////                        val resultTiff = unprocessed_raw(ac_str, tiff_path)
-////                        val resultTiff = dngToTiff(pathName, tiff_path)
-////                        val resultBitmap = dngToBitmap(pathName)
-//                        Log.d("KSM", "resultTiff Result : ${resultTiff}")
-//
-//                    }
+                    lifecycleScope.launch(Dispatchers.Main){
+                        //libraw
+//                        Log.d("KSM", "TESTING --- ${lib()}")
+                        val ac_str = arrayOf("-v", "-T", "${pathName}")
+                        val resultTiff = simple_dcraw(ac_str, tiff_path)
+//                        val resultTiff = simple_dcraw2(ac_str)
+//                        val resultTiff = unprocessed_raw(ac_str, tiff_path)
+//                        val resultTiff = dngToTiff(pathName, tiff_path)
+//                        val resultBitmap = dngToBitmap(pathName)
+                        Log.d("KSM", "resultTiff Result : ${resultTiff}")
 
-                    Log.d("KSM", "resultTiff Result : ${resultTiff}")
+                    }
+
                     Log.d("KSM", "outputDirectory PNG pathName : ${jpg_file.absolutePath}")
 
                     val m_rotate = Matrix()
@@ -1008,6 +1007,10 @@ class RawActivity : AppCompatActivity() {
 
 
     companion object{
+        init {
+            System.loadLibrary("proj_camera")
+        }
+
         private const val TAG = "proj_Camera_RAW"
 
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"

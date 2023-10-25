@@ -19,10 +19,10 @@
 #include <math.h>
 #define LIBRAW_LIBRARY_BUILD
 #define LIBRAW_IO_REDEFINED
-#include "libraw/libraw.h"
-#include "libraw/libraw_types.h"
-#include "internal/defines.h"
-#include "internal/var_defines.h"
+#include "../libraw/libraw.h"
+#include "../libraw/libraw_types.h"
+#include "../internal/defines.h"
+#include "../internal/var_defines.h"
 
 #define stmread(buf, maxlen, fp) stread(buf, MIN(maxlen, sizeof(buf)), fp)
 #define strbuflen(buf) strnlen(buf, sizeof(buf) - 1)

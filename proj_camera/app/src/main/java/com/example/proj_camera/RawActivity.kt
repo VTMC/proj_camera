@@ -3,6 +3,8 @@ package com.example.proj_camera
 import Utils.AndroidBmpUtil
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -75,6 +77,12 @@ import android.graphics.Color
 
 
 class RawActivity : AppCompatActivity() {
+    external fun simple_dcraw(argv: Array<String>, toPath: String) : Int
+
+    external fun dngToTiff(fromPath : String, toPath : String) : Int
+
+    external fun unprocessed_raw(argv: Array<String>, toPath: String) : Int
+
     private lateinit var viewBinding: RawActivityBinding
 
     private lateinit var cameraExecutor: ExecutorService
@@ -139,6 +147,11 @@ class RawActivity : AppCompatActivity() {
 
     /** Bitmap transformation derived from passed arguments */
     private val bitmapTransformation: Matrix by lazy { decodeExifOrientation(relativeOrientation.value?: 0) }
+
+
+    private lateinit var dng_str : String
+    private lateinit var jpg_str : String
+    private lateinit var bmp_str : String
 
     //ZoomRatio 초기 변수
 //    private var zoomRatio: Float = ZoomUtil().minZoom()
@@ -340,14 +353,14 @@ class RawActivity : AppCompatActivity() {
                     Log.d("KSM", "outputDirectory path : ${path}")
 
                     //bitmap으로 뽑아서 PNG로 저장하는 과정
-                    val dng_bitmap = BitmapFactory.decodeFile(pathName)
-
-                    //색 측정할 픽셀 위치 설정
-                    val pixel_x = (dng_bitmap.width) / 2
-                    val pixel_y = (dng_bitmap.height) / 2
-
-                    val dng_str = getRGB(dng_bitmap, pixel_x, pixel_y)
-                    Log.d("KSM", "DNG RGB : $dng_str")
+//                    val dng_bitmap = BitmapFactory.decodeFile(pathName)
+//
+//                    //색 측정할 픽셀 위치 설정
+//                    val pixel_x = (dng_bitmap.width) / 2
+//                    val pixel_y = (dng_bitmap.height) / 2
+//
+//                    val dng_str = getRGB(dng_bitmap, pixel_x, pixel_y)
+//                    Log.d("KSM", "DNG RGB : $dng_str")
 
 //                    val dng_buf = ByteBuffer.allocate(dng_bitmap.byteCount)
 //                    dng_bitmap.copyPixelsToBuffer(dng_buf)
@@ -402,8 +415,27 @@ class RawActivity : AppCompatActivity() {
                     val bmp_path = path+bmp_fileName
                     val bmp_file = File(path+bmp_fileName)
 
-//                    val jpg_yuvimg = File(path+txt_fileName)
+                    val tiff_fileName = "/TIFF_$timestamp"
+                    val tiff_path = path+tiff_fileName
 
+                    Log.d("KSM", "tiff path in Kotlin : ${tiff_path}")
+
+                    val ac_str = arrayOf("-v", "-T", "${pathName}")
+                    val resultTiff = simple_dcraw(ac_str, tiff_path)
+//                    lifecycleScope.launch(Dispatchers.Main){
+//                        //libraw
+////                        Log.d("KSM", "TESTING --- ${lib()}")
+//                        val ac_str = arrayOf("-v", "-T", "${pathName}")
+//                        val resultTiff = simple_dcraw(ac_str, tiff_path)
+////                        val resultTiff = simple_dcraw2(ac_str)
+////                        val resultTiff = unprocessed_raw(ac_str, tiff_path)
+////                        val resultTiff = dngToTiff(pathName, tiff_path)
+////                        val resultBitmap = dngToBitmap(pathName)
+//                        Log.d("KSM", "resultTiff Result : ${resultTiff}")
+//
+//                    }
+
+                    Log.d("KSM", "resultTiff Result : ${resultTiff}")
                     Log.d("KSM", "outputDirectory PNG pathName : ${jpg_file.absolutePath}")
 
                     val m_rotate = Matrix()
@@ -441,36 +473,36 @@ class RawActivity : AppCompatActivity() {
 //
 //                        val cropCartPngBitmap = Bitmap.createBitmap(resizePngBitmap, borderViewLeft, borderViewTop, cart_w, cart_h)
 
-                        val compressed = dng_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
-
-                        val saveBmp = AndroidBmpUtil.save(dng_bitmap, bmp_path)
-
-                        if(compressed){
-                            Log.d("KSM", "Bitmap compressed jpg!!")
-                        }else{
-                            Log.d("KSM", "Bitmap compressed failed!!")
-                        }
-
-                        if(saveBmp){
-                            Log.d("KSM", "Bitmap saved bmp!!")
-                        }else{
-                            Log.d("KSM", "Bitmap saved bmp failed!!")
-                        }
+//                        val compressed = dng_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+//
+//                        val saveBmp = AndroidBmpUtil.save(dng_bitmap, bmp_path)
+//
+//                        if(compressed){
+//                            Log.d("KSM", "Bitmap compressed jpg!!")
+//                        }else{
+//                            Log.d("KSM", "Bitmap compressed failed!!")
+//                        }
+//
+//                        if(saveBmp){
+//                            Log.d("KSM", "Bitmap saved bmp!!")
+//                        }else{
+//                            Log.d("KSM", "Bitmap saved bmp failed!!")
+//                        }
                     }catch(exc : Exception){
                         Log.e("KSM", "PNG_Errored!", exc)
                     }
 
                     //jpg_android bitmap 비교
-                    val jpg_bitmap = BitmapFactory.decodeFile(jpg_file.absolutePath)
-
-                    val jpg_str = getRGB(jpg_bitmap, pixel_x, pixel_y)
-                    Log.d("KSM", "JPG RGB : $jpg_str")
-
-                    //bmp_android bitmap 비교
-                    val bmp_bitmap = BitmapFactory.decodeFile(bmp_file.absolutePath)
-
-                    val bmp_str = getRGB(bmp_bitmap, pixel_x, pixel_y)
-                    Log.d("KSM", "BMP RGB : $bmp_str")
+//                    val jpg_bitmap = BitmapFactory.decodeFile(jpg_file.absolutePath)
+//
+//                    jpg_str = getRGB(jpg_bitmap, pixel_x, pixel_y)
+//                    Log.d("KSM", "JPG RGB : $jpg_str")
+//
+//                    //bmp_android bitmap 비교
+//                    val bmp_bitmap = BitmapFactory.decodeFile(bmp_file.absolutePath)
+//
+//                    bmp_str = getRGB(bmp_bitmap, pixel_x, pixel_y)
+//                    Log.d("KSM", "BMP RGB : $bmp_str")
 
                     //촬영 후 다시 자동 AF 모드로 설정
                     session.stopRepeating()
@@ -485,6 +517,15 @@ class RawActivity : AppCompatActivity() {
             it.post{
                 it.isEnabled = true
                 Toast.makeText(this@RawActivity, "Image Captured! \n  location:${outputUri.toString()}", Toast.LENGTH_SHORT).show()
+//                val dialog = ProgressDialog(this@RawActivity)
+//                dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+//                dialog.setCancelable(false)
+//                dialog.setMessage("이미지 저장중...")
+//                dialog.show()
+
+//                if(dng_str != null && jpg_str != null && bmp_str != null){
+//                    dialog.dismiss()
+//                }
             }
         }
 

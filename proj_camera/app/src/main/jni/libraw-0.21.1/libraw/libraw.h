@@ -505,7 +505,7 @@ protected:
   }
 
 #ifdef LIBRAW_LIBRARY_BUILD
-#include "internal/libraw_internal_funcs.h"
+#include "../internal/libraw_internal_funcs.h"
 #endif
 };
 

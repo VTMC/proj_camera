@@ -25,8 +25,8 @@ it under the terms of the one of two licenses as you choose:
 #include <sys/types.h>
 #include <sys/stat.h>
 #define LIBRAW_LIBRARY_BUILD
-#include "libraw/libraw.h"
-#include "internal/defines.h"
+#include "../libraw/libraw.h"
+#include "../internal/defines.h"
 #ifdef USE_ZLIB
 #include <zlib.h>
 #endif

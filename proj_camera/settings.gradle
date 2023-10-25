@@ -5,6 +5,8 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+//AndroidLibRaw
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -14,4 +16,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "proj_camera"
 include ':app'
+include ':libraw'
 //include ':app:dng_sdk'

@@ -18,8 +18,8 @@
 
 #include <math.h>
 #define LIBRAW_LIBRARY_BUILD
-#include "libraw/libraw.h"
-#include "internal/defines.h"
-#include "internal/var_defines.h"
+#include "../libraw/libraw.h"
+#include "../internal/defines.h"
+#include "../internal/var_defines.h"
 
 #endif

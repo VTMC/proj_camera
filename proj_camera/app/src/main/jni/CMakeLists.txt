@@ -4,18 +4,18 @@
 ## For more examples on how to use CMake, see https://github.com/android/ndk-samples.
 #
 ## Sets the minimum CMake version required for this project.
-#cmake_minimum_required(VERSION 3.22.1)
-#
-#set(CPP_FILES native-lib.cpp)
-#
-##set(pathPROJECT D:/studyProj_android/proj_camera_updated/proj_camera/proj_camera)
-##set(pathLIBRAW ${pathPROJECT}/app/src/main/cpp)
-#
+cmake_minimum_required(VERSION 3.4.1)
+project("proj_camera")
+
+set(CPP_FILES native-lib.cpp)
+
+set(pathPROJECT D:/studyProj_android/proj_camera_updated/proj_camera/proj_camera)
+
 ## Declares the project name. The project name can be accessed via ${ PROJECT_NAME},
 ## Since this is the top level CMakeLists.txt, the project name is also accessible
 ## with ${CMAKE_PROJECT_NAME} (both CMake variables are in-sync within the top level
 ## build script scope).
-#project("proj_camera")
+
 #
 ## Creates and names a library, sets it as either STATIC
 ## or SHARED, and provides the relative paths to its source code.
@@ -30,11 +30,14 @@
 ## System.loadLibrary() and pass the name of the library defined here;
 ## for GameActivity/NativeActivity derived applications, the same library name must be
 ## used in the AndroidManifest.xml file.
-#add_library(${CMAKE_PROJECT_NAME} SHARED
-#
-#        # List C/C++ source files with relative paths to this CMakeLists.txt.
-#        native-lib.cpp)
-#
+add_library(
+        proj_camera
+
+        SHARED
+
+        # List C/C++ source files with relative paths to this CMakeLists.txt.
+        native-lib.cpp unprocessed_raw.cpp simple_dcraw.cpp)
+
 ##add_library(libraw SHARED IMPORTED)
 ##set_target_properties(
 ##        # Specifies the target library.
@@ -50,15 +53,6 @@
 #
 ##target_include_directories(dngSdk_source PUBLIC ${pathDNGSDK})
 #
-#find_library(
-#        # Defines the name of the path variable that stores the
-#        # location of the NDK library.
-#        log-lib
-#
-#        # Specifies the name of the NDK library that
-#        # you want CMake to locate.
-#        log
-#)
 #
 ## Specifies libraries CMake should link to your target library. You
 ## can link libraries from various origins, such as libraries defined in this
@@ -74,8 +68,7 @@
 
 project("jni libraries")
 cmake_minimum_required(VERSION 3.4.1)
-#set(LOCAL_PATH "src/main/jni/libraw-0.21.1")
-set(LOCAL_PATH "F:/Android_Project/proj_camera/proj_camera/proj_camera/app/src/main/jni/libraw-0.21.1")
+set(LOCAL_PATH ${pathPROJECT}/app/src/main/jni/libraw-0.21.1)
 set(CMAKE_CXX_FLAGS "-DANDROID_ABI=armeabi-v7a -DLIBRAW_NOTHREADS -D_LARGEFILE_SOURCE -fno-rtti -fexceptions -D_FILE_OFFSET_BITS=64 -D__USE_FILE_OFFSET64 -DLIBRAW_OWN_SWAB")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/src/main/libs/${ANDROID_ABI})
 set(LOCAL_SRC_FILES ${LOCAL_PATH}/src/libraw_c_api.cpp ${LOCAL_PATH}/src/libraw_datastream.cpp ${LOCAL_PATH}/src/decoders/canon_600.cpp ${LOCAL_PATH}/src/decoders/crx.cpp
@@ -99,22 +92,27 @@ set(LOCAL_SRC_FILES ${LOCAL_PATH}/src/libraw_c_api.cpp ${LOCAL_PATH}/src/libraw_
 
 add_library(
         #sets the name of the library
-        raw-0.21.1
+        libraw-0.21.1
         #sets the library as a shared library
         SHARED
         #provides a relative path to source files
         ${LOCAL_SRC_FILES}
 )
 
-#search for ap specified prebuilt library
-#fine_library (
-#sets the name of the library
-#log-lib
-#specifies the name of the ndk library
-#log)
-#target_link_libraries (
-#specifes the target library
-#links the target library
-#${log-lib})
-include_directories(${LOCAL_PATH})
+find_library(
+        # Defines the name of the path variable that stores the
+        # location of the NDK library.
+        log-lib
 
+        # Specifies the name of the NDK library that
+        # you want CMake to locate.
+        log
+)
+
+target_link_libraries(
+        proj_camera
+
+        libraw-0.21.1
+
+        ${log-lib}
+)

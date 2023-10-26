@@ -3,17 +3,17 @@ package com.example.proj_camera
 import Utils.AndroidBmpUtil
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.AlertDialog
-import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.Rect
+import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraCharacteristics
@@ -58,10 +58,10 @@ import com.example.proj_camera.databinding.RawActivityBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.beyka.tiffbitmapfactory.TiffBitmapFactory
 import java.io.BufferedInputStream
 import java.io.Closeable
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -73,8 +73,6 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
 
-import android.graphics.Color
-
 
 class RawActivity : AppCompatActivity() {
     external fun simple_dcraw(argv: Array<String>, toPath: String) : Int
@@ -83,7 +81,7 @@ class RawActivity : AppCompatActivity() {
 
     external fun unprocessed_raw(argv: Array<String>, toPath: String) : Int
 
-    external fun getRGB(x : Int, y : Int, path : String) : String
+    external fun getRGB(x : Int, y : Int, path : String) : IntArray
 
     private lateinit var viewBinding: RawActivityBinding
 
@@ -96,7 +94,7 @@ class RawActivity : AppCompatActivity() {
     private var rawCameraInfo : FormatItem ?= null
 
     private val cameraManager: CameraManager by lazy {
-        this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        this.getSystemService(CAMERA_SERVICE) as CameraManager
     }
 
     private var characteristics : CameraCharacteristics ?= null
@@ -328,6 +326,13 @@ class RawActivity : AppCompatActivity() {
 
             Log.d("KSM", "CaptureBtn Clicked!!")
 
+            val border_w = viewBinding.borderView.width
+            val border_h = viewBinding.borderView.height
+
+            val previewSize = chooseOptimalSize(characteristics!!, border_w, border_h)
+//            imageReader = ImageReader.newInstance(previewSize.width, previewSize.height, )
+
+            //capture animation
             viewBinding.flashView.visibility = View.VISIBLE
             val flashAni = AnimationUtils.loadAnimation(this@RawActivity,R.anim.alpha_anim)
             viewBinding.flashView.startAnimation(flashAni)
@@ -337,6 +342,8 @@ class RawActivity : AppCompatActivity() {
             lifecycleScope.launch(Dispatchers.IO) {
                 takePhoto().use { result ->
                     Log.d("KSM", "Result received: $result")
+
+                    Log.d("KSM", "Result image size : ${result.image.width} x ${result.image.height}")
 
                     // Save the result to disk - 이전의 흔적 (이미지 저장)
 //                    val output = saveResult(result) - 이전의 흔적 (이미지 저장)
@@ -354,67 +361,12 @@ class RawActivity : AppCompatActivity() {
                     Log.d("KSM", "outputDirectory pathName : ${pathName}")
                     Log.d("KSM", "outputDirectory path : ${path}")
 
-                    //bitmap으로 뽑아서 PNG로 저장하는 과정
-//                    val dng_bitmap = BitmapFactory.decodeFile(pathName)
-//
-//                    //색 측정할 픽셀 위치 설정
-//                    val pixel_x = (dng_bitmap.width) / 2
-//                    val pixel_y = (dng_bitmap.height) / 2
-//
-//                    val dng_str = getRGB(dng_bitmap, pixel_x, pixel_y)
-//                    Log.d("KSM", "DNG RGB : $dng_str")
-
-//                    val dng_buf = ByteBuffer.allocate(dng_bitmap.byteCount)
-//                    dng_bitmap.copyPixelsToBuffer(dng_buf)
-//                    val dng_byte = dng_buf.array()
-
-//                    Log.d("KSM", "${dng_bitmap}")
-
-                    //직접 Bytes로 읽어서 비트맵으로 변환
-//                    val dng_bytes = dng_file.readBytes()
-//                    val dng_bitmap = BitmapFactory.decodeByteArray(dng_bytes, 0, dng_bytes.size)
-
-                    //imageDecoder 사용
-//                    val dng_imgDec = ImageDecoder.createSource(dng_file)
-//                    val dng_bitmap = ImageDecoder.decodeBitmap(dng_imgDec).copy(Bitmap.Config.ARGB_8888, true)
-
-                    //YUVImage 활용
-//                    val dngFis = FileInputStream(dng_file)
-//                    val dng_bytes = dngFis.readBytes()
-//                    dngFis.close()
-//
-//                    val dng_w = dng_bitmap.width
-//                    val dng_h = dng_bitmap.height
-//
-//                    val yuvImage = YuvImage(dng_bytes, ImageFormat.NV21, dng_w, dng_h, null)
-
-                    //Camera2Basic 참고
-//                    val dng_buf = loadInputBuffer(pathName)
-//                    val dng_bitmap = decodeBitmap(dng_buf, 0, dng_buf.size)
-
-                    //dng SDK 활용 - 사용 불가
-//                    val dng_data = rawSDK().dngFileInputStream(pathName)
-
-                    //fileInputStream
-//                    val baos = ByteArrayOutputStream()
-//
-//                    val fis = FileInputStream(dng_file)
-//                    var bytesRead = fis.read()
-//                    val dng_bytes = dng_file.readBytes()
-
-
-
-//                    val libraw = LibRaw.newInstance()
-//
-//                    val dng_bitmap = libraw.decodeBitmap(pathName, null)
-
                     val timestamp = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA).format(System.currentTimeMillis())
 
-                    val jpg_fileName = "/JPG_$timestamp.jpg"
-                    val jpg_file = File(path+jpg_fileName)
-
                     val bmp_fileName = "/BMP_$timestamp.bmp"
+                    val tiffbmp_convertName = "/TIFFBMP_$timestamp.bmp"
                     val bmp_path = path+bmp_fileName
+                    val tiffbmp_path = path+tiffbmp_convertName
                     val bmp_file = File(path+bmp_fileName)
 
                     val tiff_fileName = "/TIFF_$timestamp"
@@ -433,82 +385,66 @@ class RawActivity : AppCompatActivity() {
 //                        val resultBitmap = dngToBitmap(pathName)
                         Log.d("KSM", "resultTiff Result : ${resultTiff}")
 
-                    }
-
-                    Log.d("KSM", "outputDirectory PNG pathName : ${jpg_file.absolutePath}")
-
-                    val m_rotate = Matrix()
-
-                    try{
-                        val fos = FileOutputStream(jpg_file)
-//                        fos.write(dng_byte)
-
-
-//                        val o_s = FileOutputStream(jpg_yuvimg)
-//                        yuvImage.compressToJpeg(Rect(0,0,dng_w, dng_h), 100, o_s)
-
-//                        m_rotate.postRotate((relativeOrientation.value?:90).toFloat())
+//                        val tiffBmp = TiffConverter.convertTiffBmp(tiff_path+".tiff", tiffbmp_path, null, null)
 //
-//                        val rotated_bitmap = Bitmap.createBitmap(dng_bitmap, 0, 0, dng_bitmap.width, dng_bitmap.height, m_rotate, true)
-//
-//                        val patchedBitmap = SetRGBValue(rotatedPngBitmap, 0, 255, 0)
-
-//                        val rotatedPngBitmap = Bitmap.createBitmap(dng_bitmap, 0, 0, 1080, 1920, m_rotate, true)
-
-//                        val resizePngBitmap = Bitmap.createScaledBitmap(rotatedPngBitmap, viewBinding.rawViewFinder.width, viewBinding.rawViewFinder.height, true)
-//
-//                        val borderViewLeft = viewBinding.border.left
-//                        val borderViewTop = viewBinding.border.top
-//
-//                        val cart_w = viewBinding.border.width
-//                        val cart_h = viewBinding.border.height
-//
-//                        Log.d(TAG, "BorderView Info")
-//                        Log.d(TAG, "x : ${borderViewLeft}")
-//                        Log.d(TAG, "y : ${borderViewTop}")
-//                        Log.d(TAG, "width : ${cart_w}")
-//                        Log.d(TAG, "height : ${cart_h}")
-//
-//
-//                        val cropCartPngBitmap = Bitmap.createBitmap(resizePngBitmap, borderViewLeft, borderViewTop, cart_w, cart_h)
-
-//                        val compressed = dng_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
-//
-//                        val saveBmp = AndroidBmpUtil.save(dng_bitmap, bmp_path)
-//
-//                        if(compressed){
-//                            Log.d("KSM", "Bitmap compressed jpg!!")
+//                        if(tiffBmp){
+//                            Log.d("KSM", "tiff convert to bmp!!")
 //                        }else{
-//                            Log.d("KSM", "Bitmap compressed failed!!")
+//                            Log.d("KSM", "tiff convert to bmp failed!!")
 //                        }
-//
-//                        if(saveBmp){
-//                            Log.d("KSM", "Bitmap saved bmp!!")
-//                        }else{
-//                            Log.d("KSM", "Bitmap saved bmp failed!!")
-//                        }
-                    }catch(exc : Exception){
-                        Log.e("KSM", "PNG_Errored!", exc)
-                    }
 
-                    //jpg_android bitmap 비교
-//                    val jpg_bitmap = BitmapFactory.decodeFile(jpg_file.absolutePath)
-//
-//                    jpg_str = getRGB(jpg_bitmap, pixel_x, pixel_y)
-//                    Log.d("KSM", "JPG RGB : $jpg_str")
-//
-//                    //bmp_android bitmap 비교
-//                    val bmp_bitmap = BitmapFactory.decodeFile(bmp_file.absolutePath)
-//
-//                    bmp_str = getRGB(bmp_bitmap, pixel_x, pixel_y)
-//                    Log.d("KSM", "BMP RGB : $bmp_str")
+                        val a_bmp = TiffBitmapFactory.decodeFile(File(tiff_path+".tiff"))
+
+                        var pixel_x = (a_bmp.width) / 2
+                        var pixel_y = (a_bmp.height) / 2
+
+                        val a_bmpRGB = getRGB(a_bmp, pixel_x, pixel_y)
+                        Log.d("KSM", "tiff to androidBitmap R/G/B : Pos[${pixel_x},${pixel_y}] = ${a_bmpRGB[0]}/${a_bmpRGB[1]}/${a_bmpRGB[2]}")
+
+                        val saveBmp = AndroidBmpUtil.save(a_bmp, bmp_path)
+
+                        if(saveBmp){
+                            Log.d("KSM", "AndroidBmpUtil Bitmap saved bmp!!")
+                        }else{
+                            Log.d("KSM", "AndroidBmpUtil Bitmap saved bmp failed!!")
+                        }
+
+                        val dng_bitmap = BitmapFactory.decodeFile(pathName)
+                        pixel_x = (dng_bitmap.width) / 2
+                        pixel_y = (dng_bitmap.height) / 2
+                        val dng_bitmap_RGB = getRGB(dng_bitmap, pixel_x, pixel_y)
+                        Log.d("KSM", "dngToBitmap R/G/B : Pos[${pixel_x},${pixel_y}] = ${dng_bitmap_RGB[0]}/${dng_bitmap_RGB[1]}/${dng_bitmap_RGB[2]}")
+
+                        //call tiffbitmap, bmp to Andorid bitmap
+//                        var tiffbmp_bitmap = BitmapFactory.decodeFile(tiffbmp_path)
+//                        val tiffbmp_w = tiffbmp_bitmap.width
+//                        val tiffbmp_h = tiffbmp_bitmap.height
+                        var bmp_bitmap = BitmapFactory.decodeFile(bmp_path)
+                        val tiffbmp_w = bmp_bitmap.width
+                        val tiffbmp_h = bmp_bitmap.height
+
+//                        Log.d("KSM", "tiffbmp size : ${tiffbmp_bitmap.width}*${tiffbmp_bitmap.height}")
+                        Log.d("KSM", "bmp size : ${bmp_bitmap.width}*${bmp_bitmap.height}")
+
+                        //tiffbmp_bitmap RGB
+//                        pixel_x = (tiffbmp_bitmap.width) / 2
+//                        pixel_y = (tiffbmp_bitmap.height) / 2
+//                        var tiffbmp_RGB = getRGB(tiffbmp_bitmap, pixel_x, pixel_y)
+//                        Log.d("KSM", "tiffbmp R/G/B : Pos[${pixel_x},${pixel_y}] = ${tiffbmp_RGB[0]}/${tiffbmp_RGB[1]}/${tiffbmp_RGB[2]}")
+
+                        //bmp_bitmap RGB
+                        pixel_x = (bmp_bitmap.width) / 2
+                        pixel_y = (bmp_bitmap.height) / 2
+                        var bmp_RGB = getRGB(bmp_bitmap, pixel_x, pixel_y)
+                        Log.d("KSM", "bmp R/G/B : Pos[${pixel_x},${pixel_y}] = ${bmp_RGB[0]}/${bmp_RGB[1]}/${bmp_RGB[2]}")
+                    }
 
                     //촬영 후 다시 자동 AF 모드로 설정
-                    session.stopRepeating()
-                    captureRequest.apply{
-                        set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-                    }
-                    session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+//                    session.stopRepeating()
+//                    captureRequest.apply{
+//                        set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+//                    }
+//                    session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
 
                 }
             }
@@ -527,6 +463,7 @@ class RawActivity : AppCompatActivity() {
 //                }
             }
         }
+
 
         //AutoFocus 관련 변수 및 제스처 설정
         var clickCount: Int = 0
@@ -577,6 +514,23 @@ class RawActivity : AppCompatActivity() {
         //Zoom 관련 변수 및 제스처 설정
 
 
+    }
+
+    private fun chooseOptimalSize(characteristics: CameraCharacteristics, viewWidth: Int, viewHeight: Int): Size {
+        val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
+        val outputSizes = map.getOutputSizes(SurfaceTexture::class.java)
+        val desiredAspectRatio = viewWidth.toFloat() / viewHeight
+        var optimalSize = outputSizes[0]
+
+        for (size in outputSizes) {
+            if (size.width.toFloat() / size.height == desiredAspectRatio &&
+                size.width <= viewWidth && size.height <= viewHeight
+            ) {
+                optimalSize = size
+            }
+        }
+
+        return optimalSize
     }
 
     private suspend fun takePhoto():
@@ -813,8 +767,6 @@ class RawActivity : AppCompatActivity() {
                         if (outputStream != null) {
                             dngCreator.writeImage(outputStream, result.image)
 
-                            //yuvImage
-//                            yuvImage.compressToJpeg(Rect(0,0,result.image.width, result.image.height), 100, outputStream)
                         }else{
                             Log.d("KSM", "Image Write Wrong!!!!")
                         }
@@ -973,7 +925,7 @@ class RawActivity : AppCompatActivity() {
         return nv21
     }
 
-    private fun getRGB(bmp1 : Bitmap, x : Int, y : Int) : String {
+    private fun getRGB(bmp1 : Bitmap, x : Int, y : Int) : Array<Int> {
 
         val bmp1RGB = bmp1.getPixel(x, y)
 
@@ -982,9 +934,9 @@ class RawActivity : AppCompatActivity() {
         val g = Color.green(bmp1RGB)
         val b = Color.blue(bmp1RGB)
 
-        val str = "pos[$x, $y] diffrence ARGB = [$a, $r, $g, $b]\n"
+        val intArray = arrayOf(r,g,b)
 
-        return str
+        return intArray
     }
 
     override fun onPause(){
@@ -1026,8 +978,8 @@ class RawActivity : AppCompatActivity() {
         }.toTypedArray()
 
         //Camera2 Basic 참고
-        private fun enumerateCameras(cameraManager: CameraManager) : List<RawActivity.Companion.FormatItem>{
-            val availableCameras: MutableList<RawActivity.Companion.FormatItem> = mutableListOf()
+        private fun enumerateCameras(cameraManager: CameraManager) : List<FormatItem>{
+            val availableCameras: MutableList<FormatItem> = mutableListOf()
 
             //GET list of all compatible cameras
             val cameraIds = cameraManager.cameraIdList.filter{
@@ -1053,7 +1005,7 @@ class RawActivity : AppCompatActivity() {
 
                 // All cameras *must* support JPEG output so we don't need to check characteristics
                 availableCameras.add(
-                    Companion.FormatItem(
+                    FormatItem(
                         "$orientation JPEG ($id)", id, ImageFormat.JPEG
                     )
                 )
@@ -1063,7 +1015,7 @@ class RawActivity : AppCompatActivity() {
                         CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW) &&
                     outputFormats.contains(ImageFormat.RAW_SENSOR)) {
                     availableCameras.add(
-                        Companion.FormatItem(
+                        FormatItem(
                             "$orientation RAW ($id)", id, ImageFormat.RAW_SENSOR
                         )
                     )
@@ -1074,7 +1026,7 @@ class RawActivity : AppCompatActivity() {
                         CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT) &&
                     outputFormats.contains(ImageFormat.DEPTH_JPEG)) {
                     availableCameras.add(
-                        RawActivity.Companion.FormatItem(
+                        FormatItem(
                             "$orientation DEPTH ($id)", id, ImageFormat.DEPTH_JPEG
                         )
                     )

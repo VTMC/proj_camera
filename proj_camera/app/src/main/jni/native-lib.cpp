@@ -434,7 +434,7 @@ Java_com_example_proj_1camera_RawActivity_dngToTiff(JNIEnv *env, jobject thiz, j
 }
 
 extern "C"
-JNIEXPORT jstring JNICALL Java_com_example_proj_1camera_RawActivity_getRGB(JNIEnv * env, jobject thiz,
+JNIEXPORT jintArray JNICALL Java_com_example_proj_1camera_RawActivity_getRGB(JNIEnv * env, jobject thiz,
                                                                            jint x, jint y, jstring path) {
     // TODO: implement getRGB()
 
@@ -446,11 +446,9 @@ JNIEXPORT jstring JNICALL Java_com_example_proj_1camera_RawActivity_getRGB(JNIEn
     "In C++ From Path : %s\n", path_str,
     0);
 
-    Libraw RawProcessor;
+    LibRaw RawProcessor;
 
     int ret;
-
-    #define imgdata RawProcessor.imgdata.image
 
     __android_log_print(
             ANDROID_LOG_INFO,
@@ -458,11 +456,12 @@ JNIEXPORT jstring JNICALL Java_com_example_proj_1camera_RawActivity_getRGB(JNIEn
             "Try to Open File... \n");
 
     //file opening
-    if((ret = RawProcessor.open_file(path_str)) !== LIBRAW_SUCCESS){
+    if((ret = RawProcessor.open_file(path_str)) != LIBRAW_SUCCESS){
         __android_log_print(
                 ANDROID_LOG_ERROR,
                 "KSM",
                 "File Open Error %s : %s\n", path_str, libraw_strerror(ret));
+        return NULL;
     }
 
     __android_log_print(
@@ -470,13 +469,62 @@ JNIEXPORT jstring JNICALL Java_com_example_proj_1camera_RawActivity_getRGB(JNIEn
             "KSM",
             "Try to Unpack File... \n");
 
-    if((ret = RawProcessor.unpack()) !== LIBRAW_SUCCESS){
+    if((ret = RawProcessor.unpack()) != LIBRAW_SUCCESS){
         __android_log_print(
                 ANDROID_LOG_ERROR,
                 "KSM",
-                "File Unpack Error %s : %s\n", path_str, libraw_strerror(ret));
+                "File Unpack Error : %s\n", libraw_strerror(ret));
+        return NULL;
     }
 
-    //get Middle Point Pixel RGB by Libraw
+    __android_log_print(
+            ANDROID_LOG_INFO,
+            "KSM",
+            "Try to Process File... \n");
 
+    if((ret = RawProcessor.dcraw_process()) != LIBRAW_SUCCESS){
+        __android_log_print(
+                ANDROID_LOG_ERROR,
+                "KSM",
+                "File Process Error : %s\n", libraw_strerror(ret));
+        return NULL;
+    }
+
+    //get middle point
+//    int ctrX = RawProcessor.imgdata.sizes.iwidth / 2;
+//    int ctrY = RawProcessor.imgdata.sizes.iheight / 2;
+
+    //swap X,Y
+    int ctrX = RawProcessor.imgdata.sizes.iheight / 2;
+    int ctrY = RawProcessor.imgdata.sizes.iwidth / 2;
+
+    //get Middle Point Pixel RGB by Libraw
+    int r = RawProcessor.imgdata.image[ctrX * RawProcessor.imgdata.sizes.iwidth + ctrY][0];
+    int g = RawProcessor.imgdata.image[ctrX * RawProcessor.imgdata.sizes.iwidth + ctrY][1];
+    int b = RawProcessor.imgdata.image[ctrX * RawProcessor.imgdata.sizes.iwidth + ctrY][2];
+
+    __android_log_print(
+            ANDROID_LOG_INFO,
+            "KSM",
+            "Path : %s\nPos[%d,%d] R : %d, G : %d, B : %d\n", path_str, ctrX, ctrY, r, g, b);
+
+    //change to 8Bit
+    int b8r = (r*255)/65535;
+    int b8g = (g*255)/65535;
+    int b8b = (b*255)/65535;
+
+    __android_log_print(
+            ANDROID_LOG_INFO,
+            "KSM",
+            "Path : %s\nPos[%d,%d] 8bit R : %d, G : %d, B : %d\n", path_str, ctrX, ctrY, b8r, b8g, b8b);
+
+    //make rgb values to int Array
+    jintArray rgbArray = env->NewIntArray(3);
+    int rgb[] = {b8r,b8g,b8b};
+    env->SetIntArrayRegion(rgbArray, 0, 3, rgb);
+
+
+    env->ReleaseStringUTFChars(path, path_str);
+    RawProcessor.recycle();
+    return rgbArray;
 }

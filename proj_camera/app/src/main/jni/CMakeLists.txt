@@ -9,8 +9,8 @@ project("proj_camera")
 
 set(CPP_FILES native-lib.cpp)
 
-set(pathPROJECT D:/studyProj_android/proj_camera_updated/proj_camera/proj_camera) #바디텍 디렉토리
-#set(pathPROJECT K:/Android_projects/Camera_Proj/proj_camera/proj_camera) #자취방 디렉토리
+#set(pathPROJECT D:/studyProj_android/proj_camera_updated/proj_camera/proj_camera) #바디텍 디렉토리
+set(pathPROJECT K:/Android_projects/Camera_Proj/proj_camera/proj_camera) #자취방 디렉토리
 
 ## Declares the project name. The project name can be accessed via ${ PROJECT_NAME},
 ## Since this is the top level CMakeLists.txt, the project name is also accessible

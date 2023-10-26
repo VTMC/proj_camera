@@ -7,10 +7,22 @@
     android:layout_height="match_parent"
     tools:context=".RawActivity">
 
-    <com.example.android.camera.utils.AutoFitSurfaceView
-        android:id="@+id/rawViewFinder"
+    <LinearLayout
+        android:id="@+id/viewFinderLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+            <com.example.android.camera.utils.AutoFitSurfaceView
+                android:id="@+id/rawViewFinder"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+    </LinearLayout>
 
 <!--    <androidx.camera.view.PreviewView-->
 <!--        android:id="@+id/viewFinder_viewer"-->
@@ -58,10 +70,10 @@
         android:layout_height="350dp"
         android:layout_gravity="center"
         android:background="@drawable/background_drawable"
-        app:layout_constraintBottom_toBottomOf="@+id/rawViewFinder"
-        app:layout_constraintEnd_toEndOf="@+id/rawViewFinder"
-        app:layout_constraintStart_toStartOf="@+id/rawViewFinder"
-        app:layout_constraintTop_toTopOf="@+id/rawViewFinder" />
+        app:layout_constraintBottom_toBottomOf="@+id/viewFinderLayout"
+        app:layout_constraintEnd_toEndOf="@+id/viewFinderLayout"
+        app:layout_constraintStart_toStartOf="@+id/viewFinderLayout"
+        app:layout_constraintTop_toTopOf="@+id/viewFinderLayout" />
 
 
     <View
@@ -117,7 +129,7 @@
         android:textSize="30sp"
         android:textStyle="bold"
         android:background="@drawable/capture_btn"
-        app:layout_constraintBottom_toBottomOf="@+id/rawViewFinder"
+        app:layout_constraintBottom_toBottomOf="@+id/viewFinderLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -157,7 +169,7 @@
         android:background="#FFFFFF"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/rawViewFinder"
+        app:layout_constraintEnd_toEndOf="@+id/viewFinderLayout"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView

@@ -41,6 +41,7 @@ import android.view.MotionEvent
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -329,8 +330,23 @@ class RawActivity : AppCompatActivity() {
             val border_w = viewBinding.borderView.width
             val border_h = viewBinding.borderView.height
 
-            val previewSize = chooseOptimalSize(characteristics!!, border_w, border_h)
-//            imageReader = ImageReader.newInstance(previewSize.width, previewSize.height, )
+            val viewFinder = findViewById<View>(R.id.viewFinder)
+            val params = viewFinder.layoutParams
+            params.width = border_w
+            params.height = border_h
+
+            viewFinder.layoutParams = params
+
+//            imageReader = ImageReader.newInstance(
+//                border_w, border_h, rawCameraInfo!!.format, IMAGE_BUFFER_SIZE)
+
+//            val targets = listOf(viewBinding.rawViewFinder.holder.surface , imageReader.surface)
+
+//            val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
+//                addTarget(viewBinding.rawViewFinder.holder.surface)
+//            }
+//
+//            session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
 
             //capture animation
             viewBinding.flashView.visibility = View.VISIBLE
@@ -339,7 +355,7 @@ class RawActivity : AppCompatActivity() {
             Handler().postDelayed({
                 viewBinding.flashView.visibility = View.GONE }, 500)
 
-            lifecycleScope.launch(Dispatchers.IO) {
+            /*lifecycleScope.launch(Dispatchers.IO) {
                 takePhoto().use { result ->
                     Log.d("KSM", "Result received: $result")
 
@@ -461,7 +477,7 @@ class RawActivity : AppCompatActivity() {
 //                if(dng_str != null && jpg_str != null && bmp_str != null){
 //                    dialog.dismiss()
 //                }
-            }
+            }*/
         }
 
 

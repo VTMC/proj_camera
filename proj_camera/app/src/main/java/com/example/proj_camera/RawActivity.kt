@@ -41,7 +41,6 @@ import android.view.MotionEvent
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -149,6 +148,8 @@ class RawActivity : AppCompatActivity() {
     /** Bitmap transformation derived from passed arguments */
     private val bitmapTransformation: Matrix by lazy { decodeExifOrientation(relativeOrientation.value?: 0) }
 
+    //for crop by borderRect
+    private lateinit var borderRect : Rect
 
     private lateinit var dng_str : String
     private lateinit var jpg_str : String
@@ -196,7 +197,6 @@ class RawActivity : AppCompatActivity() {
                 }
             }
         }
-
 
          viewBinding.rawViewFinder.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
@@ -302,6 +302,7 @@ class RawActivity : AppCompatActivity() {
         val size = characteristics!!.get(
             CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
             .getOutputSizes(rawCameraInfo!!.format).maxByOrNull{it.height*it.width}!!
+
         Log.d("KSM", "Size : ${size}")
 
         imageReader = ImageReader.newInstance(
@@ -327,27 +328,6 @@ class RawActivity : AppCompatActivity() {
 
             Log.d("KSM", "CaptureBtn Clicked!!")
 
-            val border_w = viewBinding.borderView.width
-            val border_h = viewBinding.borderView.height
-
-            val viewFinder = findViewById<View>(R.id.viewFinder)
-            val params = viewFinder.layoutParams
-            params.width = border_w
-            params.height = border_h
-
-            viewFinder.layoutParams = params
-
-//            imageReader = ImageReader.newInstance(
-//                border_w, border_h, rawCameraInfo!!.format, IMAGE_BUFFER_SIZE)
-
-//            val targets = listOf(viewBinding.rawViewFinder.holder.surface , imageReader.surface)
-
-//            val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
-//                addTarget(viewBinding.rawViewFinder.holder.surface)
-//            }
-//
-//            session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
-
             //capture animation
             viewBinding.flashView.visibility = View.VISIBLE
             val flashAni = AnimationUtils.loadAnimation(this@RawActivity,R.anim.alpha_anim)
@@ -355,14 +335,25 @@ class RawActivity : AppCompatActivity() {
             Handler().postDelayed({
                 viewBinding.flashView.visibility = View.GONE }, 500)
 
-            /*lifecycleScope.launch(Dispatchers.IO) {
+            lifecycleScope.launch(Dispatchers.IO) {
                 takePhoto().use { result ->
                     Log.d("KSM", "Result received: $result")
 
                     Log.d("KSM", "Result image size : ${result.image.width} x ${result.image.height}")
 
-                    // Save the result to disk - 이전의 흔적 (이미지 저장)
-//                    val output = saveResult(result) - 이전의 흔적 (이미지 저장)
+                    //try to crop
+//                    val resultImage = result.image
+//                    val res_plane = resultImage.planes
+//                    val crop_top = viewBinding.borderView.top
+//                    val crop_left = viewBinding.borderView.left
+//                    val crop_w = viewBinding.borderView.width
+//                    val crop_h = viewBinding.borderView.height
+//                    val crop_buf = ByteBuffer.allocateDirect(crop_w*crop_h)
+//
+//                    res_plane[0].buffer.position(crop_top * resultImage.width + crop_left)
+//                    res_plane[0].buffer.limit((crop_top + crop_h) * resultImage.width + crop_left + crop_w)
+//                    crop_buf.put(res_plane[0].buffer)
+
 
                     outputUri = saveResult(result)
 //                    Log.d("KSM", "Image saved: ${outputUri.toString()}") //- 이전의 흔적 (이미지 저장)
@@ -373,6 +364,9 @@ class RawActivity : AppCompatActivity() {
                     val pathName = cursor.getString(cursor.getColumnIndex("_data") ?: 0)
                     val dng_file = File(pathName)
                     val path = dng_file.parent
+
+                    //for get dng's width, height
+                    val dngWHBmp = BitmapFactory.decodeFile(pathName)
 
                     Log.d("KSM", "outputDirectory pathName : ${pathName}")
                     Log.d("KSM", "outputDirectory path : ${path}")
@@ -393,7 +387,49 @@ class RawActivity : AppCompatActivity() {
                     lifecycleScope.launch(Dispatchers.Main){
                         //libraw
 //                        Log.d("KSM", "TESTING --- ${lib()}")
-                        val ac_str = arrayOf("-v", "-T", "${pathName}")
+
+                        Log.d("KSM", "DNG Size : ${dngWHBmp.width}, ${dngWHBmp.height}")
+//                        Log.d("KSM", "DNG Size[H,W] : ${dngWHBmp.height}, ${dngWHBmp.width}")
+
+                        //get ScaleRatio width, height by (result.image => horizontal/previewSize => vertical)
+//                        val scaleRatio_w = dngWHBmp.width.toFloat() / previewSize.height.toFloat()
+//                        val scaleRatio_h = dngWHBmp.height.toFloat() / previewSize.width.toFloat()
+                        val scaleRatio_w = dngWHBmp.width.toFloat() / viewBinding.rawViewFinder.height.toFloat()
+                        val scaleRatio_h = dngWHBmp.height.toFloat() / viewBinding.rawViewFinder.width.toFloat()
+                        Log.d("KSM", "scaleRatio[w, h] = ${scaleRatio_w}, ${scaleRatio_h}")
+
+                        //set borderView size to result.image size
+//                        val borderLeft = (viewBinding.borderView.left * scaleRatio_w).toInt()
+//                        val borderTop = (viewBinding.borderView.top * scaleRatio_h).toInt()
+//                        val borderWidth = (viewBinding.borderView.width * scaleRatio_w).toInt()
+//                        val borderHeight = (viewBinding.borderView.height * scaleRatio_h).toInt()
+
+                        val originborderLeft = viewBinding.borderView.left
+                        val originborderTop = viewBinding.borderView.top
+                        Log.d("KSM", "Border left, top : [${originborderLeft}, ${originborderTop}]")
+
+                        val movedLeft = (viewBinding.borderView.left *
+                                (viewBinding.borderView.height.toFloat() / viewBinding.borderView.width.toFloat())).toInt()
+                        val movedTop = (viewBinding.borderView.top *
+                                (viewBinding.borderView.width.toFloat() / viewBinding.borderView.height.toFloat())).toInt()
+
+                        val borderLeft = (movedLeft * scaleRatio_w).toInt()
+                        val borderTop = (movedTop * scaleRatio_h).toInt()
+                        val borderWidth = (viewBinding.borderView.height * scaleRatio_w).toInt()
+                        val borderHeight = (viewBinding.borderView.width * scaleRatio_h).toInt()
+                        Log.d("KSM", "origin border[l,t,w,h] = " +
+                                "${movedLeft}, " +
+                                "${movedTop}, " +
+                                "${viewBinding.borderView.height}, " +
+                                "${viewBinding.borderView.width}")
+                        Log.d("KSM", "border[l,t,w,h] = ${borderLeft}, ${borderTop}, ${borderWidth}, ${borderHeight}")
+
+                        val ac_str = if(borderLeft != 0 || borderTop != 0 || borderWidth != 0 || borderHeight != 0){
+                            arrayOf("-v", "-T", "-B", "${borderLeft}",
+                                "${borderTop}", "${borderWidth}", "${borderHeight}", "${pathName}")
+                        }else{
+                            arrayOf("-v", "-T", "${pathName}")
+                        }
                         val resultTiff = simple_dcraw(ac_str, tiff_path)
 //                        val resultTiff = simple_dcraw2(ac_str)
 //                        val resultTiff = unprocessed_raw(ac_str, tiff_path)
@@ -455,7 +491,7 @@ class RawActivity : AppCompatActivity() {
                         Log.d("KSM", "bmp R/G/B : Pos[${pixel_x},${pixel_y}] = ${bmp_RGB[0]}/${bmp_RGB[1]}/${bmp_RGB[2]}")
                     }
 
-                    //촬영 후 다시 자동 AF 모드로 설정
+//                    //촬영 후 다시 자동 AF 모드로 설정
 //                    session.stopRepeating()
 //                    captureRequest.apply{
 //                        set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
@@ -468,6 +504,7 @@ class RawActivity : AppCompatActivity() {
             it.post{
                 it.isEnabled = true
                 Toast.makeText(this@RawActivity, "Image Captured! \n  location:${outputUri.toString()}", Toast.LENGTH_SHORT).show()
+
 //                val dialog = ProgressDialog(this@RawActivity)
 //                dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
 //                dialog.setCancelable(false)
@@ -477,7 +514,7 @@ class RawActivity : AppCompatActivity() {
 //                if(dng_str != null && jpg_str != null && bmp_str != null){
 //                    dialog.dismiss()
 //                }
-            }*/
+            }
         }
 
 
@@ -629,7 +666,10 @@ class RawActivity : AppCompatActivity() {
                         val rotation = relativeOrientation.value ?: 0
                         val mirrored = characteristics!!.get(CameraCharacteristics.LENS_FACING) ==
                                 CameraCharacteristics.LENS_FACING_FRONT
-                        val exifOrientation = computeExifOrientation(rotation, mirrored)
+
+                        //set FIXED orientation
+//                        val exifOrientation = computeExifOrientation(rotation, mirrored)
+                        val exifOrientation = computeExifOrientation(90, false)
 
                         Log.d("KSM", "rotation : ${rotation}")
                         Log.d("KSM", "exifOrientation: ${exifOrientation}")
@@ -723,7 +763,7 @@ class RawActivity : AppCompatActivity() {
         val orientation: Int,
         val format: Int
     ) : Closeable {
-        override fun close() = image.close()
+    override fun close() = image.close()
     }
 
     /** Helper function used to save a [CombinedCaptureResult] into a [File] */

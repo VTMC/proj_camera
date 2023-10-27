@@ -119,14 +119,14 @@ Java_com_example_proj_1camera_RawActivity_simple_1dcraw(JNIEnv *env, jobject thi
         __android_log_print(
                 ANDROID_LOG_DEBUG,
                 "KSM",
-                "argv Test : av[%d]는 %s입니다.\n", i, argv[i]);
+                "NATIVE : argv Test : av[%d]는 %s입니다.\n", i, argv[i]);
 //        delete argv[i];
     }
 
     __android_log_print(
             ANDROID_LOG_DEBUG,
             "KSM",
-            "argc Test : ac는 %d개 입니다.\n", argc);
+            "NATIVE : argc Test : ac는 %d개 입니다.\n", argc);
 
 //    delete [] argv;
     for (i = 0; i < argc; i++)
@@ -135,27 +135,27 @@ Java_com_example_proj_1camera_RawActivity_simple_1dcraw(JNIEnv *env, jobject thi
         {
             if (argv[i][1] == 'T' && argv[i][2] == 0){
                 OUT.output_tiff = 1;
-                __android_log_print(ANDROID_LOG_INFO,"KSM","tiff setted\n");
+                __android_log_print(ANDROID_LOG_INFO,"KSM","NATIVE : tiff setted\n");
             }
             if (argv[i][1] == 'v' && argv[i][2] == 0){
                 verbose++;
-                __android_log_print(ANDROID_LOG_INFO,"KSM","verbose setted\n");
+                __android_log_print(ANDROID_LOG_INFO,"KSM","NATIVE : verbose setted\n");
             }
 
             if (argv[i][1] == 'e' && argv[i][2] == 0){
                 output_thumbs++;
-                __android_log_print(ANDROID_LOG_INFO,"KSM","output_thumbs setted\n");
+                __android_log_print(ANDROID_LOG_INFO,"KSM","NATIVE : output_thumbs setted\n");
             }
 
             if (argv[i][1] == 'E' && argv[i][2] == 0)
             {
                 output_thumbs++;
                 output_all_thumbs++;
-                __android_log_print(ANDROID_LOG_INFO,"KSM","output_thumbs setted\noutput_all_thumbs setted\n");
+                __android_log_print(ANDROID_LOG_INFO,"KSM","NATIVE : output_thumbs setted\noutput_all_thumbs setted\n");
             }
             if (argv[i][1] == '4' && argv[i][2] == 0){
                 OUT.output_bps = 16;
-                __android_log_print(ANDROID_LOG_INFO,"KSM","output bps 16bit setted\n");
+                __android_log_print(ANDROID_LOG_INFO,"KSM","NATIVE : output bps 16bit setted\n");
             }
 //            if (argv[i][1] == 'C' && argv[i][2] == 0){
 //                RawProcessor->set_progress_handler(my_progress_callback, NULL);
@@ -168,32 +168,49 @@ Java_com_example_proj_1camera_RawActivity_simple_1dcraw(JNIEnv *env, jobject thi
                 const char **cc = clist;
                 while (*cc)
                 {
-                    __android_log_print(ANDROID_LOG_INFO,"KSM","%s\n", *cc);
+                    __android_log_print(ANDROID_LOG_INFO,"KSM","NATIVE : %s\n", *cc);
                     cc++;
                 }
-                __android_log_print(ANDROID_LOG_INFO,"KSM","cameraList showed\n");
+                __android_log_print(ANDROID_LOG_INFO,"KSM","NATIVE : cameraList showed\n");
                 delete RawProcessor;
                 exit(0);
             }
+
+            if(argv[i][1] == 'B' && argv[i][2] == 0){
+                i++;
+                for(int c = 0; c < 4; c++){
+                    OUT.cropbox[c] = atoi(argv[i]);
+                    __android_log_print(ANDROID_LOG_INFO,"KSM","NATIVE : cropbox[%d] = %d | Input : %s\n", c, OUT.cropbox[c], argv[i]);
+                    if(c < 3){
+                        i++;
+                    }
+                }
+            }
+
             continue;
         }
 
         if (verbose)
             __android_log_print(ANDROID_LOG_INFO,
                                 "KSM",
-                                "Processing file %s\n", argv[i]);
+                                "NATIVE : Processing file %s\n", argv[i]);
 
         if ((ret = RawProcessor->open_file(argv[i])) != LIBRAW_SUCCESS)
         {
-            __android_log_print(ANDROID_LOG_ERROR,"KSM","Cannot open_file %s: %s\n", argv[i], libraw_strerror(ret));
+            __android_log_print(ANDROID_LOG_ERROR,"KSM","NATIVE : Cannot open_file %s: %s\n", argv[i], libraw_strerror(ret));
             resultCode = 1;
             continue; // no recycle b/c open file will recycle itself
         }
 
+        __android_log_print(
+                ANDROID_LOG_DEBUG,
+                "KSM",
+                "NATIVE : Image Width, Height : %d, %d\n", RawProcessor->imgdata.sizes.raw_width, RawProcessor->imgdata.sizes.raw_height);
+
         if (!output_thumbs) // No unpack for thumb extraction
             if ((ret = RawProcessor->unpack()) != LIBRAW_SUCCESS)
             {
-                __android_log_print(ANDROID_LOG_ERROR,"KSM","Cannot unpack %s: %s\n", argv[i], libraw_strerror(ret));
+                __android_log_print(ANDROID_LOG_ERROR,"KSM","NATIVE : Cannot unpack %s: %s\n", argv[i], libraw_strerror(ret));
                 resultCode = 1;
                 continue;
             }
@@ -203,25 +220,25 @@ Java_com_example_proj_1camera_RawActivity_simple_1dcraw(JNIEnv *env, jobject thi
         if(output_all_thumbs)
         {
             if (verbose)
-                __android_log_print(ANDROID_LOG_INFO,"KSM","Extracting %d thumbnails\n", RawProcessor->imgdata.thumbs_list.thumbcount);
+                __android_log_print(ANDROID_LOG_INFO,"KSM","NATIVE : Extracting %d thumbnails\n", RawProcessor->imgdata.thumbs_list.thumbcount);
             for (int t = 0; t < RawProcessor->imgdata.thumbs_list.thumbcount; t++)
             {
                 if ((ret = RawProcessor->unpack_thumb_ex(t)) != LIBRAW_SUCCESS) {
                     __android_log_print(ANDROID_LOG_ERROR, "KSM",
-                                        "Cannot unpack_thumb #%d from %s: %s\n", t, argv[i],
+                                        "NATIVE : Cannot unpack_thumb #%d from %s: %s\n", t, argv[i],
                                         libraw_strerror(ret));
                     resultCode = 1;
                 }
 
                 if (LIBRAW_FATAL_ERROR(ret))
                     break; // skip to next file
-                snprintf(thumbfn, sizeof(thumbfn), "%s.thumb.%d.%s", argv[i], t,
+                snprintf(thumbfn, sizeof(thumbfn), "NATIVE : %s.thumb.%d.%s", argv[i], t,
                          T.tformat == LIBRAW_THUMBNAIL_JPEG ? "jpg" : "ppm");
                 if (verbose)
-                    __android_log_print(ANDROID_LOG_INFO,"KSM","Writing thumbnail file %s\n", thumbfn);
+                    __android_log_print(ANDROID_LOG_INFO,"KSM","NATIVE : Writing thumbnail file %s\n", thumbfn);
                 if (LIBRAW_SUCCESS != (ret = RawProcessor->dcraw_thumb_writer(thumbfn)))
                 {
-                    __android_log_print(ANDROID_LOG_ERROR,"KSM","Cannot write %s: %s\n", thumbfn, libraw_strerror(ret));
+                    __android_log_print(ANDROID_LOG_ERROR,"KSM","NATIVE : Cannot write %s: %s\n", thumbfn, libraw_strerror(ret));
                     resultCode = 1;
                     if (LIBRAW_FATAL_ERROR(ret))
                         break;
@@ -233,7 +250,7 @@ Java_com_example_proj_1camera_RawActivity_simple_1dcraw(JNIEnv *env, jobject thi
         {
             if ((ret = RawProcessor->unpack_thumb()) != LIBRAW_SUCCESS)
             {
-                __android_log_print(ANDROID_LOG_ERROR,"KSM","Cannot unpack_thumb %s: %s\n", argv[i],
+                __android_log_print(ANDROID_LOG_ERROR,"KSM","NATIVE : Cannot unpack_thumb %s: %s\n", argv[i],
                                     libraw_strerror(ret));
                 resultCode = 1;
                 if (LIBRAW_FATAL_ERROR(ret))
@@ -245,10 +262,10 @@ Java_com_example_proj_1camera_RawActivity_simple_1dcraw(JNIEnv *env, jobject thi
                          T.tformat == LIBRAW_THUMBNAIL_JPEG ? "thumb.jpg"
                                                             : (T.tcolors == 1? "thumb.pgm" : "thumb.ppm"));
                 if (verbose)
-                    __android_log_print(ANDROID_LOG_INFO,"KSM","Writing thumbnail file %s\n", thumbfn);
+                    __android_log_print(ANDROID_LOG_INFO,"KSM","NATIVE : Writing thumbnail file %s\n", thumbfn);
                 if (LIBRAW_SUCCESS != (ret = RawProcessor->dcraw_thumb_writer(thumbfn)))
                 {
-                    __android_log_print(ANDROID_LOG_ERROR,"KSM","Cannot write %s: %s\n", thumbfn, libraw_strerror(ret));
+                    __android_log_print(ANDROID_LOG_ERROR,"KSM","NATIVE : Cannot write %s: %s\n", thumbfn, libraw_strerror(ret));
                     resultCode = 1;
                     if (LIBRAW_FATAL_ERROR(ret))
                         continue;
@@ -261,7 +278,7 @@ Java_com_example_proj_1camera_RawActivity_simple_1dcraw(JNIEnv *env, jobject thi
 
         if (LIBRAW_SUCCESS != ret)
         {
-            __android_log_print(ANDROID_LOG_ERROR,"KSM","Cannot do postprocessing on %s: %s\n", argv[i],
+            __android_log_print(ANDROID_LOG_ERROR,"KSM","NATIVE : Cannot do postprocessing on %s: %s\n", argv[i],
                                 libraw_strerror(ret));
             resultCode = 1;
             if (LIBRAW_FATAL_ERROR(ret))
@@ -274,10 +291,10 @@ Java_com_example_proj_1camera_RawActivity_simple_1dcraw(JNIEnv *env, jobject thi
                  OUT.output_tiff ? "tiff" : (P1.colors > 1 ? "ppm" : "pgm"));
 
         if (verbose)
-            __android_log_print(ANDROID_LOG_INFO,"KSM","Writing file %s\n", outfn);
+            __android_log_print(ANDROID_LOG_INFO,"KSM","NATIVE : Writing file %s\n", outfn);
 
         if (LIBRAW_SUCCESS != (ret = RawProcessor->dcraw_ppm_tiff_writer(outfn))){
-            __android_log_print(ANDROID_LOG_ERROR,"KSM","Cannot write %s: %s\n", outfn, libraw_strerror(ret));
+            __android_log_print(ANDROID_LOG_ERROR,"KSM","NATIVE : Cannot write %s: %s\n", outfn, libraw_strerror(ret));
             resultCode = 1;
         }
 

@@ -391,6 +391,11 @@ class RawActivity : AppCompatActivity() {
                         Log.d("KSM", "DNG Size : ${dngWHBmp.width}, ${dngWHBmp.height}")
 //                        Log.d("KSM", "DNG Size[H,W] : ${dngWHBmp.height}, ${dngWHBmp.width}")
 
+                        val rotatedWidth = viewBinding.borderView.height
+                        val rotatedHeight = viewBinding.borderView.width
+                        val rotatedTop = viewBinding.borderView.left
+                        val rotatedLeft = viewBinding.borderView.top
+
                         //get ScaleRatio width, height by (result.image => horizontal/previewSize => vertical)
 //                        val scaleRatio_w = dngWHBmp.width.toFloat() / previewSize.height.toFloat()
 //                        val scaleRatio_h = dngWHBmp.height.toFloat() / previewSize.width.toFloat()
@@ -399,29 +404,19 @@ class RawActivity : AppCompatActivity() {
                         Log.d("KSM", "scaleRatio[w, h] = ${scaleRatio_w}, ${scaleRatio_h}")
 
                         //set borderView size to result.image size
-//                        val borderLeft = (viewBinding.borderView.left * scaleRatio_w).toInt()
-//                        val borderTop = (viewBinding.borderView.top * scaleRatio_h).toInt()
-//                        val borderWidth = (viewBinding.borderView.width * scaleRatio_w).toInt()
-//                        val borderHeight = (viewBinding.borderView.height * scaleRatio_h).toInt()
+                        val borderLeft = (rotatedLeft * scaleRatio_w).toInt()
+                        val borderTop = (rotatedTop * scaleRatio_h).toInt()
+                        val borderWidth = (rotatedWidth * scaleRatio_w).toInt()
+                        val borderHeight = (rotatedHeight * scaleRatio_h).toInt()
 
-                        val originborderLeft = viewBinding.borderView.left
-                        val originborderTop = viewBinding.borderView.top
-                        Log.d("KSM", "Border left, top : [${originborderLeft}, ${originborderTop}]")
-
-                        val movedLeft = (viewBinding.borderView.left *
-                                (viewBinding.borderView.height.toFloat() / viewBinding.borderView.width.toFloat())).toInt()
-                        val movedTop = (viewBinding.borderView.top *
-                                (viewBinding.borderView.width.toFloat() / viewBinding.borderView.height.toFloat())).toInt()
-
-                        val borderLeft = (movedLeft * scaleRatio_w).toInt()
-                        val borderTop = (movedTop * scaleRatio_h).toInt()
-                        val borderWidth = (viewBinding.borderView.height * scaleRatio_w).toInt()
-                        val borderHeight = (viewBinding.borderView.width * scaleRatio_h).toInt()
                         Log.d("KSM", "origin border[l,t,w,h] = " +
-                                "${movedLeft}, " +
-                                "${movedTop}, " +
+                                "${viewBinding.borderView.left}, " +
+                                "${viewBinding.borderView.top}, " +
                                 "${viewBinding.borderView.height}, " +
                                 "${viewBinding.borderView.width}")
+                        Log.d("KSM", "rotated border[l,t,w,h] = " +
+                                "${rotatedLeft}, ${rotatedTop}, " +
+                                "${rotatedWidth}, ${rotatedHeight}")
                         Log.d("KSM", "border[l,t,w,h] = ${borderLeft}, ${borderTop}, ${borderWidth}, ${borderHeight}")
 
                         val ac_str = if(borderLeft != 0 || borderTop != 0 || borderWidth != 0 || borderHeight != 0){

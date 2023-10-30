@@ -388,7 +388,7 @@ class RawActivity : AppCompatActivity() {
                         //libraw
 //                        Log.d("KSM", "TESTING --- ${lib()}")
 
-                        Log.d("KSM", "DNG Size : ${dngWHBmp.width}, ${dngWHBmp.height}")
+                        Log.d("KSM", "DNG Size (w*h) : ${dngWHBmp.width}, ${dngWHBmp.height}")
 //                        Log.d("KSM", "DNG Size[H,W] : ${dngWHBmp.height}, ${dngWHBmp.width}")
 
                         val rotatedWidth = viewBinding.borderView.height
@@ -441,6 +441,7 @@ class RawActivity : AppCompatActivity() {
 //                        }
 
                         val a_bmp = TiffBitmapFactory.decodeFile(File(tiff_path+".tiff"))
+                        Log.d("KSM", "tiff size (w*h) : ${a_bmp.width}*${a_bmp.height}")
 
                         var pixel_x = (a_bmp.width) / 2
                         var pixel_y = (a_bmp.height) / 2
@@ -471,7 +472,7 @@ class RawActivity : AppCompatActivity() {
                         val tiffbmp_h = bmp_bitmap.height
 
 //                        Log.d("KSM", "tiffbmp size : ${tiffbmp_bitmap.width}*${tiffbmp_bitmap.height}")
-                        Log.d("KSM", "bmp size : ${bmp_bitmap.width}*${bmp_bitmap.height}")
+                        Log.d("KSM", "bmp size (w*h) : ${bmp_bitmap.width}*${bmp_bitmap.height}")
 
                         //tiffbmp_bitmap RGB
 //                        pixel_x = (tiffbmp_bitmap.width) / 2
@@ -480,10 +481,12 @@ class RawActivity : AppCompatActivity() {
 //                        Log.d("KSM", "tiffbmp R/G/B : Pos[${pixel_x},${pixel_y}] = ${tiffbmp_RGB[0]}/${tiffbmp_RGB[1]}/${tiffbmp_RGB[2]}")
 
                         //bmp_bitmap RGB
+//                        var bmp_RGB = getRGB(bmp_bitmap, saved_x, saved_y)
+//                        Log.d("KSM", "bmp R/G/B : Pos[${saved_x},${saved_y}] = ${bmp_RGB[0]}/${bmp_RGB[1]}/${bmp_RGB[2]}")
                         pixel_x = (bmp_bitmap.width) / 2
                         pixel_y = (bmp_bitmap.height) / 2
-                        var bmp_RGB = getRGB(bmp_bitmap, pixel_x, pixel_y)
-                        Log.d("KSM", "bmp R/G/B : Pos[${pixel_x},${pixel_y}] = ${bmp_RGB[0]}/${bmp_RGB[1]}/${bmp_RGB[2]}")
+                        var bmp_center_RGB = getRGB(bmp_bitmap, pixel_x, pixel_y)
+                        Log.d("KSM", "bmp R/G/B : Pos[${pixel_x},${pixel_y}] = ${bmp_center_RGB[0]}/${bmp_center_RGB[1]}/${bmp_center_RGB[2]}")
                     }
 
 //                    //촬영 후 다시 자동 AF 모드로 설정

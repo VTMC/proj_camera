@@ -18,3 +18,4 @@ rootProject.name = "proj_camera"
 include ':app'
 include ':libraw'
 //include ':app:dng_sdk'
+include ':opencv'

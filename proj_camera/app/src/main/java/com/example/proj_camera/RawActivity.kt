@@ -3,6 +3,7 @@ package com.example.proj_camera
 import Utils.AndroidBmpUtil
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -487,6 +488,14 @@ class RawActivity : AppCompatActivity() {
                         pixel_y = (bmp_bitmap.height) / 2
                         var bmp_center_RGB = getRGB(bmp_bitmap, pixel_x, pixel_y)
                         Log.d("KSM", "bmp R/G/B : Pos[${pixel_x},${pixel_y}] = ${bmp_center_RGB[0]}/${bmp_center_RGB[1]}/${bmp_center_RGB[2]}")
+
+                        val intent = Intent(this@RawActivity, ResultActivity::class.java)
+//                        intent.putExtra("cameraId", rawCameraInfo!!.cameraId)
+//                        intent.putExtra("imageFormat", rawCameraInfo!!.format)
+                        intent.putExtra("dngPath", pathName)
+                        intent.putExtra("bmpPath", bmp_path)
+                        startActivity(intent)
+                        finish()
                     }
 
 //                    //촬영 후 다시 자동 AF 모드로 설정
@@ -503,11 +512,11 @@ class RawActivity : AppCompatActivity() {
                 it.isEnabled = true
                 Toast.makeText(this@RawActivity, "Image Captured! \n  location:${outputUri.toString()}", Toast.LENGTH_SHORT).show()
 
-//                val dialog = ProgressDialog(this@RawActivity)
-//                dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
-//                dialog.setCancelable(false)
-//                dialog.setMessage("이미지 저장중...")
-//                dialog.show()
+                val dialog = ProgressDialog(this@RawActivity)
+                dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+                dialog.setCancelable(false)
+                dialog.setMessage("이미지 저장중...")
+                dialog.show()
 
 //                if(dng_str != null && jpg_str != null && bmp_str != null){
 //                    dialog.dismiss()

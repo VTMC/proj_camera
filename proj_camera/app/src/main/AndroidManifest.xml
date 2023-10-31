@@ -36,6 +36,7 @@
         </activity>
 
         <activity android:name=".RawActivity" />
+        <activity android:name=".ResultActivity" />
     </application>
 
 </manifest>

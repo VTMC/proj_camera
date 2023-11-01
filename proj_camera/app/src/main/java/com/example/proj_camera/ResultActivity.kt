@@ -3,6 +3,7 @@ package com.example.proj_camera
 import Utils.RotateTransformation
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -42,15 +43,31 @@ class ResultActivity : AppCompatActivity() {
 
         val findContours = FindContours(bmpPath)
         val resultBmp = findContours.update()
+        val resultBmp2 = findContours.update2()
+
+//        val findContours2 = FindContours2(bmpPath, true)
+//        val resultBmp = findContours2.bitmap
 
         val pointedImageView = viewBinding.pointedImageView
 
         pointedImageView.setImageBitmap(resultBmp)
 
+        val pointedImageView2 = viewBinding.pointedImageView2
+
+        pointedImageView2.setImageBitmap(resultBmp2)
+
         viewBinding.backBtn.setOnClickListener {
             val intent = Intent(this@ResultActivity, RawActivity::class.java)
             startActivity(intent)
             finish()
+        }
+
+        viewBinding.pointedImageView.setOnClickListener {
+            viewBinding.pointedImageView2.visibility = View.VISIBLE
+        }
+
+        viewBinding.pointedImageView2.setOnClickListener {
+            viewBinding.pointedImageView2.visibility = View.INVISIBLE
         }
     }
 

@@ -87,12 +87,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextureView
-        android:id="@+id/texture"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-<!--    <ImageButton-->
+    <!--    <ImageButton-->
 <!--        android:id="@+id/imageCaptureBtn"-->
 <!--        style="@android:style/Widget.Holo.ImageButton"-->
 <!--        android:layout_width="wrap_content"-->
@@ -104,6 +99,13 @@
 <!--        app:layout_constraintHorizontal_bias="0.498"-->
 <!--        app:layout_constraintStart_toStartOf="parent"-->
 <!--        app:srcCompat="@drawable/camera" />-->
+
+    <TextureView
+        android:id="@+id/texture"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="-80dp"
+        tools:layout_editor_absoluteY="-60dp" />
 
     <android.widget.Button
         android:id="@+id/imageCaptureBtn"
@@ -127,15 +129,14 @@
         android:id="@+id/torchBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginBottom="25dp"
-        android:padding="5dp"
+        android:layout_marginBottom="116dp"
         android:background="@drawable/roundcorner"
-        android:visibility="invisible"
+        android:padding="5dp"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.048"
-        app:layout_constraintStart_toEndOf="@+id/imageCaptureBtn"
+        app:layout_constraintHorizontal_bias="0.94"
+        app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/flashlight" />
 
     <Button

@@ -63,7 +63,7 @@ public class FindContours {
         drawing = Mat.zeros(cannyOutput.size(), CvType.CV_8UC3);
         for(int i = 0; i < contoursSimple.size(); i++){
             Scalar color = new Scalar(255, 0, 0);
-            Imgproc.drawContours(drawing, contoursSimple, i, color, 2, Imgproc.LINE_8, hierarchy, 5, new Point());
+            Imgproc.drawContours(drawing, contoursSimple, i, color, 5, Imgproc.LINE_8, hierarchy, 5, new Point());
         }
 
 //        for(int i = 0; i < contoursNone.size(); i++){
@@ -80,11 +80,11 @@ public class FindContours {
             int h = boundingRect.height;
             Log.d("KSM", "CONTOUR INFO : x : "+x+", y : "+y+", width : "+w+", height : "+h);
 
-            if(w>=50 && h>=50){
+            if(w>=30 && h>=30){
                 Rect rectCrop = new Rect(x,y,w,h);
                 Mat croppedImg = new Mat(src, rectCrop);
 
-                Imgproc.rectangle(resultMat_2, rectCrop, new Scalar(0, 0, 255), 5);
+                Imgproc.rectangle(resultMat_2, rectCrop, new Scalar(255, 255, 0), 2);
 
                 long timeStampMillis = System.currentTimeMillis();
                 String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStampMillis+"_"+i+".bmp";

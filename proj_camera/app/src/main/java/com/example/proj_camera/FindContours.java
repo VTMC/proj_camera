@@ -32,7 +32,8 @@ public class FindContours {
     meanable number
     19~30 : on white paper
     */
-    private int threshold = 60;
+    private int threshold = 65;
+    private int threshold2 = 65;
     private Random rng = new Random(12345);
 
     public FindContours(String path){
@@ -45,31 +46,43 @@ public class FindContours {
         enhancedSrc = img_contrast(src);
 
         Imgproc.cvtColor(enhancedSrc, srcGray, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.blur(srcGray, srcGray, new Size(3,3));
+//        Imgproc.blur(srcGray, srcGray, new Size(3,3));
     }
 
     public Bitmap update(){
         Bitmap bmp = null;
 
-        Mat cannyOutput = new Mat();
-        Imgproc.Canny(srcGray, cannyOutput, threshold, threshold*2);
+        //existing method
+        /*Mat cannyOutput = new Mat();
+        Imgproc.Canny(srcGray, cannyOutput, threshold, threshold*1.5);
 
         List<MatOfPoint> contoursSimple = new ArrayList<>();
-        List<MatOfPoint> contoursNone = new ArrayList<>();
         Mat hierarchy = new Mat();
         Imgproc.findContours(cannyOutput, contoursSimple, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-        Imgproc.findContours(cannyOutput, contoursNone, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
+
+
 
         drawing = Mat.zeros(cannyOutput.size(), CvType.CV_8UC3);
         for(int i = 0; i < contoursSimple.size(); i++){
             Scalar color = new Scalar(255, 0, 0);
-            Imgproc.drawContours(drawing, contoursSimple, i, color, 5, Imgproc.LINE_8, hierarchy, 5, new Point());
-        }
+            Imgproc.drawContours(drawing, contoursSimple, i, color, 5, Imgproc.LINE_8, hierarchy, 2, new Point());
+        }*/
 
-//        for(int i = 0; i < contoursNone.size(); i++){
-//            Scalar color = new Scalar(0, 0, 255);
-//            Imgproc.drawContours(drawing, contoursNone, i, color, 2, Imgproc., hierarchy, 2, new Point());
-//        }
+        //new one
+        Mat thresholdedMat = new Mat();
+        Imgproc.threshold(srcGray, thresholdedMat, 140, 255, Imgproc.THRESH_BINARY_INV);
+//        int block_size = 15;
+//        int C = 2;
+//        Imgproc.adaptiveThreshold(srcGray, thresholdedMat, 200, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, block_size, C);
+
+        List<MatOfPoint> contoursSimple = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(thresholdedMat, contoursSimple, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        drawing = Mat.zeros(thresholdedMat.size(), CvType.CV_8UC3);
+        for(int i = 0; i < contoursSimple.size(); i++){
+            Imgproc.drawContours(drawing, contoursSimple, i, new Scalar(255,0,0), 5, Imgproc.LINE_8, hierarchy, 2, new Point());
+        }
 
         resultMat_2 = Mat.zeros(drawing.size(), CvType.CV_8UC3);
         for(int i = 0; i < contoursSimple.size(); i++){
@@ -80,20 +93,24 @@ public class FindContours {
             int h = boundingRect.height;
             Log.d("KSM", "CONTOUR INFO : x : "+x+", y : "+y+", width : "+w+", height : "+h);
 
-            if(w>=30 && h>=30){
-                Rect rectCrop = new Rect(x,y,w,h);
+            Rect rectCrop = new Rect(x,y,w,h);
+            Imgproc.rectangle(resultMat_2, rectCrop, new Scalar(255, 255, 255), 1);
+
+            if(w>=70 && h>=50){
+//                Rect rectCrop = new Rect(x,y,w,h);
                 Mat croppedImg = new Mat(src, rectCrop);
 
                 Imgproc.rectangle(resultMat_2, rectCrop, new Scalar(255, 255, 0), 2);
+                Log.d("KSM", "successed!");
 
-                long timeStampMillis = System.currentTimeMillis();
-                String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStampMillis+"_"+i+".bmp";
-                boolean saveRes = Imgcodecs.imwrite(imgName, croppedImg);
-                if(saveRes){
-                    Log.d("KSM", "SAVE SUCCESSED!");
-                }else{
-                    Log.d("KSM", "SAVE ERROR!!");
-                }
+//                long timeStampMillis = System.currentTimeMillis();
+//                String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStampMillis+"_"+i+".bmp";
+//                boolean saveRes = Imgcodecs.imwrite(imgName, croppedImg);
+//                if(saveRes){
+//                    Log.d("KSM", "SAVE SUCCESSED!");
+//                }else{
+//                    Log.d("KSM", "SAVE ERROR!!");
+//                }
             }
         }
 

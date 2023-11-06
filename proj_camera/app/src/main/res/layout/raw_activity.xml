@@ -52,6 +52,15 @@
         app:layout_constraintStart_toEndOf="@+id/border_view"
         app:layout_constraintTop_toBottomOf="@+id/blackViewTop" />
 
+    <!--<View
+        android:id="@+id/guider"
+        android:layout_width="20dp"
+        android:layout_height="320dp"
+        android:background="@drawable/urine_square"
+        app:layout_constraintBottom_toTopOf="@+id/blackViewBottom"
+        app:layout_constraintEnd_toStartOf="@+id/blackViewRight"
+        app:layout_constraintStart_toEndOf="@+id/blackViewLeft" />-->
+
     <View
         android:id="@+id/border_view"
         android:layout_width="150dp"
@@ -62,7 +71,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <View
         android:id="@+id/view"
@@ -103,8 +112,8 @@
         android:id="@+id/texture"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="-80dp"
-        tools:layout_editor_absoluteY="-60dp" />
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="67dp" />
 
     <android.widget.Button
         android:id="@+id/imageCaptureBtn"
@@ -131,7 +140,7 @@
         android:layout_marginBottom="116dp"
         android:background="@drawable/roundcorner"
         android:padding="5dp"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.94"
@@ -186,6 +195,18 @@
         app:layout_constraintBottom_toTopOf="@id/border_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/loadingCircle"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:indeterminateDrawable="@drawable/circle_progress"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

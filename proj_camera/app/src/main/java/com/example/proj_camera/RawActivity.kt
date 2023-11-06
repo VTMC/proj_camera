@@ -494,6 +494,7 @@ class RawActivity : AppCompatActivity() {
 //                        intent.putExtra("imageFormat", rawCameraInfo!!.format)
                         intent.putExtra("dngPath", pathName)
                         intent.putExtra("bmpPath", bmp_path)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         startActivity(intent)
                         finish()
                     }
@@ -509,7 +510,7 @@ class RawActivity : AppCompatActivity() {
             }
 
             it.post{
-                it.isEnabled = true
+//                it.isEnabled = true
                 Toast.makeText(this@RawActivity, "Image Captured! \n  location:${outputUri.toString()}", Toast.LENGTH_SHORT).show()
 
                 val dialog = ProgressDialog(this@RawActivity)
@@ -518,9 +519,8 @@ class RawActivity : AppCompatActivity() {
                 dialog.setMessage("이미지 저장중...")
                 dialog.show()
 
-//                if(dng_str != null && jpg_str != null && bmp_str != null){
-//                    dialog.dismiss()
-//                }
+//                viewBinding.loadingCircle.visibility = View.VISIBLE
+
             }
         }
 
@@ -1018,6 +1018,7 @@ class RawActivity : AppCompatActivity() {
         //camera2
         cameraThread.quitSafely()
         imageReaderThread.quitSafely()
+//        viewBinding.loadingCircle.visibility = View.GONE
     }
 
 

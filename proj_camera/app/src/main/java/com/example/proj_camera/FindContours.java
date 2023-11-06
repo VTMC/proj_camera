@@ -18,6 +18,7 @@ import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -26,6 +27,7 @@ public class FindContours {
     private Mat srcGray = new Mat();
     private Mat enhancedSrc = new Mat();
     private Mat drawing = new Mat();
+    private Mat final_drawing = new Mat();
     private Mat resultMat_2 = new Mat();
     private static final int MAX_THRESHOLD = 255;
     /*
@@ -35,6 +37,13 @@ public class FindContours {
     private int threshold = 100;
     private int threshold2 = (int) (threshold*1.2);
     private Random rng = new Random(12345);
+
+    public String[] cropImgFileList;
+
+    private int urineStrip_x = 0;
+    private int urineStrip_y = 0;
+    private int urineStrip_w = 0;
+    private int urineStrip_h = 0;
 
     public FindContours(String path){
         src = Imgcodecs.imread(path);
@@ -54,27 +63,6 @@ public class FindContours {
     public Bitmap update(){
         Bitmap bmp = null;
 
-        //existing method - Canny
-        /*Mat cannyOutput = new Mat();
-        Imgproc.Canny(enhancedSrc, cannyOutput, threshold, threshold2);
-
-        List<MatOfPoint> contoursSimple = new ArrayList<>();
-        Mat hierarchy = new Mat();
-        Imgproc.findContours(cannyOutput, contoursSimple, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);*/
-
-        //new method - inRange
-        /*int lowerInt = 180;
-        int upperInt = 235;
-
-        Scalar bgrLower = new Scalar(lowerInt,lowerInt,lowerInt);
-        Scalar bgrUpper = new Scalar(upperInt,upperInt,upperInt);
-
-        Mat mask = new Mat();
-        Core.inRange(srcGray, bgrLower, bgrUpper, mask);
-        List<MatOfPoint> contoursSimple = new ArrayList<>();
-        Mat hierarchy = new Mat();
-        Imgproc.findContours(mask, contoursSimple, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);*/
-
         //new method - threshold
         Mat thresholdOutput = new Mat();
         //if background color is black
@@ -89,60 +77,72 @@ public class FindContours {
         Mat hierarchy = new Mat();
         Imgproc.findContours(thresholdOutput, contoursSimple, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
-
-        //existing method
-//        drawing = Mat.zeros(cannyOutput.size(), CvType.CV_8UC3);
-//        for(int i = 0; i < contoursSimple.size(); i++){
-//            Scalar color = new Scalar(255, 0, 0);
-//            Imgproc.drawContours(drawing, contoursSimple, i, color, 5, Imgproc.LINE_8, hierarchy, 2, new Point());
-//        }
-
-        //new method - inRange
-        /*drawing = Mat.zeros(mask.size(), CvType.CV_8UC3);
-        for(int i = 0; i < contoursSimple.size(); i++){
-            Scalar color = new Scalar(255,0,0);
-            Imgproc.drawContours(drawing, contoursSimple, i, color, 5, Imgproc.LINE_8, hierarchy, 2, new Point());
-        }*/
-
         //new method - threshold
         drawing = Mat.zeros(thresholdOutput.size(), CvType.CV_8UC3);
         for(int i = 0; i < contoursSimple.size(); i++){
             Scalar color = new Scalar(255, 0, 0);
-            Imgproc.drawContours(drawing, contoursSimple, i, color, 5, Imgproc.LINE_8, hierarchy, 2, new Point());
+            Imgproc.drawContours(drawing, contoursSimple, i, color, 3, Imgproc.LINE_8, hierarchy, 2, new Point());
         }
 
         Mat croppedImg = cropImg(src, contoursSimple, 70, 200);
 
-//        Mat cannyOutput = new Mat();
-//        Imgproc.Canny(croppedImg, cannyOutput, threshold, threshold2);
-
         Mat croppedImgGray = new Mat();
         Imgproc.cvtColor(croppedImg, croppedImgGray, Imgproc.COLOR_BGR2GRAY);
 
-        Mat adaptThresOutput = new Mat();
-        int blockSize = 15;
-        int C = 3;
-        Imgproc.adaptiveThreshold(croppedImgGray, adaptThresOutput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, blockSize, C);
+        Imgproc.threshold(croppedImgGray, thresholdOutput, 130, 255, Imgproc.THRESH_BINARY_INV);
 
-//        List<MatOfPoint> contoursSimple2 = new ArrayList<>();
-//        Mat hierarchy2 = new Mat();
-//        Imgproc.findContours(thresholdOutput2, contoursSimple2, hierarchy2, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-//
-//        Mat drawing2 = Mat.zeros(thresholdOutput2.size(), CvType.CV_8UC3);
-//        for(int i = 0; i < contoursSimple2.size(); i++){
-//            Scalar color = new Scalar(255, 0, 0);
-//            Imgproc.drawContours(drawing2, contoursSimple2, i, color, 5, Imgproc.LINE_8, hierarchy2, 2, new Point());
-//            Rect boundingRect = Imgproc.boundingRect(contoursSimple2.get(i));
-//            if(boundingRect.width >= 70 && boundingRect.height >= 70){
-//                Rect rectCrop = new Rect(boundingRect.x,boundingRect.y,boundingRect.width,boundingRect.height);
-//                Imgproc.rectangle(drawing2, rectCrop, new Scalar(255, 255, 0), 2);
-//            }
-//        }
+        List<MatOfPoint> contoursSimple2 = new ArrayList<>();
+        Mat hierarchy2 = new Mat();
+        Imgproc.findContours(thresholdOutput, contoursSimple2, hierarchy2, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-//        Mat croppedImg2 = cropImg(src, contoursSimple2, 50, 50);
+        drawing = Mat.zeros(thresholdOutput.size(), CvType.CV_8UC3);
+        /*for(int i = 0; i < contoursSimple2.size(); i++){
+            Scalar color = new Scalar(255, 0, 0);
+            Imgproc.drawContours(drawing, contoursSimple2, i, color, 5, Imgproc.LINE_8, hierarchy2, 2, new Point());
+//            Imgproc.drawContours(drawing, contoursSimple2, 1, color, -1);
+        }*/
 
-        Mat result_mat = new Mat();
-        Core.add(drawing, enhancedSrc, result_mat);
+        Imgproc.drawContours(drawing, contoursSimple2, -1, new Scalar(255, 0, 0), 5);
+
+        for(MatOfPoint contour : contoursSimple2){
+            for(Point point : contour.toArray()){
+                Imgproc.circle(drawing, point, 5, new Scalar(255, 255, 0), -1);
+            }
+        }
+
+
+        Mat resMat = new Mat();
+        Core.add(drawing, croppedImg, resMat);
+
+        //perspective transformation
+        /*Point[] srcPoint = new Point[]{
+                new Point(urineStrip_x, urineStrip_y), //leftTop
+                new Point((urineStrip_x+urineStrip_w), urineStrip_y), //rightTop
+                new Point(urineStrip_x, (urineStrip_y+urineStrip_h)), //leftBottom
+                new Point((urineStrip_x+urineStrip_w), (urineStrip_y+urineStrip_h)) //rightBottom
+        };
+
+        MatOfPoint2f srcQuad = new MatOfPoint2f(srcPoint);
+
+        Point[] dstPoint = new Point[]{
+                new Point(0.0,0.0),
+                new Point(src.width() - 1, 0.0),
+                new Point(0.0, src.height() - 1),
+                new Point(src.width() - 1, src.height() - 1)
+        };
+
+        MatOfPoint2f dstQuad = new MatOfPoint2f(dstPoint);
+
+        //cacluate perspectiveTransform
+        Mat perspectiveTransform = Imgproc.getPerspectiveTransform(srcQuad, dstQuad);
+
+        //set perspectiveTransform
+        Mat formCroppedImg = new Mat();
+        Imgproc.warpPerspective(src, formCroppedImg, perspectiveTransform, new Size(0.0, 0.0));
+
+        formCroppedImg = formCroppedImg.submat(new Rect(0,0, (int)src.width(), (int)src.height()));
+
+        Imgproc.resize(formCroppedImg, formCroppedImg, new Size((int)croppedImg.width(), (int)croppedImg.height()), Imgproc.INTER_LINEAR);*/
 
         try{
             //existing method
@@ -152,11 +152,13 @@ public class FindContours {
 //            bmp = Bitmap.createBitmap(cannyOutput.cols(), cannyOutput.rows(), Bitmap.Config.ARGB_8888);
 //            Utils.matToBitmap(cannyOutput, bmp);
             //watch enhancedSrc
-            bmp = Bitmap.createBitmap(adaptThresOutput.cols(), adaptThresOutput.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(adaptThresOutput, bmp);
+            bmp = Bitmap.createBitmap(resMat.cols(), resMat.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(resMat, bmp);
         }catch(CvException e){
             Log.e("KSM", "Mat to bitmap Error!!", e);
         }
+
+        Log.d("KSM", "bmp width : "+bmp.getWidth()+" / height : "+bmp.getHeight());
 
         return bmp;
     }
@@ -164,12 +166,12 @@ public class FindContours {
     public Bitmap update2(){
         Bitmap bmp = null;
 
-        Mat result_mat = new Mat();
-        Core.add(resultMat_2, drawing, result_mat);
+//        Mat result_mat = new Mat();
+//        Core.add(resultMat_2, drawing, result_mat);
 
         try{
-            bmp = Bitmap.createBitmap(result_mat.cols(), result_mat.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(result_mat, bmp);
+            bmp = Bitmap.createBitmap(final_drawing.cols(), final_drawing.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(final_drawing, bmp);
         }catch(CvException e){
             Log.e("KSM", "Mat to bitmap Error!!", e);
         }
@@ -207,14 +209,15 @@ public class FindContours {
             int y = boundingRect.y;
             int w = boundingRect.width;
             int h = boundingRect.height;
-            Log.d("KSM", "CONTOUR INFO : x : "+x+", y : "+y+", width : "+w+", height : "+h);
-
-            Rect rectCrop = new Rect(x,y,w,h);
-            Imgproc.rectangle(resultMat_2, rectCrop, new Scalar(255, 255, 255), 1);
 
             if(w>=width && h>=height){
-//                Rect rectCrop = new Rect(x,y,w,h);
+                Rect rectCrop = new Rect(x,y,w,h);
                 croppedImg = new Mat(src, rectCrop);
+                Log.d("KSM", "CONTOUR INFO : x : "+x+", y : "+y+", width : "+w+", height : "+h);
+                urineStrip_x = x;
+                urineStrip_y = y;
+                urineStrip_w = w;
+                urineStrip_h = h;
 
                 Imgproc.rectangle(resultMat_2, rectCrop, new Scalar(255, 255, 0), 2);
                 Log.d("KSM", "successed!");
@@ -231,5 +234,44 @@ public class FindContours {
         }
 
         return croppedImg;
+    }
+
+    private String[] finalCropImg(Mat img, List<MatOfPoint> contours, int width, int height){
+        String[] croppedImgList = new String[0];
+        Mat croppedImg = new Mat();
+        resultMat_2 = Mat.zeros(final_drawing.size(), CvType.CV_8UC3);
+        for(int i = 0; i < contours.size(); i++){
+            Rect boundingRect = Imgproc.boundingRect(contours.get(i));
+            int x = boundingRect.x;
+            int y = boundingRect.y;
+            int w = boundingRect.width;
+            int h = boundingRect.height;
+            Rect rectCrop = new Rect(x,y,w,h);
+
+            if(w>=width && h>=height && height < 500){
+//                Rect rectCrop = new Rect(x,y,w,h);
+                croppedImg = new Mat(src, rectCrop);
+                Log.d("KSM", "CONTOUR INFO : x : "+x+", y : "+y+", width : "+w+", height : "+h);
+                Imgproc.rectangle(final_drawing, rectCrop, new Scalar(255, 255, 0), 3);
+
+                long timeStampMillis = System.currentTimeMillis();
+                String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStampMillis+"_"+i+".bmp";
+
+                croppedImgList = Add(croppedImgList, imgName);
+                boolean saveRes = Imgcodecs.imwrite(imgName, croppedImg);
+                if(saveRes){
+                    Log.d("KSM", "SAVE SUCCESSED!\n"+imgName);
+                }else{
+                    Log.d("KSM", "SAVE ERROR!!");
+                }
+            }
+        }
+        return croppedImgList;
+    }
+
+    private static String[] Add(String[] originArray, String val){
+        String[] newArray = Arrays.copyOf(originArray, originArray.length + 1);
+        newArray[originArray.length] = val;
+        return newArray;
     }
 }

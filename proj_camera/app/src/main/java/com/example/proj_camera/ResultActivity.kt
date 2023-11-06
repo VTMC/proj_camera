@@ -3,12 +3,16 @@ package com.example.proj_camera
 import Utils.RotateTransformation
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.example.proj_camera.databinding.ResultActivityBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 
 class ResultActivity : AppCompatActivity() {
@@ -37,24 +41,33 @@ class ResultActivity : AppCompatActivity() {
                 .into(viewBinding.resultImageView)
         }
 
-        //openCV to pointed
+        lifecycleScope.launch(Dispatchers.Main){
+            //openCV to pointed
 //        val goodFeaturesToTrack = GoodFeaturesToTrack(bmpPath)
 //        val resultBmp = goodFeaturesToTrack.update()
 
-        val findContours = FindContours(bmpPath)
-        val resultBmp = findContours.update()
-        val resultBmp2 = findContours.update2()
+//            val findContours = FindContours(bmpPath)
+//            val resultBmp = findContours.update()
+//            val resultBmp2 = findContours.update2()
+//            val croppedImgList = findContours.cropImgFileList
 
-//        val findContours2 = FindContours2(bmpPath, true)
-//        val resultBmp = findContours2.bitmap
+            val findContours2 = FindContours2(bmpPath)
+            val resultBmp = findContours2.update()
+            val resultBmp2 = findContours2.update2()
+            val croppedImgList = findContours2.cropImgFileList
 
-        val pointedImageView = viewBinding.pointedImageView
+            val pointedImageView = viewBinding.pointedImageView
 
-        pointedImageView.setImageBitmap(resultBmp)
+            pointedImageView.setImageBitmap(resultBmp)
 
-        val pointedImageView2 = viewBinding.pointedImageView2
+            val pointedImageView2 = viewBinding.pointedImageView2
 
-        pointedImageView2.setImageBitmap(resultBmp2)
+            pointedImageView2.setImageBitmap(resultBmp2)
+
+            for(i in 0 until(croppedImgList.size)){
+                Log.d("KSM", "croppedImg[${i+1}] = ${croppedImgList[i]}")
+            }
+        }
 
         viewBinding.backBtn.setOnClickListener {
             val intent = Intent(this@ResultActivity, RawActivity::class.java)

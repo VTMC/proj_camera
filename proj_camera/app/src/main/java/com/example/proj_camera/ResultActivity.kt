@@ -1,7 +1,9 @@
 package com.example.proj_camera
 
 import Utils.RotateTransformation
+import android.app.ProgressDialog
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -17,9 +19,17 @@ import java.io.File
 
 class ResultActivity : AppCompatActivity() {
     private lateinit var viewBinding: ResultActivityBinding
+    private lateinit var resultBmp : Bitmap
+    private lateinit var resultBmp2 : Bitmap
+    private lateinit var croppedImgList : Array<String>
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+        progressDialog.setCancelable(false)
+        progressDialog.setMessage("이미지 처리중...")
+        progressDialog.show()
 
         viewBinding = ResultActivityBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
@@ -41,7 +51,7 @@ class ResultActivity : AppCompatActivity() {
                 .into(viewBinding.resultImageView)
         }
 
-        lifecycleScope.launch(Dispatchers.Main){
+        lifecycleScope.launch(Dispatchers.Default){
             //openCV to pointed
 //        val goodFeaturesToTrack = GoodFeaturesToTrack(bmpPath)
 //        val resultBmp = goodFeaturesToTrack.update()
@@ -52,20 +62,24 @@ class ResultActivity : AppCompatActivity() {
 //            val croppedImgList = findContours.cropImgFileList
 
             val findContours2 = FindContours2(bmpPath)
-            val resultBmp = findContours2.update()
-            val resultBmp2 = findContours2.update2()
-            val croppedImgList = findContours2.cropImgFileList
+            resultBmp = findContours2.update()
+            resultBmp2 = findContours2.update2()
+            croppedImgList = findContours2.cropImgFileList
 
-            val pointedImageView = viewBinding.pointedImageView
+            lifecycleScope.launch(Dispatchers.Main){
+                val pointedImageView = viewBinding.pointedImageView
 
-            pointedImageView.setImageBitmap(resultBmp)
+                pointedImageView.setImageBitmap(resultBmp)
 
-            val pointedImageView2 = viewBinding.pointedImageView2
+                val pointedImageView2 = viewBinding.pointedImageView2
 
-            pointedImageView2.setImageBitmap(resultBmp2)
+                pointedImageView2.setImageBitmap(resultBmp2)
 
-            for(i in 0 until(croppedImgList.size)){
-                Log.d("KSM", "croppedImg[${i+1}] = ${croppedImgList[i]}")
+                for(i in 0 until(croppedImgList!!.size)){
+                    Log.d("KSM", "croppedImg[${i+1}] = ${croppedImgList!![i]}")
+                }
+
+                progressDialog.dismiss()
             }
         }
 

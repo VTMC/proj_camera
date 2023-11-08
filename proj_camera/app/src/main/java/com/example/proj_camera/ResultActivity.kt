@@ -1,7 +1,9 @@
 package com.example.proj_camera
 
 import Utils.RotateTransformation
+import android.app.AlertDialog
 import android.app.ProgressDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -19,9 +21,9 @@ import java.io.File
 
 class ResultActivity : AppCompatActivity() {
     private lateinit var viewBinding: ResultActivityBinding
-    private lateinit var resultBmp : Bitmap
-    private lateinit var resultBmp2 : Bitmap
-    private lateinit var croppedImgList : Array<String>
+    private var resultBmp : Bitmap? = null
+    private var resultBmp2 : Bitmap? = null
+    private var croppedImgList : Array<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
@@ -61,25 +63,74 @@ class ResultActivity : AppCompatActivity() {
 //            val resultBmp2 = findContours.update2()
 //            val croppedImgList = findContours.cropImgFileList
 
-            val findContours2 = FindContours2(bmpPath)
-            resultBmp = findContours2.update()
-            resultBmp2 = findContours2.update2()
-            croppedImgList = findContours2.cropImgFileList
+            val findContours = FindContours(bmpPath)
+            resultBmp = findContours.update()
+            if(resultBmp != null){
+                resultBmp2 = findContours.update2()
+//                croppedImgList = findContours.cropImgFileList
+            }
+
 
             lifecycleScope.launch(Dispatchers.Main){
-                val pointedImageView = viewBinding.pointedImageView
+                val dialogBuilder = AlertDialog.Builder(this@ResultActivity)
+                val intent = Intent(this@ResultActivity, RawActivity::class.java)
 
-                pointedImageView.setImageBitmap(resultBmp)
+                if(resultBmp == null){
+                    progressDialog.dismiss()
 
-                val pointedImageView2 = viewBinding.pointedImageView2
+                    dialogBuilder.setTitle("이미지 처리 오류 발생 (1)")
+                        .setMessage("이미지 처리가 제대로 되지 않았습니다. \n다시 촬영해주세요.")
+                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                        .setCancelable(false)
+                        .setPositiveButton("확인",
+                            DialogInterface.OnClickListener{ dialog, id ->
+                                startActivity(intent)
+                                finish()
+                            })
+                        .show()
+                }else if(resultBmp2 == null){
+                    progressDialog.dismiss()
 
-                pointedImageView2.setImageBitmap(resultBmp2)
+                    dialogBuilder.setTitle("이미지 처리 오류 발생 (2)")
+                        .setMessage("이미지 처리가 제대로 되지 않았습니다. \n다시 촬영해주세요.")
+                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                        .setCancelable(false)
+                        .setPositiveButton("확인",
+                            DialogInterface.OnClickListener{ dialog, id ->
+                                startActivity(intent)
+                                finish()
+                            })
+                        .show()
+                }/*else if(croppedImgList == null){
+                    progressDialog.dismiss()
 
-                for(i in 0 until(croppedImgList!!.size)){
-                    Log.d("KSM", "croppedImg[${i+1}] = ${croppedImgList!![i]}")
+                    dialogBuilder.setTitle("이미지 처리 오류 발생 (3)")
+                        .setMessage("잘린 이미지를 로드할 수 없습니다. \n다시 촬영해주세요.")
+                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                        .setCancelable(false)
+                        .setPositiveButton("확인",
+                            DialogInterface.OnClickListener{ dialog, id ->
+                                startActivity(intent)
+                                finish()
+                            })
+                        .show()
+                }*/else{
+                    val pointedImageView = viewBinding.pointedImageView
+
+                    pointedImageView.setImageBitmap(resultBmp)
+
+                    val pointedImageView2 = viewBinding.pointedImageView2
+
+                    pointedImageView2.setImageBitmap(resultBmp2)
+
+                    for(i in 0 until(croppedImgList!!.size)){
+                        Log.d("KSM", "croppedImg[${i+1}] = ${croppedImgList!![i]}")
+                    }
+
+                    progressDialog.dismiss()
                 }
 
-                progressDialog.dismiss()
+
             }
         }
 

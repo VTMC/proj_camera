@@ -17,9 +17,11 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class FindContours2 {
@@ -182,7 +184,7 @@ public class FindContours2 {
             Imgproc.drawContours(final_drawing, contoursSimple2, i, color, 1, Imgproc.LINE_8, hierarchy2, 2, new Point());
         }
 
-        cropImgFileList = finalCropImg(croppedSrc, contoursSimple2, 80, 80);
+        cropImgFileList = finalCropImg(croppedSrc, contoursSimple2, 70, 70);
 
         long endTimeMillis = System.currentTimeMillis();
         long progressedTime = endTimeMillis - startTimeMillis;
@@ -375,26 +377,26 @@ public class FindContours2 {
             int w = boundingRect.width;
             int h = boundingRect.height;
 
-//            if(w>=width && h>=height && h < 150 && w < 150){
-//                Rect rectCrop = new Rect(x,y,w,h);
-//                croppedImg = new Mat(img, rectCrop);
-//                Log.d("KSM", "CONTOUR INFO : x : "+x+", y : "+y+", width : "+w+", height : "+h);
-//                Imgproc.rectangle(final_drawing, rectCrop, new Scalar(255, 255, 0), 3);
-//
-//
-//                String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
-//                SimpleDateFormat sdf = new SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA);
-//                String timeStamp = sdf.format(System.currentTimeMillis());
-//                String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStamp+"_"+i+".bmp";
-//
-//                croppedImgList = Add(croppedImgList, imgName);
-//                boolean saveRes = Imgcodecs.imwrite(imgName, croppedImg);
-//                if(saveRes){
-//                    Log.d("KSM", "SAVE SUCCESSED!\n"+imgName);
-//                }else{
-//                    Log.d("KSM", "SAVE ERROR!!");
-//                }
-//            }
+            if(w>=width && h>=height && h < 150 && w < 150){
+                Rect rectCrop = new Rect(x,y,w,h);
+                croppedImg = new Mat(img, rectCrop);
+                Log.d("KSM", "CONTOUR INFO : x : "+x+", y : "+y+", width : "+w+", height : "+h);
+                Imgproc.rectangle(final_drawing, rectCrop, new Scalar(255, 255, 0), 3);
+
+
+                String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
+                SimpleDateFormat sdf = new SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA);
+                String timeStamp = sdf.format(System.currentTimeMillis());
+                String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStamp+"_"+i+".bmp";
+
+                croppedImgList = Add(croppedImgList, imgName);
+                boolean saveRes = Imgcodecs.imwrite(imgName, croppedImg);
+                if(saveRes){
+                    Log.d("KSM", "SAVE SUCCESSED!\n"+imgName);
+                }else{
+                    Log.d("KSM", "SAVE ERROR!!");
+                }
+            }
         }
         return croppedImgList;
     }

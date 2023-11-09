@@ -7,7 +7,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -54,21 +53,17 @@ class ResultActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch(Dispatchers.Default){
-            //openCV to pointed
-//        val goodFeaturesToTrack = GoodFeaturesToTrack(bmpPath)
-//        val resultBmp = goodFeaturesToTrack.update()
-
-//            val findContours = FindContours(bmpPath)
-//            val resultBmp = findContours.update()
-//            val resultBmp2 = findContours.update2()
-//            val croppedImgList = findContours.cropImgFileList
+            //existing method
+//            val findContours2 = FindContours2(bmpPath)
+//            resultBmp = findContours2.update()
+//            if(resultBmp != null){
+//                resultBmp2 = findContours2.update2()
+//                croppedImgList = findContours2.cropImgFileList
+//            }
 
             val findContours = FindContours(bmpPath)
-            resultBmp = findContours.update()
-            if(resultBmp != null){
-                resultBmp2 = findContours.update2()
-//                croppedImgList = findContours.cropImgFileList
-            }
+            val resultBmp = findContours.update()
+            val resultBmp2 = findContours.sqr
 
 
             lifecycleScope.launch(Dispatchers.Main){
@@ -123,9 +118,9 @@ class ResultActivity : AppCompatActivity() {
 
                     pointedImageView2.setImageBitmap(resultBmp2)
 
-                    for(i in 0 until(croppedImgList!!.size)){
-                        Log.d("KSM", "croppedImg[${i+1}] = ${croppedImgList!![i]}")
-                    }
+//                    for(i in 0 until(croppedImgList!!.size)){
+//                        Log.d("KSM", "croppedImg[${i+1}] = ${croppedImgList!![i]}")
+//                    }
 
                     progressDialog.dismiss()
                 }

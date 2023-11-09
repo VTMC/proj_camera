@@ -9,7 +9,6 @@ import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -64,7 +63,6 @@ public class FindContours {
 
     public Bitmap update(){
         Bitmap bmp = null;
-        long startTimeMillis = System.currentTimeMillis();
 
         //new method - threshold
         Mat thresholdOutput = new Mat();
@@ -99,27 +97,6 @@ public class FindContours {
         Rect roi = new Rect(croppedImg_x, croppedImg_y, croppedImg_w, croppedImg_h);
         croppedSrc = new Mat(src, roi);
 
-        /*List<MatOfPoint> contoursSimple2 = new ArrayList<>();
-        Mat hierarchy2 = new Mat();
-        Imgproc.findContours(thresOutput, contoursSimple2, hierarchy2, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-
-        final_drawing = Mat.zeros(thresOutput.size(), CvType.CV_8UC3);
-        for(int i = 0; i < contoursSimple2.size(); i++){
-            Scalar color = new Scalar(255, 0, 0);
-            Imgproc.drawContours(final_drawing, contoursSimple2, i, color, 1, Imgproc.LINE_8, hierarchy2, 2, new Point());
-        }
-
-        cropImgFileList = finalCropImg(croppedSrc, contoursSimple2, 80, 80);*/
-
-        long endTimeMillis = System.currentTimeMillis();
-        long progressedTime = endTimeMillis - startTimeMillis;
-        Log.d("KSM", "==========[progressedTime]==========\n" +
-                "progressedTime : "+progressedTime+"\n" +
-                "====================================\n");
-
-        Mat result_mat = new Mat();
-        Core.add(drawing, enhancedSrc, result_mat);
-
         try{
             Imgproc.cvtColor(croppedSrc, croppedSrc, Imgproc.COLOR_BGR2RGB);
             bmp = Bitmap.createBitmap(croppedSrc.cols(), croppedSrc.rows(), Bitmap.Config.ARGB_8888);
@@ -133,19 +110,31 @@ public class FindContours {
         return bmp;
     }
 
-    public Bitmap update2(){
+    public Bitmap getSqr(){
         Bitmap bmp = null;
 
-        Mat fittedImg = new Mat();
-        fittedImg = fitImg(croppedSrc, src.width(), src.height());
+        Mat rotatedImg = fitImg(croppedSrc, croppedSrc.width(), croppedSrc.height());
 
         try{
-            bmp = Bitmap.createBitmap(fittedImg.cols(), fittedImg.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(fittedImg, bmp);
+//            Imgproc.cvtColor(croppedSrc, croppedSrc, Imgproc.COLOR_BGR2RGB);
+            bmp = Bitmap.createBitmap(rotatedImg.cols(), rotatedImg.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(rotatedImg, bmp);
         }catch(CvException e){
             Log.e("KSM", "Mat to bitmap Error!!", e);
         }
+
         return bmp;
+    }
+
+    public Mat[] ratioCut(Mat img){
+        Mat[] result = {};
+        int blankTop_h = (int)(img.height() * 0.02);
+        int blank_h = (int)(img.height() * 0.021);
+        int square_h = (int)(img.height() * 0.04);
+
+//        Rect blancTopSqr = new Rect(croppedImg_x, croppedImg_y)
+
+        return result;
     }
 
     private Mat img_contrast(Mat img){
@@ -188,42 +177,43 @@ public class FindContours {
             Mat thresholdOutput = new Mat();
             Imgproc.threshold(imgGray, thresholdOutput, 130, 255, Imgproc.THRESH_BINARY_INV);
 
-            List<MatOfPoint> contours = new ArrayList<>();
-            Mat hierarchy = new Mat();
-            Imgproc.findContours(thresholdOutput, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+            result = thresholdOutput;
+//            List<MatOfPoint> contours = new ArrayList<>();
+//            Mat hierarchy = new Mat();
+//            Imgproc.findContours(thresholdOutput, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+//
+//            MatOfPoint maxContour = null;
+//            double maxContourArea = 0;
+//            for(MatOfPoint contour : contours){
+//                double area = Imgproc.contourArea(contour);
+//                if(area > maxContourArea){
+//                    maxContour = contour;
+//                    maxContourArea = area;
+//                }
+//            }
+//
+//            double epsilon = 0.02 * Imgproc.arcLength(new MatOfPoint2f(maxContour.toArray()), true);
+//            MatOfPoint2f approx = new MatOfPoint2f();
+//            Imgproc.approxPolyDP(new MatOfPoint2f(maxContour.toArray()), approx, epsilon, true);
+//
+//            Point[] sortedPoints = sortPointsByYThenX(approx.toArray());
+//            Point bottomLeft = sortedPoints[0];
+//            Point topLeft = sortedPoints[1];
+//            Point bottomRight = sortedPoints[2];
+//            Point topRight = sortedPoints[3];
+//
+//            MatOfPoint2f imgRect = new MatOfPoint2f(bottomLeft, topRight, topLeft, bottomRight);
 
-            MatOfPoint maxContour = null;
-            double maxContourArea = 0;
-            for(MatOfPoint contour : contours){
-                double area = Imgproc.contourArea(contour);
-                if(area > maxContourArea){
-                    maxContour = contour;
-                    maxContourArea = area;
-                }
-            }
+//            MatOfPoint2f targetRect = new MatOfPoint2f(
+//                    new Point(0,0),
+//                    new Point(width, height),
+//                    new Point(width, 0),
+//                    new Point(0, height)
+//            );
 
-            double epsilon = 0.02 * Imgproc.arcLength(new MatOfPoint2f(maxContour.toArray()), true);
-            MatOfPoint2f approx = new MatOfPoint2f();
-            Imgproc.approxPolyDP(new MatOfPoint2f(maxContour.toArray()), approx, epsilon, true);
-
-            Point[] sortedPoints = sortPointsByYThenX(approx.toArray());
-            Point bottomLeft = sortedPoints[0];
-            Point topLeft = sortedPoints[1];
-            Point bottomRight = sortedPoints[2];
-            Point topRight = sortedPoints[3];
-
-            MatOfPoint2f imgRect = new MatOfPoint2f(bottomLeft, topRight, topLeft, bottomRight);
-
-            MatOfPoint2f targetRect = new MatOfPoint2f(
-                    new Point(0,0),
-                    new Point(width, height),
-                    new Point(width, 0),
-                    new Point(0, height)
-            );
-
-            Mat matrix = Imgproc.getPerspectiveTransform(imgRect, targetRect);
-
-            Imgproc.warpPerspective(img, result, matrix, new Size(width, height));
+//            Mat matrix = Imgproc.getPerspectiveTransform(imgRect, targetRect);
+//
+//            Imgproc.warpPerspective(img, result, matrix, new Size(width, height));
         }catch(Exception e){
             Log.e("KSM", "FitImg ERROR!!", e);
         }

@@ -62,8 +62,10 @@ class ResultActivity : AppCompatActivity() {
 //            }
 
             val findContours = FindContours(bmpPath)
-            val resultBmp = findContours.update()
-            val resultBmp2 = findContours.sqr
+            resultBmp = findContours.update()
+            if(resultBmp != null){
+                resultBmp2 = findContours.sqr
+            }
 
 
             lifecycleScope.launch(Dispatchers.Main){
@@ -83,6 +85,7 @@ class ResultActivity : AppCompatActivity() {
                                 finish()
                             })
                         .show()
+
                 }else if(resultBmp2 == null){
                     progressDialog.dismiss()
 
@@ -136,10 +139,12 @@ class ResultActivity : AppCompatActivity() {
         }
 
         viewBinding.pointedImageView.setOnClickListener {
+            viewBinding.pointedImageView.visibility = View.INVISIBLE
             viewBinding.pointedImageView2.visibility = View.VISIBLE
         }
 
         viewBinding.pointedImageView2.setOnClickListener {
+            viewBinding.pointedImageView.visibility = View.VISIBLE
             viewBinding.pointedImageView2.visibility = View.INVISIBLE
         }
     }

@@ -141,44 +141,54 @@ public class FindContours2 {
         Rect roi = new Rect(croppedImg_x, croppedImg_y, croppedImg_w, croppedImg_h);
         croppedSrc = new Mat(src, roi);
 
-        //get Gray ContourRange
-        Mat contouredImg = new Mat();
-        contouredImg = contourRange(croppedImg);
+//        //get Gray ContourRange
+//        Mat contouredImg = new Mat();
+//        contouredImg = contourRange(croppedImg);
+
+//        Mat mosaicImg = mosaic(croppedImg, 2);
 
         //make Gray for adaptiveThreshold
         Mat croppedImgGray = new Mat();
-        Imgproc.cvtColor(contouredImg, croppedImgGray, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.cvtColor(croppedImg, croppedImgGray, Imgproc.COLOR_BGR2GRAY);
 
-        //threshold
-        Mat thresOutput =  Mat.zeros(croppedImgGray.size(), CvType.CV_8UC1);
-        Mat output = new Mat();
-        for(int i = 50; i < 120; i++){
-            Log.d("KSM", "Threshold doing...");
-            Imgproc.threshold(croppedImgGray, output, i, 255, Imgproc.THRESH_BINARY_INV);
-            Core.add(thresOutput, output, thresOutput);
-        }
+//        Mat blurredImg = new Mat();
+//        Imgproc.GaussianBlur(croppedImgGray, blurredImg, new Size(5,5), 0);
+//
+//        Mat sharpenKernel = new Mat(3, 3, CvType.CV_32F, new Scalar(-1));
+//        sharpenKernel.put(1,1,9);
+//
+//        Mat sharpenImg = new Mat();
+//        Imgproc.filter2D(blurredImg, sharpenImg, -1, sharpenKernel);
+////
+//        //threshold
+////        Mat thresOutput =  Mat.zeros(croppedImgGray.size(), CvType.CV_8UC1);
+////        Mat output = new Mat();
+////        for(int i = 180; i < 220; i++){
+////            Log.d("KSM", "Threshold doing...");
+////            Imgproc.threshold(sharpenImg, output, i, 255, Imgproc.THRESH_BINARY_INV);
+////            Core.add(thresOutput, output, thresOutput);
+////        }
+//        Mat thresOutput = new Mat();
+//        Imgproc.threshold(sharpenImg, thresOutput, 180, 255, Imgproc.THRESH_BINARY);
 
-        //블러 처리
-//        Imgproc.blur(thresOutput, thresOutput, new Size(5,5));
-        //모자이크 처리
-        thresOutput = mosaic(thresOutput, 10);
+        Mat adaptThresOutput = new Mat();
+//        int blockSize = 3; //THRESH_BINARY Imgproc.ADAPTIVE_THRESH_MEAN_C
+//        int C = 0; //THRESH_BINARY Imgproc.ADAPTIVE_THRESH_MEAN_C
+        int blockSize = 11; //THRESH_BINARY Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C
+        int C = 0; //THRESH_BINARY Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C
+//        Imgproc.adaptiveThreshold(croppedImgGray, adaptThresOutput, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, blockSize, C);
+        Imgproc.adaptiveThreshold(croppedImgGray, adaptThresOutput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, blockSize, C);
 
-//        Mat adaptThresOutput = new Mat();
-////        int blockSize = 3; //THRESH_BINARY Imgproc.ADAPTIVE_THRESH_MEAN_C
-////        int C = 0; //THRESH_BINARY Imgproc.ADAPTIVE_THRESH_MEAN_C
-//        int blockSize = 5; //THRESH_BINARY Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C
-//        int C = 0; //THRESH_BINARY Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C
-//        Imgproc.adaptiveThreshold(thresOutput, adaptThresOutput, Core.BORDER_ISOLATED, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, blockSize, C);
-
-        //Canny
-//        Mat cannyOutput = new Mat();
-//        Imgproc.Canny(adaptThresOutput, cannyOutput, threshold, threshold2);
+//        //Morphological closing
+//        Mat closeKernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3,3));
+//        Mat closedImg = new Mat();
+//        Imgproc.morphologyEx(adaptThresOutput, closedImg, Imgproc.MORPH_CLOSE, closeKernel, new Point(-1, -1), 2);
 
         List<MatOfPoint> contoursSimple2 = new ArrayList<>();
         Mat hierarchy2 = new Mat();
-        Imgproc.findContours(thresOutput, contoursSimple2, hierarchy2, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(adaptThresOutput, contoursSimple2, hierarchy2, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        final_drawing = Mat.zeros(thresOutput.size(), CvType.CV_8UC3);
+        final_drawing = Mat.zeros(adaptThresOutput.size(), CvType.CV_8UC3);
         for(int i = 0; i < contoursSimple2.size(); i++){
             Scalar color = new Scalar(255, 0, 0);
             Imgproc.drawContours(final_drawing, contoursSimple2, i, color, 1, Imgproc.LINE_8, hierarchy2, 2, new Point());
@@ -204,8 +214,8 @@ public class FindContours2 {
 //            Utils.matToBitmap(cannyOutput, bmp);
             //watch enhancedSrc
             Imgproc.cvtColor(croppedImg, croppedImg, Imgproc.COLOR_BGR2RGB);
-            bmp = Bitmap.createBitmap(croppedImg.cols(), croppedImg.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(croppedImg, bmp);
+            bmp = Bitmap.createBitmap(adaptThresOutput.cols(), adaptThresOutput.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(adaptThresOutput, bmp);
         }catch(CvException e){
             Log.e("KSM", "Mat to bitmap Error!!", e);
         }

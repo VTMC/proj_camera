@@ -82,7 +82,7 @@ android {
 //        commandLine getNdkBuildPath(), '-C', file('src/main').absolutePath, 'clean'
 //    }
 
-    clean.dependsOn 'cleanNative'
+//    clean.dependsOn 'cleanNative'
 
     buildTypes {
         release {

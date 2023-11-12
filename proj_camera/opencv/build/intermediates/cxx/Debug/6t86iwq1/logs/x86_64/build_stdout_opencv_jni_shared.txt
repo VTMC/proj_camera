@@ -1,0 +1,2 @@
+ninja: Entering directory `K:\Android_projects\Camera_Proj\proj_camera\proj_camera\opencv\.cxx\Debug\6t86iwq1\x86_64'
+ninja: no work to do.

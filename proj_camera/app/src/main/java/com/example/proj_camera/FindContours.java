@@ -18,9 +18,11 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class FindContours {
@@ -29,23 +31,12 @@ public class FindContours {
     private Mat enhancedSrc = new Mat();
     private Mat croppedSrc = new Mat();
     private Mat drawing = new Mat();
-    private Mat final_drawing = new Mat();
-    private Mat resultMat_2 = new Mat();
-    private static final int MAX_THRESHOLD = 255;
-    /*
-    meanable number
-    19~30 : on white paper
-    */
-    private int threshold;
-    private int threshold2 = threshold;
-    private Random rng = new Random(12345);
-
     public String[] cropImgFileList;
-
     int croppedImg_x = 0;
     int croppedImg_y = 0;
     int croppedImg_w = 0;
     int croppedImg_h = 0;
+    double movedAngle = 0;
 
     public FindContours(String path){
         src = Imgcodecs.imread(path);
@@ -133,33 +124,47 @@ public class FindContours {
         //crop to Only UrineStick
         Mat cropOnlyUrineStick = cropUrineStick(rotatedImg, contours, 70, 1400);
 
+        //do croppedSrc rotate and crop
+        Mat croppedUrineStripSrc = new Mat();
+        Mat matrix = Imgproc.getRotationMatrix2D(new Point(croppedSrc.cols()/2, croppedSrc.rows()/2), movedAngle*(-1), 1.0);
+        Imgproc.warpAffine(croppedSrc, croppedUrineStripSrc, matrix, new Size(croppedSrc.width(), croppedSrc.height()));
+        Rect roi = new Rect(croppedImg_x, croppedImg_y, croppedImg_w, croppedImg_h);
+        croppedUrineStripSrc = new Mat(croppedUrineStripSrc, roi);
+        Imgproc.cvtColor(croppedUrineStripSrc, croppedUrineStripSrc, Imgproc.COLOR_BGR2RGB);
+
+        Log.d("KSM", "cropOnlyUrineStick w : "+cropOnlyUrineStick.width()+", h : "+cropOnlyUrineStick.height());
+
         //crop UrineStick
         int w = cropOnlyUrineStick.width();
         int h = cropOnlyUrineStick.height();
-        int sqr_h = (int)0.04*h;
-        int fbh = (int) 0.02 * h; //first blank height
-        int bh = (int) 0.021 * h; //blank height
+        double sqr_h = 0.04*h;
+        double fbh = 0.02 * h; //first blank height
+        double bh = 0.021 * h; //blank height
 
+        Log.d("KSM", "setting.... \nw : "+cropOnlyUrineStick.width()+"\nh : "+cropOnlyUrineStick.height()
+                +"\nsqr_h : "+sqr_h+"\nfbh : "+fbh+"\nbh : "+bh);
 
         Rect[] sqrArray = new Rect[11];
 
-        sqrArray[0] = new Rect(0,fbh, w, sqr_h);
+        sqrArray[0] = new Rect(0,(int)fbh, w, (int)sqr_h);
         for(int i = 1; i < 11; i++){
-            Rect sqr = new Rect(0, fbh+(sqr_h*i)+(bh*i), w, sqr_h);
+            Rect sqr = new Rect(0, (int)(fbh+(sqr_h*i)+(bh*i)), w, (int)sqr_h);
             sqrArray[i] = sqr;
         }
 
         for(int i = 0; i < 11; i++){
-            Log.d("KSM", "Rect ["+i+"] : "+sqrArray[i]);
+            Log.d("KSM", "Rect ["+(i+1)+"] : "+sqrArray[i]);
         }
 
         //croppedImg = new Mat(img, rectCrop);
         Mat[] croppedSqr = new Mat[11];
         for(int i = 0; i < 11; i++){
-            croppedSqr[i] = new Mat(rotatedImg, sqrArray[i]);
+            croppedSqr[i] = new Mat(croppedUrineStripSrc, sqrArray[i]);
 
-            long timeStampMillis = System.currentTimeMillis();
-            String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStampMillis+"_"+i+".bmp";
+            String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
+            SimpleDateFormat sdf = new SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA);
+            String timeStamp = sdf.format(System.currentTimeMillis());
+            String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStamp+"_"+i+".bmp";
             boolean saveRes = Imgcodecs.imwrite(imgName, croppedSqr[i]);
             if(saveRes){
                 Log.d("KSM", "SAVE SUCCESSED!\n"+imgName);
@@ -170,8 +175,8 @@ public class FindContours {
 
         try{
 //            Imgproc.cvtColor(croppedSrc, croppedSrc, Imgproc.COLOR_BGR2RGB);
-            bmp = Bitmap.createBitmap(cropOnlyUrineStick.cols(), cropOnlyUrineStick.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(cropOnlyUrineStick, bmp);
+            bmp = Bitmap.createBitmap(croppedUrineStripSrc.cols(), croppedUrineStripSrc.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(croppedUrineStripSrc, bmp);
         }catch(CvException e){
             Log.e("KSM", "Mat to bitmap Error!!", e);
         }
@@ -179,16 +184,7 @@ public class FindContours {
         return bmp;
     }
 
-    public Mat[] ratioCut(Mat img){
-        Mat[] result = {};
-        int blankTop_h = (int)(img.height() * 0.02);
-        int blank_h = (int)(img.height() * 0.021);
-        int square_h = (int)(img.height() * 0.04);
 
-//        Rect blancTopSqr = new Rect(croppedImg_x, croppedImg_y)
-
-        return result;
-    }
 
     private Mat img_contrast(Mat img){
         Mat lab = new Mat();
@@ -293,11 +289,13 @@ public class FindContours {
                 pointAngle -= 180; //무조건 180도 안의 값을 가지도록 진행
             }
             double widthCenterAngle = getAngle(widthCenterPoint1, widthCenterPoint2);
-            double movedAngle = pointAngle - 90;
+            movedAngle = pointAngle - 90;
 
             Log.d("KSM", "pointAngle : "+pointAngle);
             Log.d("KSM", "widthCenterAngle : "+widthCenterAngle);
             Log.d("KSM", "pointAngle - 90˚ : "+movedAngle);
+
+
 
             //90도로 다시 맞추기 위해서는 이동된 방향과 반대방향으로 회전해야한다.
             Mat rotatedImg = new Mat();
@@ -375,7 +373,6 @@ public class FindContours {
 
     private Mat cropImg(Mat img, List<MatOfPoint> contours, int width, int height){
         Mat croppedImg = Mat.zeros(drawing.size(), CvType.CV_8UC3);
-        resultMat_2 = Mat.zeros(drawing.size(), CvType.CV_8UC3);
         for(int i = 0; i < contours.size(); i++){
             Rect boundingRect = Imgproc.boundingRect(contours.get(i));
             int x = boundingRect.x-10;
@@ -384,7 +381,6 @@ public class FindContours {
             int h = boundingRect.height+20;
 
             Rect rectCrop = new Rect(x,y,w,h);
-            Imgproc.rectangle(resultMat_2, rectCrop, new Scalar(255, 255, 255), 1);
 
             if(w>=width && h>=height){
 //                Rect rectCrop = new Rect(x,y,w,h);
@@ -395,7 +391,6 @@ public class FindContours {
                 croppedImg_w = w;
                 croppedImg_h = h;
 
-                Imgproc.rectangle(resultMat_2, rectCrop, new Scalar(255, 255, 0), 2);
                 Log.d("KSM", "successed!");
 
 //                long timeStampMillis = System.currentTimeMillis();
@@ -413,7 +408,7 @@ public class FindContours {
     }
 
     private Mat cropUrineStick(Mat img, List<MatOfPoint> contours, int width, int height){
-        Mat croppedImg = Mat.zeros(drawing.size(), CvType.CV_8UC3);
+        Mat croppedImg = new Mat();
         for(int i = 0; i < contours.size(); i++){
             Rect boundingRect = Imgproc.boundingRect(contours.get(i));
             int x = boundingRect.x;
@@ -422,10 +417,12 @@ public class FindContours {
             int h = boundingRect.height;
 
             if(w>=width && h>=height){
-                x += 10;
-                y += 4;
-                w -= 15;
-                h -= 4;
+                if(Math.abs(movedAngle) > 1.0){
+                    x += 10;
+                    y += 4;
+                    w -= 15;
+                    h -= 4;
+                }
 
                 Rect rectCrop = new Rect(x,y,w,h);
                 croppedImg = new Mat(img, rectCrop);
@@ -435,7 +432,7 @@ public class FindContours {
                 croppedImg_w = w;
                 croppedImg_h = h;
 
-                Imgproc.rectangle(drawing, rectCrop, new Scalar(255, 255, 0), 2);
+//                Imgproc.rectangle(drawing, rectCrop, new Scalar(255, 255, 0), 2);
                 Log.d("KSM", "successed!");
 
 //                long timeStampMillis = System.currentTimeMillis();
@@ -450,41 +447,6 @@ public class FindContours {
         }
 
         return croppedImg;
-    }
-
-    private String[] finalCropImg(Mat img, List<MatOfPoint> contours, int width, int height){
-        String[] croppedImgList = new String[0];
-        Mat croppedImg = new Mat();
-        resultMat_2 = Mat.zeros(final_drawing.size(), CvType.CV_8UC3);
-        for(int i = 0; i < contours.size(); i++){
-            Rect boundingRect = Imgproc.boundingRect(contours.get(i));
-            int x = boundingRect.x;
-            int y = boundingRect.y;
-            int w = boundingRect.width;
-            int h = boundingRect.height;
-
-//            if(w>=width && h>=height && h < 150 && w < 150){
-//                Rect rectCrop = new Rect(x,y,w,h);
-//                croppedImg = new Mat(img, rectCrop);
-//                Log.d("KSM", "CONTOUR INFO : x : "+x+", y : "+y+", width : "+w+", height : "+h);
-//                Imgproc.rectangle(final_drawing, rectCrop, new Scalar(255, 255, 0), 3);
-//
-//
-//                String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
-//                SimpleDateFormat sdf = new SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA);
-//                String timeStamp = sdf.format(System.currentTimeMillis());
-//                String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStamp+"_"+i+".bmp";
-//
-//                croppedImgList = Add(croppedImgList, imgName);
-//                boolean saveRes = Imgcodecs.imwrite(imgName, croppedImg);
-//                if(saveRes){
-//                    Log.d("KSM", "SAVE SUCCESSED!\n"+imgName);
-//                }else{
-//                    Log.d("KSM", "SAVE ERROR!!");
-//                }
-//            }
-        }
-        return croppedImgList;
     }
 
     private static String[] Add(String[] originArray, String val){

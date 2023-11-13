@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
 public class FindContours {
     private Mat src = new Mat();
@@ -121,34 +120,48 @@ public class FindContours {
         Mat hierarchy = new Mat();
         Imgproc.findContours(thresholdOutput, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        //crop to Only UrineStick
+        //crop and resize to Only UrineStick
         Mat cropOnlyUrineStick = cropUrineStick(rotatedImg, contours, 70, 1400);
+//        Imgproc.resize(cropOnlyUrineStick, cropOnlyUrineStick, new Size(croppedImg_w, croppedImg_w*(24.6)));
+        Imgproc.resize(cropOnlyUrineStick, cropOnlyUrineStick, new Size(100, 1600));
+        drawing = Mat.zeros(cropOnlyUrineStick.size(), CvType.CV_8UC3);
+        Core.add(drawing, cropOnlyUrineStick, drawing);
 
-        //do croppedSrc rotate and crop
+        //do croppedSrc rotate, crop and resize
         Mat croppedUrineStripSrc = new Mat();
         Mat matrix = Imgproc.getRotationMatrix2D(new Point(croppedSrc.cols()/2, croppedSrc.rows()/2), movedAngle*(-1), 1.0);
         Imgproc.warpAffine(croppedSrc, croppedUrineStripSrc, matrix, new Size(croppedSrc.width(), croppedSrc.height()));
         Rect roi = new Rect(croppedImg_x, croppedImg_y, croppedImg_w, croppedImg_h);
         croppedUrineStripSrc = new Mat(croppedUrineStripSrc, roi);
+//        Imgproc.resize(croppedUrineStripSrc, croppedUrineStripSrc, new Size(croppedImg_w, croppedImg_w*(24.6)));
+        Imgproc.resize(croppedUrineStripSrc, croppedUrineStripSrc, new Size(100, 1600));
         Imgproc.cvtColor(croppedUrineStripSrc, croppedUrineStripSrc, Imgproc.COLOR_BGR2RGB);
 
         Log.d("KSM", "cropOnlyUrineStick w : "+cropOnlyUrineStick.width()+", h : "+cropOnlyUrineStick.height());
 
         //crop UrineStick
-        int w = cropOnlyUrineStick.width();
+        int w = cropOnlyUrineStick.width() - 20; //x = 10
         int h = cropOnlyUrineStick.height();
-        double sqr_h = 0.04*h;
-        double fbh = 0.02 * h; //first blank height
-        double bh = 0.021 * h; //blank height
+        double sqr_h = (4.5/123.0)*h; //origin : almost 0.04
+//        int sqr_h = w;
+        double fbh = (2.0/123.0)/3.5 * h; //first blank height | origin : almost 0.02
+        double bh = (2.5/123.0) * h; //blank height | origin : almost 0.021
 
         Log.d("KSM", "setting.... \nw : "+cropOnlyUrineStick.width()+"\nh : "+cropOnlyUrineStick.height()
                 +"\nsqr_h : "+sqr_h+"\nfbh : "+fbh+"\nbh : "+bh);
 
         Rect[] sqrArray = new Rect[11];
 
-        sqrArray[0] = new Rect(0,(int)fbh, w, (int)sqr_h);
-        for(int i = 1; i < 11; i++){
-            Rect sqr = new Rect(0, (int)(fbh+(sqr_h*i)+(bh*i)), w, (int)sqr_h);
+//        for(int i = 0; i < 4; i++){
+//            sqrArray[i] = new Rect(0,(int)(fbh+(sqr_h*i)+(fbh*i)), w, (int)sqr_h);
+//        }
+        sqrArray[0] = new Rect(10,(int)fbh, w, (int)sqr_h); //0
+        for(int i = 1; i < 11; i++){ //1~10
+            int y = (int)(fbh+(sqr_h*i)+(bh*i));
+            /*if(i >= 1 && i < 10){ //1~9
+                y -=
+            }*/
+            Rect sqr = new Rect(10, y, w, (int)sqr_h);
             sqrArray[i] = sqr;
         }
 
@@ -161,22 +174,40 @@ public class FindContours {
         for(int i = 0; i < 11; i++){
             croppedSqr[i] = new Mat(croppedUrineStripSrc, sqrArray[i]);
 
-            String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
-            SimpleDateFormat sdf = new SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA);
-            String timeStamp = sdf.format(System.currentTimeMillis());
-            String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStamp+"_"+i+".bmp";
-            boolean saveRes = Imgcodecs.imwrite(imgName, croppedSqr[i]);
-            if(saveRes){
-                Log.d("KSM", "SAVE SUCCESSED!\n"+imgName);
-            }else{
-                Log.d("KSM", "SAVE ERROR!!");
-            }
+            Imgproc.rectangle(drawing, sqrArray[i], new Scalar(255, 0, 0), 3);
+
+//            String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
+//            SimpleDateFormat sdf = new SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA);
+//            String timeStamp = sdf.format(System.currentTimeMillis());
+//            String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStamp+"_"+i+".bmp";
+//            boolean saveRes = Imgcodecs.imwrite(imgName, croppedSqr[i]);
+//            if(saveRes){
+//                Log.d("KSM", "SAVE SUCCESSED!\n"+imgName);
+//            }else{
+//                Log.d("KSM", "SAVE ERROR!!");
+//            }
         }
+
+        String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA);
+        String timeStamp = sdf.format(System.currentTimeMillis());
+        String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/DRAWING_"+timeStamp+".bmp";
+        Mat drawingOutput = new Mat();
+        Imgproc.cvtColor(drawing, drawingOutput, Imgproc.COLOR_BGR2RGB);
+//        boolean saveRes = Imgcodecs.imwrite(imgName, drawingOutput);
+//        if(saveRes){
+//            Log.d("KSM", "SAVE SUCCESSED!\n"+imgName);
+//        }else{
+//            Log.d("KSM", "SAVE ERROR!!");
+//        }
+
 
         try{
 //            Imgproc.cvtColor(croppedSrc, croppedSrc, Imgproc.COLOR_BGR2RGB);
-            bmp = Bitmap.createBitmap(croppedUrineStripSrc.cols(), croppedUrineStripSrc.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(croppedUrineStripSrc, bmp);
+//            bmp = Bitmap.createBitmap(drawing.cols(), drawing.rows(), Bitmap.Config.ARGB_8888);
+//            Utils.matToBitmap(drawing, bmp);
+            bmp = Bitmap.createBitmap(drawing.cols(), drawing.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(drawing, bmp);
         }catch(CvException e){
             Log.e("KSM", "Mat to bitmap Error!!", e);
         }
@@ -289,7 +320,7 @@ public class FindContours {
                 pointAngle -= 180; //무조건 180도 안의 값을 가지도록 진행
             }
             double widthCenterAngle = getAngle(widthCenterPoint1, widthCenterPoint2);
-            movedAngle = pointAngle - 90;
+            movedAngle = pointAngle - widthCenterAngle;
 
             Log.d("KSM", "pointAngle : "+pointAngle);
             Log.d("KSM", "widthCenterAngle : "+widthCenterAngle);
@@ -364,9 +395,11 @@ public class FindContours {
 
     //reference : https://cording-cossk3.tistory.com/32
     private double getAngle(Point p1, Point p2){
-        double deltaY = p1.y-p2.y;
-        double deltaX = p2.x-p1.x;
+        double deltaY = Math.abs(p1.y-p2.y);
+        double deltaX = Math.abs(p1.x-p2.x);
         double result = Math.toDegrees(Math.atan2(deltaY, deltaX));
+
+        Log.d("KSM", "getAngle - Degrees : "+result);
 
         return (result < 0) ? (360d + result) : result;
     }
@@ -375,15 +408,20 @@ public class FindContours {
         Mat croppedImg = Mat.zeros(drawing.size(), CvType.CV_8UC3);
         for(int i = 0; i < contours.size(); i++){
             Rect boundingRect = Imgproc.boundingRect(contours.get(i));
-            int x = boundingRect.x-10;
-            int y = boundingRect.y-10;
-            int w = boundingRect.width+20;
-            int h = boundingRect.height+20;
+            int x = boundingRect.x;
+            int y = boundingRect.y;
+            int w = boundingRect.width;
+            int h = boundingRect.height;
 
-            Rect rectCrop = new Rect(x,y,w,h);
+
 
             if(w>=width && h>=height){
-//                Rect rectCrop = new Rect(x,y,w,h);
+                x-=10;
+                y-=10;
+                w+=20;
+                h+=20;
+
+                Rect rectCrop = new Rect(x,y,w,h);
                 croppedImg = new Mat(img, rectCrop);
                 Log.d("KSM", "CONTOUR INFO : x : "+x+", y : "+y+", width : "+w+", height : "+h);
                 croppedImg_x = x;
@@ -417,12 +455,10 @@ public class FindContours {
             int h = boundingRect.height;
 
             if(w>=width && h>=height){
-                if(Math.abs(movedAngle) > 1.0){
-                    x += 10;
-                    y += 4;
-                    w -= 15;
-                    h -= 4;
-                }
+                x += 5;
+                w -= 5;
+                y += 1;
+                y -= 1;
 
                 Rect rectCrop = new Rect(x,y,w,h);
                 croppedImg = new Mat(img, rectCrop);

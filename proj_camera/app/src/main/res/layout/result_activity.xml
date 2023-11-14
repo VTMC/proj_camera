@@ -72,6 +72,19 @@
             app:layout_constraintVertical_bias="0.567"
             tools:srcCompat="@tools:sample/avatars" />
 
+        <ImageView
+            android:id="@+id/pointedImageView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.501"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/resultImageView"
+            app:layout_constraintVertical_bias="0.567"
+            tools:srcCompat="@tools:sample/avatars" />
+
         <Button
             android:id="@+id/backBtn"
             android:layout_width="wrap_content"

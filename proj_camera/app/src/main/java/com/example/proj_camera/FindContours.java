@@ -37,8 +37,12 @@ public class FindContours {
     int croppedImg_y = 0;
     int croppedImg_w = 0;
     int croppedImg_h = 0;
+    int croppedSqr_x = 0;
+    int croppedSqr_y = 0;
+    int croppedSqr_w = 0;
+    int croppedSqr_h = 0;
     double movedAngle = 0;
-    boolean noRotate = false;
+    Mat cropOnlyUrineStripOut = new Mat();
 
     //ddeteed
     private Mat final_drawing = new Mat();
@@ -81,10 +85,10 @@ public class FindContours {
 
             //new method - threshold
             drawing = Mat.zeros(thresholdOutput.size(), CvType.CV_8UC3);
-            for(int i = 0; i < contoursSimple.size(); i++){
-                Scalar color = new Scalar(255, 0, 0);
-                Imgproc.drawContours(drawing, contoursSimple, i, color, 5, Imgproc.LINE_8, hierarchy, 2, new Point());
-            }
+//            for(int i = 0; i < contoursSimple.size(); i++){
+//                Scalar color = new Scalar(255, 0, 0);
+//                Imgproc.drawContours(drawing, contoursSimple, i, color, 5, Imgproc.LINE_8, hierarchy, 2, new Point());
+//            }
 
             Mat croppedImg = cropImg(src, contoursSimple, 70, 1400);
 
@@ -141,97 +145,104 @@ public class FindContours {
         Mat cropOnlyUrineStrip = cropUrineStrip(rotatedImg, contours, 50, 1000);
         Log.d("KSM", "cropOnlyUrineStrip : " +
                 "\nw : "+cropOnlyUrineStrip.width()+"/ h : "+cropOnlyUrineStrip.height());
-//        Imgproc.resize(cropOnlyUrineStrip, cropOnlyUrineStrip, new Size(100, 1600));
-////        Rect roi = new Rect(15, 0, cropOnlyUrineStrip.width()-30, cropOnlyUrineStrip.height());
-////        Mat afterCropOnlyUrineStrip = new Mat(cropOnlyUrineStrip, roi);
-//        if(Math.abs(movedAngle) <= 7){
-//            Rect roi = new Rect(0, 8, cropOnlyUrineStrip.width(), cropOnlyUrineStrip.height()-16);
-//            cropOnlyUrineStrip = new Mat(cropOnlyUrineStrip, roi);
-//            Imgproc.resize(cropOnlyUrineStrip, cropOnlyUrineStrip, new Size(100, 1600));
-//        }else if(Math.abs(movedAngle) > 7 && Math.abs(movedAngle) < 13){
-//            Rect roi = new Rect(0, 4, cropOnlyUrineStrip.width(), cropOnlyUrineStrip.height()-8);
-//            cropOnlyUrineStrip = new Mat(cropOnlyUrineStrip, roi);
-//            Imgproc.resize(cropOnlyUrineStrip, cropOnlyUrineStrip, new Size(100, 1600));
-//        }
+
+        cropOnlyUrineStripOut = cropOnlyUrineStrip;
 
 //        Log.i("KSM", "SOOOMTHINGGGGG");
 
-//
         //drawing cropOnlyUrineStrip to check result.
         drawing = Mat.zeros(cropOnlyUrineStrip.size(), CvType.CV_8UC3);
         Core.add(drawing, cropOnlyUrineStrip, drawing);
-//
-        /*//do croppedSrc rotate, crop and resize
-        Mat croppedUrineStripSrc = rotatedImg;
-        roi = new Rect(croppedImg_x, croppedImg_y, croppedImg_w, croppedImg_h);
-        croppedUrineStripSrc = new Mat(croppedUrineStripSrc, roi);
-        Imgproc.resize(croppedUrineStripSrc, croppedUrineStripSrc, new Size(100, 1600));*/
 
-        Log.d("KSM", "cropOnlyUrineStrip w : " + cropOnlyUrineStrip.width() + ", h : " + cropOnlyUrineStrip.height());
+//        //cropOnlyUrineStrip gray
+//        Mat cropOnlyUrineStripGray = new Mat();
+//        Imgproc.cvtColor(cropOnlyUrineStrip, cropOnlyUrineStripGray, Imgproc.COLOR_BGR2GRAY);
+
+        //threshold to find sqr
+        Mat sqr = colorRangeCut(cropOnlyUrineStrip, 90, 120);
+
+        Mat blurSqr = new Mat();
+        Imgproc.medianBlur(sqr, blurSqr,9);
+
+        Mat mosaicSqr = mosaic(blurSqr, 4);
+
+        Mat sqrGray = new Mat();
+        Imgproc.cvtColor(mosaicSqr, sqrGray, Imgproc.COLOR_BGR2GRAY);
+
+        Mat thresholdSqr = new Mat();
+        Imgproc.threshold(sqrGray, thresholdSqr, 130, 255, Imgproc.THRESH_BINARY);
+
+        List<MatOfPoint> contoursSqr = new ArrayList<>();
+        Mat hierarchySqr = new Mat();
+        Imgproc.findContours(thresholdSqr, contoursSqr, hierarchySqr, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        Mat croppedSqr = cropSqr(cropOnlyUrineStrip, contoursSqr, 30, 30);
+
+
 
         //crop UrineStrip
-        int w = cropOnlyUrineStrip.width() - 30; //x = 10
-        int h = cropOnlyUrineStrip.height();
-        double sqr_h = (4.0 / 123.0) * h; //origin : almost 0.04
-//        int sqr_h = w;
-        double fbh = (2.0 / 123.0) * h; //first blank height | origin : almost 0.02
-        double bh = (3.0 / 123.0) * h; //blank height | origin : almost 0.021
-
-        Log.d("KSM", "setting.... \nw : " + cropOnlyUrineStrip.width() + "\nh : " + cropOnlyUrineStrip.height()
-                + "\nsqr_h : " + sqr_h + "\nfbh : " + fbh + "\nbh : " + bh);
-
-        Rect[] sqrArray = new Rect[11];
-
-//        for(int i = 0; i < 4; i++){
-//            sqrArray[i] = new Rect(0,(int)(fbh+(sqr_h*i)+(fbh*i)), w, (int)sqr_h);
+//        int w = cropOnlyUrineStrip.width() - 30; //x = 10
+//        int h = cropOnlyUrineStrip.height();
+//        double sqr_h = (4.0 / 123.0) * h; //origin : almost 0.04
+////        int sqr_h = w;
+//        double fbh = (1.8 / 123.0) * h; //first blank height | origin : almost 0.02
+//        double bh = (3.1 / 123.0) * h; //blank height | origin : almost 0.021
+//
+//        Log.d("KSM", "setting.... \nw : " + cropOnlyUrineStrip.width() + "\nh : " + cropOnlyUrineStrip.height()
+//                + "\nsqr_h : " + sqr_h + "\nfbh : " + fbh + "\nbh : " + bh);
+//
+//        Rect[] sqrArray = new Rect[11];
+//
+////        for(int i = 0; i < 4; i++){
+////            sqrArray[i] = new Rect(0,(int)(fbh+(sqr_h*i)+(fbh*i)), w, (int)sqr_h);
+////        }
+//        sqrArray[0] = new Rect(15, (int) fbh, w, (int) sqr_h); //0
+//
+//        for (int i = 1; i < 11; i++) { //1~10
+//            int y = (int) (fbh + (sqr_h * i) + (bh * i));
+////            if(i >= 1 && i < 10){ //1,9
+////                y -= 10;
+////                if(i >= 2 && i < 9){ //2,8
+////                    y -= 10;
+////                    if(i >=3 && i < 7){ //3~6
+////                        y -= 7;
+////                    }
+////                }
+////            }
+//
+//            Rect sqr = new Rect(15, y, w, (int) sqr_h);
+//            sqrArray[i] = sqr;
 //        }
-        sqrArray[0] = new Rect(15, (int) fbh, w, (int) sqr_h); //0
-
-        for (int i = 1; i < 11; i++) { //1~10
-            int y = (int) (fbh + (sqr_h * i) + (bh * i));
-//            if(i >= 1 && i < 10){ //1,9
-//                y -= 10;
-//                if(i >= 2 && i < 9){ //2,8
-//                    y -= 10;
-//                    if(i >=3 && i < 7){ //3~6
-//                        y -= 7;
-//                    }
-//                }
-//            }
-
-            Rect sqr = new Rect(15, y, w, (int) sqr_h);
-            sqrArray[i] = sqr;
-        }
-
-        for (int i = 0; i < 11; i++) {
-            Log.d("KSM", "Rect [" + (i + 1) + "] : " + sqrArray[i]);
-        }
-
-        //croppedImg = new Mat(img, rectCrop);
-        Mat[] croppedSqr = new Mat[11];
-        for (int i = 0; i < 11; i++) {
-            croppedSqr[i] = new Mat(cropOnlyUrineStrip, sqrArray[i]);
-
-            Imgproc.rectangle(drawing, sqrArray[i], new Scalar(255, 0, 0), 3);
-
-//            String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
-//            SimpleDateFormat sdf = new SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA);
-//            String timeStamp = sdf.format(System.currentTimeMillis());
-//            String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStamp+"_"+i+".bmp";
-//            boolean saveRes = Imgcodecs.imwrite(imgName, croppedSqr[i]);
-//            if(saveRes){
-//                Log.d("KSM", "SAVE SUCCESSED!\n"+imgName);
-//            }else{
-//                Log.d("KSM", "SAVE ERROR!!");
-//            }
-        }
+//
+//        for (int i = 0; i < 11; i++) {
+//            Log.d("KSM", "Rect [" + (i + 1) + "] : " + sqrArray[i]);
+//        }
+//
+//        //croppedImg = new Mat(img, rectCrop);
+//        Mat[] croppedSqr = new Mat[11];
+//        for (int i = 0; i < 11; i++) {
+//            croppedSqr[i] = new Mat(cropOnlyUrineStrip, sqrArray[i]);
+//
+//            Imgproc.rectangle(drawing, sqrArray[i], new Scalar(255, 0, 0), 1);
+//
+////            String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
+////            SimpleDateFormat sdf = new SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA);
+////            String timeStamp = sdf.format(System.currentTimeMillis());
+////            String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStamp+"_"+i+".bmp";
+////            boolean saveRes = Imgcodecs.imwrite(imgName, croppedSqr[i]);
+////            if(saveRes){
+////                Log.d("KSM", "SAVE SUCCESSED!\n"+imgName);
+////            }else{
+////                Log.d("KSM", "SAVE ERROR!!");
+////            }
+//        }
 //
         String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
         SimpleDateFormat sdf = new SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA);
         String timeStamp = sdf.format(System.currentTimeMillis());
-//        String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/DRAWING_"+timeStamp+".bmp";
-        String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/URINESTRIP_" + timeStamp + ".bmp";
-//        boolean saveRes = Imgcodecs.imwrite(imgName, cropOnlyUrineStrip);
+        String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/DRAWING_"+timeStamp+".bmp";
+//        String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/URINESTRIP_" + timeStamp + ".bmp";
+//        boolean saveRes = Imgcodecs.imwrite(imgName, drawing);
 //        if (saveRes) {
 //            Log.d("KSM", "SAVE SUCCESSED!\n" + imgName);
 //        } else {
@@ -262,11 +273,11 @@ public class FindContours {
         cropImgFileList = finalCropImg(afterCropOnlyUrineStrip, contoursSimple2, 70, 70);*/
 
         try{
-//            Imgproc.cvtColor(croppedSrc, croppedSrc, Imgproc.COLOR_BGR2RGB);
+            Imgproc.cvtColor(croppedSqr, croppedSqr, Imgproc.COLOR_BGR2RGB);
 //            bmp = Bitmap.createBitmap(drawing.cols(), drawing.rows(), Bitmap.Config.ARGB_8888);
 //            Utils.matToBitmap(drawing, bmp);
-            bmp = Bitmap.createBitmap(drawing.cols(), drawing.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(drawing, bmp);
+            bmp = Bitmap.createBitmap(croppedSqr.cols(), croppedSqr.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(croppedSqr, bmp);
         }catch(CvException e){
             Log.e("KSM", "Mat to bitmap Error!!", e);
         }
@@ -279,6 +290,15 @@ public class FindContours {
         Bitmap bmp = null;
         bmp = Bitmap.createBitmap(rotateDrawing.cols(), rotateDrawing.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(rotateDrawing, bmp);
+
+        return bmp;
+    }
+
+    public Bitmap getCropOnlyUrineStrip(){
+        Bitmap bmp = null;
+        Imgproc.cvtColor(cropOnlyUrineStripOut,cropOnlyUrineStripOut, Imgproc.COLOR_BGR2RGB);
+        bmp = Bitmap.createBitmap(cropOnlyUrineStripOut.cols(), cropOnlyUrineStripOut.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(cropOnlyUrineStripOut, bmp);
 
         return bmp;
     }
@@ -557,6 +577,9 @@ public class FindContours {
             int h = boundingRect.height;
 
             if(w>=width && h>=height){
+                x+=10;
+                w-=20;
+
                 cropOnlyUrineStripDrawing = Mat.zeros(img.size(), CvType.CV_8UC3);
                 Core.add(img, cropOnlyUrineStripDrawing, cropOnlyUrineStripDrawing);
 
@@ -574,6 +597,55 @@ public class FindContours {
         }
 
         return croppedImg;
+    }
+
+    private Mat cropSqr(Mat img, List<MatOfPoint> contours, int width, int height){
+        Mat croppedImg = new Mat();
+        for(int i = 0; i < contours.size(); i++){
+            Rect boundingRect = Imgproc.boundingRect(contours.get(i));
+            int x = boundingRect.x;
+            int y = boundingRect.y;
+            int w = boundingRect.width;
+            int h = boundingRect.height;
+
+            if(w>=width && h>=height){
+//                cropOnlyUrineStripDrawing = Mat.zeros(img.size(), CvType.CV_8UC3);
+//                Core.add(img, cropOnlyUrineStripDrawing, cropOnlyUrineStripDrawing);
+
+                Rect rectCrop = new Rect(x,y,w,h);
+                croppedImg = new Mat(img, rectCrop);
+                Log.d("KSM", "CROPSQR - CONTOUR INFO : x : "+x+", y : "+y+", width : "+w+", height : "+h);
+                croppedSqr_x = x;
+                croppedSqr_y = y;
+                croppedSqr_w = w;
+                croppedSqr_h = h;
+
+//                Imgproc.rectangle(cropOnlyUrineStripDrawing, rectCrop, new Scalar(255, 0, 0), 2);
+                Log.d("KSM", "successed!");
+            }
+        }
+
+        return croppedImg;
+    }
+
+    //startH, endH -> double형태로 8비트(0~255)
+    private Mat colorRangeCut(Mat img, double startH, double endH){
+        Mat resMat = new Mat();
+        Mat imgHSV = new Mat();
+        img.copyTo(imgHSV);
+        Imgproc.cvtColor(imgHSV, imgHSV, Imgproc.COLOR_BGR2HSV);
+
+        Scalar minHSV = new Scalar(startH, 0, 10);
+        Scalar maxHSV = new Scalar(endH, 255, 235);
+
+        Log.d("KSM", "colorRangeCut : minHSV : "+minHSV);
+        Log.d("KSM", "colorRangeCut : maxHSV : "+maxHSV);
+
+        Mat imgMask = new Mat();
+        Core.inRange(imgHSV, minHSV, maxHSV, imgMask);
+        Core.bitwise_and(img, img, resMat, imgMask);
+
+        return resMat;
     }
 
     private static String[] Add(String[] originArray, String val){

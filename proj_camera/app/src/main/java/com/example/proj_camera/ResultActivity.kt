@@ -67,7 +67,7 @@ class ResultActivity : AppCompatActivity() {
             if(resultBmp != null){
                 resultBmp2 = findContours.sqr
                 rotatedDrawing = findContours.rotateDrawing
-
+//                rotatedDrawing = findContours.cropOnlyUrineStrip
             }
 
 

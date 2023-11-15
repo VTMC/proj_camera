@@ -178,7 +178,21 @@ public class FindContours {
 
         Mat croppedSqr = cropSqr(cropOnlyUrineStrip, contoursSqr, 30, 30);
 
+        Rect[] cropSqrRect = new Rect[11];
 
+        cropSqrRect[7] = new Rect(croppedSqr_x, croppedImg_y, croppedImg_w, croppedImg_h);
+        //get below 3 sqr
+        for(int i = 8; i < 11; i++){
+            int j = 1;
+            double y = croppedSqr_y + (croppedSqr_h * j) + ((croppedSqr_h * 0.5) * j);
+            cropSqrRect[i] = new Rect(croppedSqr_x, (int)y, croppedSqr_w, croppedSqr_h);
+        }
+        //get upper 7 sqr
+        for(int i= 6; i >= 0; i--){
+            int j = 1;
+            double y = croppedSqr_y - (croppedSqr_h * j) - ((croppedSqr_h * 0.5) * j);
+            cropSqrRect[i] = new Rect(croppedSqr_x, (int)y, croppedSqr_w, croppedSqr_h);
+        }
 
         //crop UrineStrip
 //        int w = cropOnlyUrineStrip.width() - 30; //x = 10

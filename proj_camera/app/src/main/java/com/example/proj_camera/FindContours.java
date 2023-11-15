@@ -30,6 +30,7 @@ public class FindContours {
     private Mat enhancedSrc = new Mat();
     private Mat croppedSrc = new Mat();
     private Mat drawing = new Mat();
+    private Mat cropOnlyUrineStripDrawing = new Mat();
     private Mat rotateDrawing = new Mat();
     public String[] cropImgFileList;
     int croppedImg_x = 0;
@@ -136,20 +137,22 @@ public class FindContours {
         Mat hierarchy = new Mat();
         Imgproc.findContours(thresholdOutput, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        //crop and resize to Only UrineStrip
-        Mat cropOnlyUrineStrip = cropUrineStrip(rotatedImg, contours, 50, 1300);
+//        //crop and resize to Only UrineStrip
+        Mat cropOnlyUrineStrip = cropUrineStrip(rotatedImg, contours, 50, 1000);
         Log.d("KSM", "cropOnlyUrineStrip : " +
                 "\nw : "+cropOnlyUrineStrip.width()+"/ h : "+cropOnlyUrineStrip.height());
-        Imgproc.resize(cropOnlyUrineStrip, cropOnlyUrineStrip, new Size(100, 1600));
-//        Rect roi = new Rect(15, 0, cropOnlyUrineStrip.width()-30, cropOnlyUrineStrip.height());
-//        Mat afterCropOnlyUrineStrip = new Mat(cropOnlyUrineStrip, roi);
-        if(Math.abs(movedAngle) <= 7){
-            Rect roi = new Rect(0, 8, cropOnlyUrineStrip.width(), cropOnlyUrineStrip.height()-16);
-            cropOnlyUrineStrip = new Mat(cropOnlyUrineStrip, roi);
-        }else if(Math.abs(movedAngle) > 7 && Math.abs(movedAngle) < 13){
-            Rect roi = new Rect(0, 4, cropOnlyUrineStrip.width(), cropOnlyUrineStrip.height()-8);
-            cropOnlyUrineStrip = new Mat(cropOnlyUrineStrip, roi);
-        }
+//        Imgproc.resize(cropOnlyUrineStrip, cropOnlyUrineStrip, new Size(100, 1600));
+////        Rect roi = new Rect(15, 0, cropOnlyUrineStrip.width()-30, cropOnlyUrineStrip.height());
+////        Mat afterCropOnlyUrineStrip = new Mat(cropOnlyUrineStrip, roi);
+//        if(Math.abs(movedAngle) <= 7){
+//            Rect roi = new Rect(0, 8, cropOnlyUrineStrip.width(), cropOnlyUrineStrip.height()-16);
+//            cropOnlyUrineStrip = new Mat(cropOnlyUrineStrip, roi);
+//            Imgproc.resize(cropOnlyUrineStrip, cropOnlyUrineStrip, new Size(100, 1600));
+//        }else if(Math.abs(movedAngle) > 7 && Math.abs(movedAngle) < 13){
+//            Rect roi = new Rect(0, 4, cropOnlyUrineStrip.width(), cropOnlyUrineStrip.height()-8);
+//            cropOnlyUrineStrip = new Mat(cropOnlyUrineStrip, roi);
+//            Imgproc.resize(cropOnlyUrineStrip, cropOnlyUrineStrip, new Size(100, 1600));
+//        }
 
 //        Log.i("KSM", "SOOOMTHINGGGGG");
 
@@ -171,8 +174,8 @@ public class FindContours {
         int h = cropOnlyUrineStrip.height();
         double sqr_h = (4.0 / 123.0) * h; //origin : almost 0.04
 //        int sqr_h = w;
-        double fbh = (2.0 / 123.0)/2 * h; //first blank height | origin : almost 0.02
-        double bh = (3.1 / 123.0) * h; //blank height | origin : almost 0.021
+        double fbh = (2.0 / 123.0) * h; //first blank height | origin : almost 0.02
+        double bh = (3.0 / 123.0) * h; //blank height | origin : almost 0.021
 
         Log.d("KSM", "setting.... \nw : " + cropOnlyUrineStrip.width() + "\nh : " + cropOnlyUrineStrip.height()
                 + "\nsqr_h : " + sqr_h + "\nfbh : " + fbh + "\nbh : " + bh);
@@ -186,12 +189,15 @@ public class FindContours {
 
         for (int i = 1; i < 11; i++) { //1~10
             int y = (int) (fbh + (sqr_h * i) + (bh * i));
-            if(i >= 1 && i < 10){ //2~9
-                y -= 10;
-                if(i >= 3 && i < 7){ //3~6
-                    y -= 10;
-                }
-            }
+//            if(i >= 1 && i < 10){ //1,9
+//                y -= 10;
+//                if(i >= 2 && i < 9){ //2,8
+//                    y -= 10;
+//                    if(i >=3 && i < 7){ //3~6
+//                        y -= 7;
+//                    }
+//                }
+//            }
 
             Rect sqr = new Rect(15, y, w, (int) sqr_h);
             sqrArray[i] = sqr;
@@ -223,14 +229,14 @@ public class FindContours {
         String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
         SimpleDateFormat sdf = new SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA);
         String timeStamp = sdf.format(System.currentTimeMillis());
-        String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/DRAWING_"+timeStamp+".bmp";
-//        String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/URINESTRIP_" + timeStamp + ".bmp";
-        boolean saveRes = Imgcodecs.imwrite(imgName, drawing);
-        if (saveRes) {
-            Log.d("KSM", "SAVE SUCCESSED!\n" + imgName);
-        } else {
-            Log.d("KSM", "SAVE ERROR!!");
-        }
+//        String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/DRAWING_"+timeStamp+".bmp";
+        String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/URINESTRIP_" + timeStamp + ".bmp";
+//        boolean saveRes = Imgcodecs.imwrite(imgName, cropOnlyUrineStrip);
+//        if (saveRes) {
+//            Log.d("KSM", "SAVE SUCCESSED!\n" + imgName);
+//        } else {
+//            Log.d("KSM", "SAVE ERROR!!");
+//        }
 
         /*Mat afterCropOnlyUrineStripGray = new Mat();
         Imgproc.cvtColor(afterCropOnlyUrineStrip, afterCropOnlyUrineStripGray, Imgproc.COLOR_BGR2GRAY);
@@ -324,8 +330,18 @@ public class FindContours {
             rotateDrawing = Mat.zeros(thresholdOutput.size(), CvType.CV_8UC3);
             for(int i = 0; i < contours.size(); i++){
                 Scalar color = new Scalar(255, 0, 0);
-                Imgproc.drawContours(rotateDrawing, contours, i, color, 1, Imgproc.LINE_8, hierarchy, 2, new Point());
+                Imgproc.drawContours(rotateDrawing, contours, i, color, 1, Imgproc.LINE_8, hierarchy, 3, new Point());
             }
+
+            //RotatedRect Part (Not Use)
+            /*MatOfPoint2f contour2f = new MatOfPoint2f(contours.get(contours.size()-1).toArray());
+            RotatedRect rotatedRect = Imgproc.minAreaRect(contour2f);
+
+            Point[] boxPoints = new Point[4];
+            rotatedRect.points(boxPoints);
+
+            MatOfPoint boxContour = new MatOfPoint(boxPoints);
+            Imgproc.drawContours(rotateDrawing, Arrays.asList(boxContour), 0, new Scalar(255, 255, 0), 2);*/
 
             /* ref :
             https://www.charlezz.com/?p=45831
@@ -391,6 +407,10 @@ public class FindContours {
             }
             movedAngle = pointAngle - widthCenterAngle;
 
+            //rotatedRect Part (Not Use)
+            /*double pointAngle = rotatedRect.angle;
+            Point centerPoint = new Point(img.width()/2, img.height()/2);*/
+
             Log.d("KSM", "pointAngle : "+pointAngle);
             Log.d("KSM", "widthCenterAngle : "+widthCenterAngle);
             Log.d("KSM", "pointAngle - 90˚ : "+movedAngle);
@@ -400,6 +420,8 @@ public class FindContours {
             Mat rotatedImg = new Mat();
             //90도로 다시 맞추기 위해서는 이동된 방향과 반대방향으로 회전해야한다.
 
+            //RotatedRect Part (Not Use)
+            /*Mat matrix = Imgproc.getRotationMatrix2D(centerPoint, pointAngle, 1.0);*/
             Mat matrix = Imgproc.getRotationMatrix2D(contourCenterPoint, movedAngle * (-1.0), 1.0);
             Imgproc.warpAffine(img, rotatedImg, matrix, new Size(img.width(), img.height()));
 
@@ -535,17 +557,8 @@ public class FindContours {
             int h = boundingRect.height;
 
             if(w>=width && h>=height){
-//                if(noRotate == true){
-//                    x += 10;
-//                    w -= 30;
-//                    y += 1;
-//                    y -= 1;
-//                }else{
-//                    x += 5;
-//                    w -= 10;
-//                    y += 1;
-//                    y -= 1;
-//                }
+                cropOnlyUrineStripDrawing = Mat.zeros(img.size(), CvType.CV_8UC3);
+                Core.add(img, cropOnlyUrineStripDrawing, cropOnlyUrineStripDrawing);
 
                 Rect rectCrop = new Rect(x,y,w,h);
                 croppedImg = new Mat(img, rectCrop);
@@ -555,19 +568,8 @@ public class FindContours {
                 croppedImg_w = w;
                 croppedImg_h = h;
 
-                drawing = Mat.zeros(img.size(), CvType.CV_8UC3);
-                Core.add(drawing, img, drawing);
-                Imgproc.rectangle(drawing, rectCrop, new Scalar(255, 0, 0), 2);
+                Imgproc.rectangle(cropOnlyUrineStripDrawing, rectCrop, new Scalar(255, 0, 0), 2);
                 Log.d("KSM", "successed!");
-
-//                long timeStampMillis = System.currentTimeMillis();
-//                String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/CROP_"+timeStampMillis+"_"+i+".bmp";
-//                boolean saveRes = Imgcodecs.imwrite(imgName, croppedImg);
-//                if(saveRes){
-//                    Log.d("KSM", "SAVE SUCCESSED!\n"+imgName);
-//                }else{
-//                    Log.d("KSM", "SAVE ERROR!!");
-//                }
             }
         }
 

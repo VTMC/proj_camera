@@ -66,7 +66,7 @@ class ResultActivity : AppCompatActivity() {
             resultBmp = findContours.update()
             if(resultBmp != null){
                 resultBmp2 = findContours.sqr
-                rotatedDrawing = findContours.rotateDrawing
+//                rotatedDrawing = findContours.rotateDrawing
 //                rotatedDrawing = findContours.cropOnlyUrineStrip
             }
 
@@ -122,11 +122,11 @@ class ResultActivity : AppCompatActivity() {
 
                     val pointedImageView2 = viewBinding.pointedImageView2
 
-                    pointedImageView2.setImageBitmap(rotatedDrawing)
-
-                    val pointedImageView3 = viewBinding.pointedImageView3
-
-                    pointedImageView3.setImageBitmap(resultBmp2)
+                    pointedImageView2.setImageBitmap(resultBmp2)
+//
+//                    val pointedImageView3 = viewBinding.pointedImageView3
+//
+//                    pointedImageView3.setImageBitmap(resultBmp2)
 
 //                    for(i in 0 until(croppedImgList!!.size)){
 //                        Log.d("KSM", "croppedImg[${i+1}] = ${croppedImgList!![i]}")
@@ -151,8 +151,9 @@ class ResultActivity : AppCompatActivity() {
         }
 
         viewBinding.pointedImageView2.setOnClickListener {
+            viewBinding.pointedImageView.visibility = View.VISIBLE
             viewBinding.pointedImageView2.visibility = View.INVISIBLE
-            viewBinding.pointedImageView3.visibility = View.VISIBLE
+//            viewBinding.pointedImageView3.visibility = View.VISIBLE
         }
 
         viewBinding.pointedImageView3.setOnClickListener {

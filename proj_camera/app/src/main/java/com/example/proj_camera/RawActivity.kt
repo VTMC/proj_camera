@@ -15,6 +15,10 @@ import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.SurfaceTexture
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraCharacteristics
@@ -75,7 +79,7 @@ import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
 
 
-class RawActivity : AppCompatActivity() {
+class RawActivity : AppCompatActivity(), SensorEventListener{
     external fun simple_dcraw(argv: Array<String>, toPath: String) : Int
 
     external fun dngToTiff(fromPath : String, toPath : String) : Int
@@ -170,9 +174,21 @@ class RawActivity : AppCompatActivity() {
 //        }
 //    }
 
+    private lateinit var sensorManager : SensorManager
+    private var accelerometerSensor: Sensor? = null
+    private var accX : Double = 0.0
+    private var accY : Double = 0.0
+    private var accZ : Double = 0.0
+    private var angleXZ : Double = 0.0
+    private var angleYZ : Double = 0.0
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //accelerometer
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
         viewBinding = RawActivityBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
@@ -1002,6 +1018,40 @@ class RawActivity : AppCompatActivity() {
         return intArray
     }
 
+    override fun onSensorChanged(event: SensorEvent){
+        var accX = event.values[0].toDouble()
+        var accY = event.values[1].toDouble()
+        var accZ = event.values[2].toDouble()
+
+        var angleXZ = Math.atan2(accX, accZ) * 180/Math.PI
+        var angleYZ = Math.atan2(accY, accZ) * 180/Math.PI
+
+        Log.i("KSM", "ACCELOMETER | X : ${String.format("%.4f", accX)} | Y : ${String.format("%.4f", accY)} | Z : ${String.format("%.4f", accZ)}" +
+                " | angleXZ : ${String.format("%.4f", angleXZ)} | angleYZ : ${String.format("%.4f", angleYZ)}")
+    }
+
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int)  = Unit
+
+    override fun onResume() {
+        super.onResume()
+
+        // Get updates from the accelerometer and magnetometer at a constant rate.
+        // To make batch operations more efficient and reduce power consumption,
+        // provide support for delaying updates to the application.
+        //
+        // In this example, the sensor reporting delay is small enough such that
+        // the application receives an update before the system checks the sensor
+        // readings again.
+        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.also { accelerometer ->
+            sensorManager.registerListener(
+                this,
+                accelerometer,
+                SensorManager.SENSOR_DELAY_NORMAL,
+                SensorManager.SENSOR_DELAY_UI
+            )
+        }
+    }
+
     override fun onPause(){
         super.onPause()
 
@@ -1010,6 +1060,8 @@ class RawActivity : AppCompatActivity() {
         }catch(exc: Throwable){
             Log.e("KSM", "Error closing camera", exc)
         }
+
+        sensorManager.unregisterListener(this)
     }
 
     override fun onDestroy() {
@@ -1019,8 +1071,8 @@ class RawActivity : AppCompatActivity() {
         cameraThread.quitSafely()
         imageReaderThread.quitSafely()
 //        viewBinding.loadingCircle.visibility = View.GONE
+        sensorManager.unregisterListener(this)
     }
-
 
     companion object{
         init {

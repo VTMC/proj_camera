@@ -124,76 +124,93 @@ public class FindContours {
         Bitmap bmp = null;
 
 
-        Mat rotatedImg = rotateToVerticalityImg(croppedSrc);
+        Mat fittedImg = fitImg(croppedSrc, 100, 1600);
         Log.d("KSM", "rotatedImg : " +
-                "\nw : "+rotatedImg.width()+"/ h : "+rotatedImg.height());
+                "\nw : "+fittedImg.width()+"/ h : "+fittedImg.height());
 
         //rotatedImg make gray
-        Mat rotatedImgGray = new Mat();
-        Imgproc.cvtColor(rotatedImg, rotatedImgGray, Imgproc.COLOR_BGR2GRAY);
+//        Mat rotatedImgGray = new Mat();
+//        Imgproc.cvtColor(rotatedImg, rotatedImgGray, Imgproc.COLOR_BGR2GRAY);
+//
+//        //threshold it
+//        Mat thresholdOutput = new Mat();
+//        Imgproc.threshold(rotatedImgGray, thresholdOutput, 130, 255, Imgproc.THRESH_BINARY);
+//
+//        //contour it
+//        List<MatOfPoint> contours = new ArrayList<>();
+//        Mat hierarchy = new Mat();
+//        Imgproc.findContours(thresholdOutput, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+//
+////        //crop and resize to Only UrineStrip
+//        Mat cropOnlyUrineStrip = cropUrineStrip(rotatedImg, contours, 50, 1000);
+//        Log.d("KSM", "cropOnlyUrineStrip : " +
+//                "\nw : "+cropOnlyUrineStrip.width()+"/ h : "+cropOnlyUrineStrip.height());
+//
+//        cropOnlyUrineStripOut = cropOnlyUrineStrip;
+//
+////        Log.i("KSM", "SOOOMTHINGGGGG");
+//
+//        //drawing cropOnlyUrineStrip to check result.
+//        drawing = Mat.zeros(cropOnlyUrineStrip.size(), CvType.CV_8UC3);
+//        Core.add(drawing, cropOnlyUrineStrip, drawing);
+//
+////        //cropOnlyUrineStrip gray
+////        Mat cropOnlyUrineStripGray = new Mat();
+////        Imgproc.cvtColor(cropOnlyUrineStrip, cropOnlyUrineStripGray, Imgproc.COLOR_BGR2GRAY);
+//
+//        //threshold to find sqr
+//        Mat sqr = colorRangeCut(cropOnlyUrineStrip, 90, 120);
+//
+////        Mat blurSqr = new Mat();
+////        Imgproc.medianBlur(sqr, blurSqr,9);
+////
+////        Mat mosaicSqr = mosaic(blurSqr, 4);
+//
+//        Mat sqrGray = new Mat();
+//        Imgproc.cvtColor(sqr, sqrGray, Imgproc.COLOR_BGR2GRAY);
+//
+//        Mat thresholdSqr = new Mat();
+//        Imgproc.threshold(sqrGray, thresholdSqr, 130, 255, Imgproc.THRESH_BINARY);
+//
+//        List<MatOfPoint> contoursSqr = new ArrayList<>();
+//        Mat hierarchySqr = new Mat();
+//        Imgproc.findContours(thresholdSqr, contoursSqr, hierarchySqr, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+//
+//        Mat croppedSqr = cropSqr(cropOnlyUrineStrip, contoursSqr, 30, 30);
+//
+//        Rect[] cropSqrRect = new Rect[11];
+//
+//        Log.d("KSM", "x : "+croppedSqr_x+" y : "+croppedSqr_y+" w : "+croppedSqr_w+" h : "+croppedSqr_h);
+//        cropSqrRect[7] = new Rect(croppedSqr_x, croppedSqr_y, croppedSqr_w, croppedSqr_h);
+//        Imgproc.rectangle(drawing, cropSqrRect[7], new Scalar(255, 255, 0), 1);
+//
+//        int j = 1;
+//
+//        //get below 3 sqr
+//        for(int i = 8; i < 11; i++){
+////            double y = croppedSqr_y + (croppedSqr_h * j) + ((croppedSqr_h * 0.5) * j);
+//            double y = croppedSqr_y + (croppedSqr_h * j) + ((croppedSqr_h * 0.4) * j);
+//            cropSqrRect[i] = new Rect(croppedSqr_x, (int)y, croppedSqr_w, croppedSqr_h);
+//            Imgproc.rectangle(drawing, cropSqrRect[i], new Scalar(255, 0, 0), 1);
+//            j++;
+//        }
+//
+//        j = 1;
+//
+//        //get upper 7 sqr
+//        for(int i= 6; i >= 0; i--){
+////            double y = croppedSqr_y - (croppedSqr_h * j) - ((croppedSqr_h * 0.5) * j);
+//            double y = croppedSqr_y - (croppedSqr_h * j) - ((croppedSqr_h * 0.4) * j) + (2 * j);
+//            cropSqrRect[i] = new Rect(croppedSqr_x, (int)y, croppedSqr_w, croppedSqr_h);
+//            Imgproc.rectangle(drawing, cropSqrRect[i], new Scalar(0, 0, 255), 1);
+//            j++;
+//        }
+//
+////        for(Rect sqrqr : cropSqrRect){
+////            Imgproc.rectangle(drawing, sqrqr, new Scalar(255, 0, 0), 1);
+////        }
 
-        //threshold it
-        Mat thresholdOutput = new Mat();
-        Imgproc.threshold(rotatedImgGray, thresholdOutput, 130, 255, Imgproc.THRESH_BINARY);
-
-        //contour it
-        List<MatOfPoint> contours = new ArrayList<>();
-        Mat hierarchy = new Mat();
-        Imgproc.findContours(thresholdOutput, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-
-//        //crop and resize to Only UrineStrip
-        Mat cropOnlyUrineStrip = cropUrineStrip(rotatedImg, contours, 50, 1000);
-        Log.d("KSM", "cropOnlyUrineStrip : " +
-                "\nw : "+cropOnlyUrineStrip.width()+"/ h : "+cropOnlyUrineStrip.height());
-
-        cropOnlyUrineStripOut = cropOnlyUrineStrip;
-
-//        Log.i("KSM", "SOOOMTHINGGGGG");
-
-        //drawing cropOnlyUrineStrip to check result.
-        drawing = Mat.zeros(cropOnlyUrineStrip.size(), CvType.CV_8UC3);
-        Core.add(drawing, cropOnlyUrineStrip, drawing);
-
-//        //cropOnlyUrineStrip gray
-//        Mat cropOnlyUrineStripGray = new Mat();
-//        Imgproc.cvtColor(cropOnlyUrineStrip, cropOnlyUrineStripGray, Imgproc.COLOR_BGR2GRAY);
-
-        //threshold to find sqr
-        Mat sqr = colorRangeCut(cropOnlyUrineStrip, 90, 120);
-
-        Mat blurSqr = new Mat();
-        Imgproc.medianBlur(sqr, blurSqr,9);
-
-        Mat mosaicSqr = mosaic(blurSqr, 4);
-
-        Mat sqrGray = new Mat();
-        Imgproc.cvtColor(mosaicSqr, sqrGray, Imgproc.COLOR_BGR2GRAY);
-
-        Mat thresholdSqr = new Mat();
-        Imgproc.threshold(sqrGray, thresholdSqr, 130, 255, Imgproc.THRESH_BINARY);
-
-        List<MatOfPoint> contoursSqr = new ArrayList<>();
-        Mat hierarchySqr = new Mat();
-        Imgproc.findContours(thresholdSqr, contoursSqr, hierarchySqr, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-
-        Mat croppedSqr = cropSqr(cropOnlyUrineStrip, contoursSqr, 30, 30);
-
-        Rect[] cropSqrRect = new Rect[11];
-
-        cropSqrRect[7] = new Rect(croppedSqr_x, croppedImg_y, croppedImg_w, croppedImg_h);
-        //get below 3 sqr
-        for(int i = 8; i < 11; i++){
-            int j = 1;
-            double y = croppedSqr_y + (croppedSqr_h * j) + ((croppedSqr_h * 0.5) * j);
-            cropSqrRect[i] = new Rect(croppedSqr_x, (int)y, croppedSqr_w, croppedSqr_h);
-        }
-        //get upper 7 sqr
-        for(int i= 6; i >= 0; i--){
-            int j = 1;
-            double y = croppedSqr_y - (croppedSqr_h * j) - ((croppedSqr_h * 0.5) * j);
-            cropSqrRect[i] = new Rect(croppedSqr_x, (int)y, croppedSqr_w, croppedSqr_h);
-        }
-
+        //getSqr existing method
         //crop UrineStrip
 //        int w = cropOnlyUrineStrip.width() - 30; //x = 10
 //        int h = cropOnlyUrineStrip.height();
@@ -250,7 +267,7 @@ public class FindContours {
 ////                Log.d("KSM", "SAVE ERROR!!");
 ////            }
 //        }
-//
+
         String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
         SimpleDateFormat sdf = new SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA);
         String timeStamp = sdf.format(System.currentTimeMillis());
@@ -263,35 +280,12 @@ public class FindContours {
 //            Log.d("KSM", "SAVE ERROR!!");
 //        }
 
-        /*Mat afterCropOnlyUrineStripGray = new Mat();
-        Imgproc.cvtColor(afterCropOnlyUrineStrip, afterCropOnlyUrineStripGray, Imgproc.COLOR_BGR2GRAY);
-
-        Mat adaptThresOutput = new Mat();
-//        int blockSize = 3; //THRESH_BINARY Imgproc.ADAPTIVE_THRESH_MEAN_C
-//        int C = 0; //THRESH_BINARY Imgproc.ADAPTIVE_THRESH_MEAN_C
-        int blockSize = 11; //THRESH_BINARY Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C
-        int C = 0; //THRESH_BINARY Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C
-//        Imgproc.adaptiveThreshold(croppedImgGray, adaptThresOutput, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, blockSize, C);
-        Imgproc.adaptiveThreshold(afterCropOnlyUrineStripGray, adaptThresOutput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, blockSize, C);
-
-        List<MatOfPoint> contoursSimple2 = new ArrayList<>();
-        Mat hierarchy2 = new Mat();
-        Imgproc.findContours(adaptThresOutput, contoursSimple2, hierarchy2, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-
-        final_drawing = Mat.zeros(adaptThresOutput.size(), CvType.CV_8UC3);
-        for(int i = 0; i < contoursSimple2.size(); i++){
-            Scalar color = new Scalar(255, 0, 0);
-            Imgproc.drawContours(final_drawing, contoursSimple2, i, color, 1, Imgproc.LINE_8, hierarchy2, 2, new Point());
-        }
-
-        cropImgFileList = finalCropImg(afterCropOnlyUrineStrip, contoursSimple2, 70, 70);*/
-
         try{
-            Imgproc.cvtColor(croppedSqr, croppedSqr, Imgproc.COLOR_BGR2RGB);
+            Imgproc.cvtColor(fittedImg, fittedImg, Imgproc.COLOR_BGR2RGB);
 //            bmp = Bitmap.createBitmap(drawing.cols(), drawing.rows(), Bitmap.Config.ARGB_8888);
 //            Utils.matToBitmap(drawing, bmp);
-            bmp = Bitmap.createBitmap(croppedSqr.cols(), croppedSqr.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(croppedSqr, bmp);
+            bmp = Bitmap.createBitmap(fittedImg.cols(), fittedImg.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(fittedImg, bmp);
         }catch(CvException e){
             Log.e("KSM", "Mat to bitmap Error!!", e);
         }
@@ -339,6 +333,7 @@ public class FindContours {
         return enhancedImg;
     }
 
+    //mosaic
     private Mat mosaic(Mat img, int rate){
         Mat mosaic = new Mat();
         Imgproc.resize(img, mosaic, new Size(img.width() / rate, img.height() / rate));
@@ -347,208 +342,304 @@ public class FindContours {
         return img;
     }
 
-    private Mat rotateToVerticalityImg(Mat img){
-        Mat result = new Mat();
+    //rotateToVerticalityImg() - existing Method
+//    private Mat rotateToVerticalityImg(Mat img){
+//        Mat result = new Mat();
+//
+//        Mat imgGray = new Mat();
+//        Imgproc.cvtColor(img, imgGray, Imgproc.COLOR_BGR2GRAY);
+//
+//        try{
+//            Mat thresholdOutput = new Mat();
+//            Imgproc.threshold(imgGray, thresholdOutput, 130, 255, Imgproc.THRESH_BINARY);
+//
+//            List<MatOfPoint> contours = new ArrayList<>();
+//            Mat hierarchy = new Mat();
+//            Imgproc.findContours(thresholdOutput, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+//
+//            rotateDrawing = Mat.zeros(thresholdOutput.size(), CvType.CV_8UC3);
+//            for(int i = 0; i < contours.size(); i++){
+//                Scalar color = new Scalar(255, 0, 0);
+//                Imgproc.drawContours(rotateDrawing, contours, i, color, 1, Imgproc.LINE_8, hierarchy, 3, new Point());
+//            }
+//
+//            //RotatedRect Part (Not Use)
+//            /*MatOfPoint2f contour2f = new MatOfPoint2f(contours.get(contours.size()-1).toArray());
+//            RotatedRect rotatedRect = Imgproc.minAreaRect(contour2f);
+//
+//            Point[] boxPoints = new Point[4];
+//            rotatedRect.points(boxPoints);
+//
+//            MatOfPoint boxContour = new MatOfPoint(boxPoints);
+//            Imgproc.drawContours(rotateDrawing, Arrays.asList(boxContour), 0, new Scalar(255, 255, 0), 2);*/
+//
+//            /* ref :
+//            https://www.charlezz.com/?p=45831
+//            https://docs.opencv.org/4.x/dd/d49/tutorial_py_contour_features.html
+//             */
+//            MatOfPoint2f contour2f = new MatOfPoint2f(contours.get(contours.size()-1).toArray());
+//            Mat line = new Mat();
+//            //주어진 점들에 대해 적합한 선분 정보 구하기
+//            Imgproc.fitLine(contour2f, line, Imgproc.DIST_L2, 0.0, 0.01, 0.01);
+//
+//            //단위 벡터
+//            double vx = line.get(0,0)[0];
+//            double vy = line.get(1,0)[0];
+//            //직선위의 점
+//            double x = line.get(2,0)[0];
+//            double y = line.get(3,0)[0];
+//
+//            //이미지 경계부근까지 연장한 후 노란색으로 그림
+//            //vy/vx = 기울기, x,y는 Contour된 UrineStrip의 중심점
+//            double lefty = Math.round((-x * vy / vx + y));
+//            double righty = Math.round(((thresholdOutput.cols() - x) * vy / vx) + y);
+//
+//            //직사각형 가운데 선을 지나가는 점을 구하기
+//            Point point1 = new Point((double)(thresholdOutput.cols() - 1), righty);
+//            Point point2 = new Point(0, lefty);
+//            Point contourCenterPoint = new Point(x,y);
+//
+//            Log.d("KSM", "point1 x : "+ point1.x + " / y : "+point1.y);
+//            Log.d("KSM", "point2 x : "+ point2.x + " / y : "+point2.y);
+//            Log.d("KSM", "contour center Point x : "+contourCenterPoint.x+
+//                    "/ y : "+contourCenterPoint.y);
+//            Log.d("KSM", "contour line slope grade : "+(vy / vx));
+//
+//            Imgproc.circle(rotateDrawing, point1, 3, new Scalar(0, 255, 0), 3);
+//            Imgproc.circle(rotateDrawing, point2, 3, new Scalar(0, 255, 0), 3);
+//            Imgproc.circle(rotateDrawing, contourCenterPoint, 3, new Scalar(0, 255, 0), 3);
+//
+//            //UrineStrip크기 만큼 자른 사각형의 너비 중앙값을 기준으로 한 선을 긋는다
+//            Point widthCenterPoint1 = new Point((thresholdOutput.cols()/2), 0);
+//            Point widthCenterPoint2 = new Point((thresholdOutput.cols()/2), thresholdOutput.rows());
+//
+//            Imgproc.circle(rotateDrawing, widthCenterPoint1, 3, new Scalar(0, 255, 0), 3);
+//            Imgproc.circle(rotateDrawing, widthCenterPoint2, 3, new Scalar(0, 255, 0), 3);
+//
+//            Point centerPoint = new Point((thresholdOutput.cols()/2), (thresholdOutput.rows()/2));
+//            Imgproc.circle(rotateDrawing, centerPoint, 1, new Scalar(0, 255, 0), 3);
+//
+//            Log.d("KSM", "widthCenterPoint1 x : "+ widthCenterPoint1.x + " / y : "+widthCenterPoint1.y);
+//            Log.d("KSM", "widthCenterPoint2 x : "+ widthCenterPoint2.x + " / y : "+widthCenterPoint2.y);
+//
+//            //각각의 위치에 대한 라인을 그려넣기.
+//            Imgproc.line(rotateDrawing, widthCenterPoint1, widthCenterPoint2, new Scalar(255, 255, 255));
+//            Imgproc.line(rotateDrawing, point1, point2, new Scalar(255, 255, 0));
+//
+//            //각도 구하기 ref : https://cording-cossk3.tistory.com/32
+//            double pointAngle = getAngle(point1, point2);
+//            if(pointAngle > 180){
+//                pointAngle -= 180; //무조건 180도 안의 값을 가지도록 진행
+//            }
+//            double widthCenterAngle = getAngle(widthCenterPoint1, widthCenterPoint2);
+//            if(widthCenterAngle > 180){
+//                widthCenterAngle -= 180;
+//            }
+//            movedAngle = pointAngle - widthCenterAngle;
+//
+//            //rotatedRect Part (Not Use)
+//            /*double pointAngle = rotatedRect.angle;
+//            Point centerPoint = new Point(img.width()/2, img.height()/2);*/
+//
+//            Log.d("KSM", "pointAngle : "+pointAngle);
+//            Log.d("KSM", "widthCenterAngle : "+widthCenterAngle);
+//            Log.d("KSM", "pointAngle - 90˚ : "+movedAngle);
+//            Log.d("KSM", "rotate angle˚ : "+movedAngle*(-1.0));
+//
+//
+//            Mat rotatedImg = new Mat();
+//            //90도로 다시 맞추기 위해서는 이동된 방향과 반대방향으로 회전해야한다.
+//
+//            //RotatedRect Part (Not Use)
+//            /*Mat matrix = Imgproc.getRotationMatrix2D(centerPoint, pointAngle, 1.0);*/
+//            Mat matrix = Imgproc.getRotationMatrix2D(contourCenterPoint, movedAngle * (-1.0), 1.0);
+//            Imgproc.warpAffine(img, rotatedImg, matrix, new Size(img.width(), img.height()));
+//
+////            if(Math.abs(movedAngle) > 1){
+////                Mat matrix = Imgproc.getRotationMatrix2D(contourCenterPoint, movedAngle * (-1.0), 1.0);
+////                Imgproc.warpAffine(img, rotatedImg, matrix, new Size(img.width(), img.height()));
+////                Log.d("KSM", "ROTATED!!!");
+////            }else{
+////                noRotate = true;
+////                rotatedImg = img;
+////                Log.d("KSM", "NOT ROTATED!!!");
+////            }
+//
+//            result = rotatedImg;
+//
+//            //existing method
+////            MatOfPoint maxContour = null;
+////            double maxContourArea = 0;
+////            for(MatOfPoint contour : contours){
+////                double area = Imgproc.contourArea(contour);
+////                if(area > maxContourArea){
+////                    maxContour = contour;
+////                    maxContourArea = area;
+////                    Log.d("KSM", "maxContour : "+maxContour+"\nmaxContourArea : "+maxContourArea);
+////                }
+////            }
+////
+////            double epsilon = 0.01 * Imgproc.arcLength(new MatOfPoint2f(maxContour.toArray()), true);
+////            MatOfPoint2f approx = new MatOfPoint2f();
+////            Imgproc.approxPolyDP(new MatOfPoint2f(maxContour.toArray()), approx, epsilon, true);
+////
+////
+////            Point[] sortedPoints = sortPointsByYThenX(approx.toArray());
+////            for(Point point : sortedPoints){
+////                Log.d("KSM", "Point - "+point);
+////                Imgproc.circle(drawing, point, 2, new Scalar(255, 255, 0), 3);
+////            }
+//
+////            Point bottomLeft = sortedPoints[0];
+////            Point topLeft = sortedPoints[1];
+////            Point bottomRight = sortedPoints[2];
+////            Point topRight = sortedPoints[3];
+////
+////            MatOfPoint2f imgRect = new MatOfPoint2f(bottomLeft, topRight, topLeft, bottomRight);
+//
+////            MatOfPoint2f targetRect = new MatOfPoint2f(
+////                    new Point(0,0),
+////                    new Point(width, height),
+////                    new Point(width, 0),
+////                    new Point(0, height)
+////            );
+//
+////            Mat matrix = Imgproc.getPerspectiveTransform(imgRect, targetRect);
+////
+////            Imgproc.warpPerspective(img, result, matrix, new Size(width, height));
+//        }catch(Exception e){
+//            Log.e("KSM", "FitImg ERROR!!", e);
+//        }
+//
+//        return result;
+//    }
+
+//    private Point[] sortPointsByYThenX(Point[] points){
+//        Arrays.sort(points, (pt1, pt2) -> {
+//            if(pt1.y != pt2.y){
+//                return Double.compare(pt1.y, pt2.y);
+//            }else{
+//                return Double.compare(pt1.x, pt2.x);
+//            }
+//        });
+//        return points;
+//    }
+
+    //reference : https://cording-cossk3.tistory.com/32
+//    private double getAngle(Point p1, Point p2){
+//        double deltaY = p1.y-p2.y;
+//        double deltaX = p2.x-p1.x;
+//        double result = Math.toDegrees(Math.atan2(deltaY, deltaX));
+//
+//        Log.d("KSM", "getAngle - Degrees : "+result);
+//
+//        return (result < 0) ? (360d + result) : result;
+//    }
+
+
+    private Mat fitImg(Mat img, int width, int height){
+        Mat resMat = new Mat();
 
         Mat imgGray = new Mat();
         Imgproc.cvtColor(img, imgGray, Imgproc.COLOR_BGR2GRAY);
 
-        try{
-            Mat thresholdOutput = new Mat();
-            Imgproc.threshold(imgGray, thresholdOutput, 130, 255, Imgproc.THRESH_BINARY);
+        Mat thresholdImg = new Mat();
+        Imgproc.threshold(imgGray, thresholdImg, 130, 255, Imgproc.THRESH_BINARY);
 
-            List<MatOfPoint> contours = new ArrayList<>();
-            Mat hierarchy = new Mat();
-            Imgproc.findContours(thresholdOutput, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+        List<MatOfPoint> contours = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(thresholdImg, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-            rotateDrawing = Mat.zeros(thresholdOutput.size(), CvType.CV_8UC3);
-            for(int i = 0; i < contours.size(); i++){
-                Scalar color = new Scalar(255, 0, 0);
-                Imgproc.drawContours(rotateDrawing, contours, i, color, 1, Imgproc.LINE_8, hierarchy, 3, new Point());
+        MatOfPoint sourceContour = findMaxContour(contours);
+        Point[] sourceRect = findRect(sourceContour);
+        Point[] targetRect = {
+                new Point(0, height),
+                new Point(width, 0),
+                new Point(0, 0),
+                new Point(width, height)
+        };
+
+        MatOfPoint2f sourceMat = new MatOfPoint2f(sourceRect);
+        MatOfPoint2f targetMat = new MatOfPoint2f(targetRect);
+
+        Mat matrix = Imgproc.getPerspectiveTransform(sourceMat, targetMat);
+        Imgproc.warpPerspective(img, resMat, matrix, new Size(width, height));
+
+        return resMat;
+    }
+
+    private MatOfPoint findMaxContour(List<MatOfPoint> contours){
+        MatOfPoint maxContour = null;
+
+        double maxArea = 0;
+
+        for(MatOfPoint contour : contours){
+            double area = Imgproc.contourArea(contour);
+
+            if(maxArea < area){
+                maxContour = contour;
+                maxArea = area;
             }
-
-            //RotatedRect Part (Not Use)
-            /*MatOfPoint2f contour2f = new MatOfPoint2f(contours.get(contours.size()-1).toArray());
-            RotatedRect rotatedRect = Imgproc.minAreaRect(contour2f);
-
-            Point[] boxPoints = new Point[4];
-            rotatedRect.points(boxPoints);
-
-            MatOfPoint boxContour = new MatOfPoint(boxPoints);
-            Imgproc.drawContours(rotateDrawing, Arrays.asList(boxContour), 0, new Scalar(255, 255, 0), 2);*/
-
-            /* ref :
-            https://www.charlezz.com/?p=45831
-            https://docs.opencv.org/4.x/dd/d49/tutorial_py_contour_features.html
-             */
-            MatOfPoint2f contour2f = new MatOfPoint2f(contours.get(contours.size()-1).toArray());
-            Mat line = new Mat();
-            //주어진 점들에 대해 적합한 선분 정보 구하기
-            Imgproc.fitLine(contour2f, line, Imgproc.DIST_L2, 0.0, 0.01, 0.01);
-
-            //단위 벡터
-            double vx = line.get(0,0)[0];
-            double vy = line.get(1,0)[0];
-            //직선위의 점
-            double x = line.get(2,0)[0];
-            double y = line.get(3,0)[0];
-
-            //이미지 경계부근까지 연장한 후 노란색으로 그림
-            //vy/vx = 기울기, x,y는 Contour된 UrineStrip의 중심점
-            double lefty = Math.round((-x * vy / vx + y));
-            double righty = Math.round(((thresholdOutput.cols() - x) * vy / vx) + y);
-
-            //직사각형 가운데 선을 지나가는 점을 구하기
-            Point point1 = new Point((double)(thresholdOutput.cols() - 1), righty);
-            Point point2 = new Point(0, lefty);
-            Point contourCenterPoint = new Point(x,y);
-
-            Log.d("KSM", "point1 x : "+ point1.x + " / y : "+point1.y);
-            Log.d("KSM", "point2 x : "+ point2.x + " / y : "+point2.y);
-            Log.d("KSM", "contour center Point x : "+contourCenterPoint.x+
-                    "/ y : "+contourCenterPoint.y);
-            Log.d("KSM", "contour line slope grade : "+(vy / vx));
-
-            Imgproc.circle(rotateDrawing, point1, 3, new Scalar(0, 255, 0), 3);
-            Imgproc.circle(rotateDrawing, point2, 3, new Scalar(0, 255, 0), 3);
-            Imgproc.circle(rotateDrawing, contourCenterPoint, 3, new Scalar(0, 255, 0), 3);
-
-            //UrineStrip크기 만큼 자른 사각형의 너비 중앙값을 기준으로 한 선을 긋는다
-            Point widthCenterPoint1 = new Point((thresholdOutput.cols()/2), 0);
-            Point widthCenterPoint2 = new Point((thresholdOutput.cols()/2), thresholdOutput.rows());
-
-            Imgproc.circle(rotateDrawing, widthCenterPoint1, 3, new Scalar(0, 255, 0), 3);
-            Imgproc.circle(rotateDrawing, widthCenterPoint2, 3, new Scalar(0, 255, 0), 3);
-
-            Point centerPoint = new Point((thresholdOutput.cols()/2), (thresholdOutput.rows()/2));
-            Imgproc.circle(rotateDrawing, centerPoint, 1, new Scalar(0, 255, 0), 3);
-
-            Log.d("KSM", "widthCenterPoint1 x : "+ widthCenterPoint1.x + " / y : "+widthCenterPoint1.y);
-            Log.d("KSM", "widthCenterPoint2 x : "+ widthCenterPoint2.x + " / y : "+widthCenterPoint2.y);
-
-            //각각의 위치에 대한 라인을 그려넣기.
-            Imgproc.line(rotateDrawing, widthCenterPoint1, widthCenterPoint2, new Scalar(255, 255, 255));
-            Imgproc.line(rotateDrawing, point1, point2, new Scalar(255, 255, 0));
-
-            //각도 구하기 ref : https://cording-cossk3.tistory.com/32
-            double pointAngle = getAngle(point1, point2);
-            if(pointAngle > 180){
-                pointAngle -= 180; //무조건 180도 안의 값을 가지도록 진행
-            }
-            double widthCenterAngle = getAngle(widthCenterPoint1, widthCenterPoint2);
-            if(widthCenterAngle > 180){
-                widthCenterAngle -= 180;
-            }
-            movedAngle = pointAngle - widthCenterAngle;
-
-            //rotatedRect Part (Not Use)
-            /*double pointAngle = rotatedRect.angle;
-            Point centerPoint = new Point(img.width()/2, img.height()/2);*/
-
-            Log.d("KSM", "pointAngle : "+pointAngle);
-            Log.d("KSM", "widthCenterAngle : "+widthCenterAngle);
-            Log.d("KSM", "pointAngle - 90˚ : "+movedAngle);
-            Log.d("KSM", "rotate angle˚ : "+movedAngle*(-1.0));
-
-
-            Mat rotatedImg = new Mat();
-            //90도로 다시 맞추기 위해서는 이동된 방향과 반대방향으로 회전해야한다.
-
-            //RotatedRect Part (Not Use)
-            /*Mat matrix = Imgproc.getRotationMatrix2D(centerPoint, pointAngle, 1.0);*/
-            Mat matrix = Imgproc.getRotationMatrix2D(contourCenterPoint, movedAngle * (-1.0), 1.0);
-            Imgproc.warpAffine(img, rotatedImg, matrix, new Size(img.width(), img.height()));
-
-//            if(Math.abs(movedAngle) > 1){
-//                Mat matrix = Imgproc.getRotationMatrix2D(contourCenterPoint, movedAngle * (-1.0), 1.0);
-//                Imgproc.warpAffine(img, rotatedImg, matrix, new Size(img.width(), img.height()));
-//                Log.d("KSM", "ROTATED!!!");
-//            }else{
-//                noRotate = true;
-//                rotatedImg = img;
-//                Log.d("KSM", "NOT ROTATED!!!");
-//            }
-
-            result = rotatedImg;
-
-            //existing method
-//            MatOfPoint maxContour = null;
-//            double maxContourArea = 0;
-//            for(MatOfPoint contour : contours){
-//                double area = Imgproc.contourArea(contour);
-//                if(area > maxContourArea){
-//                    maxContour = contour;
-//                    maxContourArea = area;
-//                    Log.d("KSM", "maxContour : "+maxContour+"\nmaxContourArea : "+maxContourArea);
-//                }
-//            }
-//
-//            double epsilon = 0.01 * Imgproc.arcLength(new MatOfPoint2f(maxContour.toArray()), true);
-//            MatOfPoint2f approx = new MatOfPoint2f();
-//            Imgproc.approxPolyDP(new MatOfPoint2f(maxContour.toArray()), approx, epsilon, true);
-//
-//
-//            Point[] sortedPoints = sortPointsByYThenX(approx.toArray());
-//            for(Point point : sortedPoints){
-//                Log.d("KSM", "Point - "+point);
-//                Imgproc.circle(drawing, point, 2, new Scalar(255, 255, 0), 3);
-//            }
-
-//            Point bottomLeft = sortedPoints[0];
-//            Point topLeft = sortedPoints[1];
-//            Point bottomRight = sortedPoints[2];
-//            Point topRight = sortedPoints[3];
-//
-//            MatOfPoint2f imgRect = new MatOfPoint2f(bottomLeft, topRight, topLeft, bottomRight);
-
-//            MatOfPoint2f targetRect = new MatOfPoint2f(
-//                    new Point(0,0),
-//                    new Point(width, height),
-//                    new Point(width, 0),
-//                    new Point(0, height)
-//            );
-
-//            Mat matrix = Imgproc.getPerspectiveTransform(imgRect, targetRect);
-//
-//            Imgproc.warpPerspective(img, result, matrix, new Size(width, height));
-        }catch(Exception e){
-            Log.e("KSM", "FitImg ERROR!!", e);
         }
 
-        return result;
+        return maxContour;
     }
 
-    private Point[] sortPointsByYThenX(Point[] points){
-        Arrays.sort(points, (pt1, pt2) -> {
-            if(pt1.y != pt2.y){
-                return Double.compare(pt1.y, pt2.y);
-            }else{
-                return Double.compare(pt1.x, pt2.x);
-            }
-        });
-        return points;
+    private Point[] findRect(MatOfPoint contour){
+        Point[] contourPoints = contour.toArray();
+        Point[] rotatedContour = rotateContour(contour, 45);
+
+        int index1 = 0; //x최솟값
+        int index2 = 0; //x최댓값
+        int index3 = 0; //y최솟값
+        int index4 = 0; //y최댓값
+
+        for(int i = 1; i < rotatedContour.length; i++){
+            if(rotatedContour[i].x < rotatedContour[index1].x)
+                index1 = i;
+            if(rotatedContour[i].x > rotatedContour[index2].x)
+                index2 = i;
+            if(rotatedContour[i].y < rotatedContour[index3].y)
+                index3 = i;
+            if(rotatedContour[i].y > rotatedContour[index4].y)
+                index4 = i;
+        }
+
+        Point[] resPoints = {contourPoints[index1], contourPoints[index2],
+                contourPoints[index3], contourPoints[index4]};
+        return resPoints;
     }
 
-    //reference : https://cording-cossk3.tistory.com/32
-    private double getAngle(Point p1, Point p2){
-        double deltaY = p1.y-p2.y;
-        double deltaX = p2.x-p1.x;
-        double result = Math.toDegrees(Math.atan2(deltaY, deltaX));
+    private Point[] rotateContour(MatOfPoint contour, int angle){
+        Point[] contourPoints = contour.toArray();
+        Point[] rotatedPoints = new Point[contourPoints.length];
 
-        Log.d("KSM", "getAngle - Degrees : "+result);
+        Rect boundcontourRect = Imgproc.boundingRect(contour);
 
-        return (result < 0) ? (360d + result) : result;
+        double centerX = (boundcontourRect.x+ boundcontourRect.width)/2;
+        double centerY = (boundcontourRect.y+ boundcontourRect.height)/2;
+
+        double radian = angle * Math.PI / 180;
+
+        for(int i = 0; i < contourPoints.length; i++){
+            int rotatedX = (int)((contourPoints[i].x - centerX) * Math.cos(radian) - (contourPoints[i].y - centerY) * Math.sin(radian));
+            int rotatedY = (int)((contourPoints[i].x - centerX) * Math.sin(radian) + (contourPoints[i].y - centerY) * Math.cos(radian));
+
+            rotatedPoints[i] = new Point(rotatedX, rotatedY);
+        }
+
+        return rotatedPoints;
     }
 
     private Mat cropImg(Mat img, List<MatOfPoint> contours, int width, int height){
         Mat croppedImg = new Mat();
         for(int i = 0; i < contours.size(); i++){
             Rect boundingRect = Imgproc.boundingRect(contours.get(i));
+            Log.d("KSM", "contour : "+contours.get(i));
             int x = boundingRect.x;
             int y = boundingRect.y;
             int w = boundingRect.width;
             int h = boundingRect.height;
-
 
 
             if(w>=width && h>=height){
@@ -622,7 +713,7 @@ public class FindContours {
             int w = boundingRect.width;
             int h = boundingRect.height;
 
-            if(w>=width && h>=height){
+            if(w>=width && h>=height && height < 100){
 //                cropOnlyUrineStripDrawing = Mat.zeros(img.size(), CvType.CV_8UC3);
 //                Core.add(img, cropOnlyUrineStripDrawing, cropOnlyUrineStripDrawing);
 
@@ -649,8 +740,8 @@ public class FindContours {
         img.copyTo(imgHSV);
         Imgproc.cvtColor(imgHSV, imgHSV, Imgproc.COLOR_BGR2HSV);
 
-        Scalar minHSV = new Scalar(startH, 0, 10);
-        Scalar maxHSV = new Scalar(endH, 255, 235);
+        Scalar minHSV = new Scalar(startH, 50, 50);
+        Scalar maxHSV = new Scalar(endH, 235, 235); //(S,V 적정 값) 225, 225 / 230, 230 / 235, 235 / 240, 240 / 245, 245
 
         Log.d("KSM", "colorRangeCut : minHSV : "+minHSV);
         Log.d("KSM", "colorRangeCut : maxHSV : "+maxHSV);

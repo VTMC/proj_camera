@@ -6,6 +6,7 @@ import android.app.ProgressDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +23,6 @@ class ResultActivity : AppCompatActivity() {
     private lateinit var viewBinding: ResultActivityBinding
     private var resultBmp : Bitmap? = null
     private var resultBmp2 : Bitmap? = null
-    private var rotatedDrawing : Bitmap? = null
     private var croppedImgList : Array<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?){
@@ -40,6 +40,11 @@ class ResultActivity : AppCompatActivity() {
 //        val imgageFormat = intent.getStringExtra("imageFormat")
         val dngPath = intent.getStringExtra("dngPath")
         val bmpPath = intent.getStringExtra("bmpPath")
+        val accX = intent.getStringExtra("accX")
+        val accY = intent.getStringExtra("accY")
+        val accZ = intent.getStringExtra("accZ")
+        val angleXZ = intent.getStringExtra("angleXZ")
+        val angleYZ = intent.getStringExtra("angleYZ")
 
         val options = RequestOptions.skipMemoryCacheOf(true).diskCacheStrategy(DiskCacheStrategy.NONE)
         options.transform(RotateTransformation(this, -90f))
@@ -52,6 +57,12 @@ class ResultActivity : AppCompatActivity() {
                 .thumbnail()
                 .into(viewBinding.resultImageView)
         }
+
+        viewBinding.accXTextView.text = "accX : ${accX}"
+        viewBinding.accYTextView.text = "accY : ${accY}"
+        viewBinding.accZTextView.text = "accZ : ${accZ}"
+        viewBinding.angleXZTextView.text = "angleXZ : ${angleXZ}"
+        viewBinding.angleYZTextView.text = "angleYZ : ${angleYZ}"
 
         lifecycleScope.launch(Dispatchers.Default){
             //existing method
@@ -66,8 +77,7 @@ class ResultActivity : AppCompatActivity() {
             resultBmp = findContours.update()
             if(resultBmp != null){
                 resultBmp2 = findContours.sqr
-//                rotatedDrawing = findContours.rotateDrawing
-//                rotatedDrawing = findContours.cropOnlyUrineStrip
+                croppedImgList = findContours.getCropImgFileList()
             }
 
 
@@ -102,7 +112,7 @@ class ResultActivity : AppCompatActivity() {
                                 finish()
                             })
                         .show()
-                }/*else if(croppedImgList == null){
+                }else if(croppedImgList == null){
                     progressDialog.dismiss()
 
                     dialogBuilder.setTitle("이미지 처리 오류 발생 (3)")
@@ -115,7 +125,7 @@ class ResultActivity : AppCompatActivity() {
                                 finish()
                             })
                         .show()
-                }*/else{
+                }else{
                     val pointedImageView = viewBinding.pointedImageView
 
                     pointedImageView.setImageBitmap(resultBmp)
@@ -123,14 +133,57 @@ class ResultActivity : AppCompatActivity() {
                     val pointedImageView2 = viewBinding.pointedImageView2
 
                     pointedImageView2.setImageBitmap(resultBmp2)
-//
-//                    val pointedImageView3 = viewBinding.pointedImageView3
-//
-//                    pointedImageView3.setImageBitmap(resultBmp2)
 
-//                    for(i in 0 until(croppedImgList!!.size)){
-//                        Log.d("KSM", "croppedImg[${i+1}] = ${croppedImgList!![i]}")
-//                    }
+                    for(i in 0 until 11){
+                        val cropBmp = BitmapFactory.decodeFile(croppedImgList!![i])
+
+                        when(i){
+                            0 -> {
+                                val cropImageView = viewBinding.cropImg1
+                                cropImageView.setImageBitmap(cropBmp)
+                            }
+                            1 -> {
+                                val cropImageView = viewBinding.cropImg2
+                                cropImageView.setImageBitmap(cropBmp)
+                            }
+                            2 -> {
+                                val cropImageView = viewBinding.cropImg3
+                                cropImageView.setImageBitmap(cropBmp)
+                            }
+                            3 -> {
+                                val cropImageView = viewBinding.cropImg4
+                                cropImageView.setImageBitmap(cropBmp)
+                            }
+                            4 -> {
+                                val cropImageView = viewBinding.cropImg5
+                                cropImageView.setImageBitmap(cropBmp)
+                            }
+                            5 -> {
+                                val cropImageView = viewBinding.cropImg6
+                                cropImageView.setImageBitmap(cropBmp)
+                            }
+                            6 -> {
+                                val cropImageView = viewBinding.cropImg7
+                                cropImageView.setImageBitmap(cropBmp)
+                            }
+                            7 -> {
+                                val cropImageView = viewBinding.cropImg8
+                                cropImageView.setImageBitmap(cropBmp)
+                            }
+                            8 -> {
+                                val cropImageView = viewBinding.cropImg9
+                                cropImageView.setImageBitmap(cropBmp)
+                            }
+                            9 -> {
+                                val cropImageView = viewBinding.cropImg10
+                                cropImageView.setImageBitmap(cropBmp)
+                            }
+                            10 -> {
+                                val cropImageView = viewBinding.cropImg11
+                                cropImageView.setImageBitmap(cropBmp)
+                            }
+                        }
+                    }
 
                     progressDialog.dismiss()
                 }

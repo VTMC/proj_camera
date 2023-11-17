@@ -342,6 +342,11 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
         //캡처버튼을 클릭했을 경우
         viewBinding.imageCaptureBtn.setOnClickListener{
             it.isEnabled = false
+            val captureAccX = accX.toInt().toString()
+            val captureAccY = accY.toInt().toString()
+            val captureAccZ = accZ.toInt().toString()
+            val captureAngleXZ = angleXZ.toInt().toString()
+            val captureAngleYZ = angleYZ.toInt().toString()
 
             Log.d("KSM", "CaptureBtn Clicked!!")
 
@@ -510,6 +515,13 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 //                        intent.putExtra("imageFormat", rawCameraInfo!!.format)
                         intent.putExtra("dngPath", pathName)
                         intent.putExtra("bmpPath", bmp_path)
+                        Log.d("KSM", "accX : ${captureAccX}, accY : ${captureAccY}, accZ : ${captureAccZ}\n" +
+                                "angleXZ : ${captureAngleXZ}, angleYZ : ${captureAngleYZ}")
+                        intent.putExtra("accX", captureAccX)
+                        intent.putExtra("accY", captureAccY)
+                        intent.putExtra("accZ", captureAccZ)
+                        intent.putExtra("angleXZ", captureAngleXZ)
+                        intent.putExtra("angleYZ", captureAngleYZ)
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         startActivity(intent)
                         finish()
@@ -1019,15 +1031,20 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
     }
 
     override fun onSensorChanged(event: SensorEvent){
-        var accX = event.values[0].toDouble()
-        var accY = event.values[1].toDouble()
-        var accZ = event.values[2].toDouble()
+        accX = event.values[0].toDouble()
+        accY = event.values[1].toDouble()
+        accZ = event.values[2].toDouble()
 
-        var angleXZ = Math.atan2(accX, accZ) * 180/Math.PI
-        var angleYZ = Math.atan2(accY, accZ) * 180/Math.PI
+        angleXZ = Math.atan2(accX, accZ) * 180/Math.PI
+        angleYZ = Math.atan2(accY, accZ) * 180/Math.PI
 
-        Log.i("KSM", "ACCELOMETER | X : ${String.format("%.4f", accX)} | Y : ${String.format("%.4f", accY)} | Z : ${String.format("%.4f", accZ)}" +
-                " | angleXZ : ${String.format("%.4f", angleXZ)} | angleYZ : ${String.format("%.4f", angleYZ)}")
+//        Log.i("KSM", "ACCELOMETER | X : ${String.format("%.4f", accX)} | Y : ${String.format("%.4f", accY)} | Z : ${String.format("%.4f", accZ)}" +
+//                " | angleXZ : ${String.format("%.4f", angleXZ)} | angleYZ : ${String.format("%.4f", angleYZ)}")
+        viewBinding.accXTextView.text = "accX : ${accX.toInt()}"
+        viewBinding.accYTextView.text = "accY : ${accY.toInt()}"
+        viewBinding.accZTextView.text = "accZ : ${accZ.toInt()}"
+        viewBinding.angleXZTextView.text = "angleXZ : ${angleXZ.toInt()}"
+        viewBinding.angleYZTextView.text = "angleYZ : ${angleYZ.toInt()}"
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int)  = Unit

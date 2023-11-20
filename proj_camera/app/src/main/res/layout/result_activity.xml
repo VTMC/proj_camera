@@ -204,7 +204,7 @@
         <HorizontalScrollView
             android:id="@+id/cropResult"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toTopOf="@+id/backBtn"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
@@ -216,83 +216,337 @@
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/cropImg1"
+                <LinearLayout
+                    android:id="@+id/img1layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    tools:srcCompat="@tools:sample/avatars" />
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="1"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <ImageView
+                        android:id="@+id/cropImg1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/cropCheckImg1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/cropImg2"
+                <LinearLayout
+                    android:id="@+id/img2layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    tools:srcCompat="@tools:sample/avatars"/>
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="2"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <ImageView
+                        android:id="@+id/cropImg2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars"/>
 
-                <ImageView
-                    android:id="@+id/cropImg3"
+                    <ImageView
+                        android:id="@+id/cropCheckImg2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        android:layout_margin="20dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/img3layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    tools:srcCompat="@tools:sample/avatars"/>
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="3"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <ImageView
+                        android:id="@+id/cropImg3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars"/>
+                    <ImageView
+                        android:id="@+id/cropCheckImg3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/cropImg4"
+                <LinearLayout
+                    android:id="@+id/img4layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    tools:srcCompat="@tools:sample/avatars"/>
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="4"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <ImageView
+                        android:id="@+id/cropImg4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars"/>
+                    <ImageView
+                        android:id="@+id/cropCheckImg4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/cropImg5"
+                <LinearLayout
+                    android:id="@+id/img5layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    tools:srcCompat="@tools:sample/avatars"/>
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="5"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <ImageView
+                        android:id="@+id/cropImg5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars"/>
+                    <ImageView
+                        android:id="@+id/cropCheckImg5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/cropImg6"
+                <LinearLayout
+                    android:id="@+id/img6layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    tools:srcCompat="@tools:sample/avatars"/>
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="6"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <ImageView
+                        android:id="@+id/cropImg6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars"/>
+                    <ImageView
+                        android:id="@+id/cropCheckImg6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/cropImg7"
+                <LinearLayout
+                    android:id="@+id/img7layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    tools:srcCompat="@tools:sample/avatars"/>
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="7"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <ImageView
+                        android:id="@+id/cropImg7"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars"/>
+                    <ImageView
+                        android:id="@+id/cropCheckImg7"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/cropImg8"
+                <LinearLayout
+                    android:id="@+id/img8layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    tools:srcCompat="@tools:sample/avatars"/>
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="8"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <ImageView
+                        android:id="@+id/cropImg8"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars"/>
+                    <ImageView
+                        android:id="@+id/cropCheckImg8"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/cropImg9"
+                <LinearLayout
+                    android:id="@+id/img9layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    tools:srcCompat="@tools:sample/avatars"/>
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="9"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <ImageView
+                        android:id="@+id/cropImg9"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars"/>
+                    <ImageView
+                        android:id="@+id/cropCheckImg9"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/cropImg10"
+                <LinearLayout
+                    android:id="@+id/img10layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    tools:srcCompat="@tools:sample/avatars"/>
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="10"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <ImageView
+                        android:id="@+id/cropImg10"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars"/>
+                    <ImageView
+                        android:id="@+id/cropCheckImg10"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/cropImg11"
+                <LinearLayout
+                    android:id="@+id/img11layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    tools:srcCompat="@tools:sample/avatars"/>
-
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="11"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <ImageView
+                        android:id="@+id/cropImg11"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars"/>
+                    <ImageView
+                        android:id="@+id/cropCheckImg11"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                </LinearLayout>
             </LinearLayout>
         </HorizontalScrollView>
 

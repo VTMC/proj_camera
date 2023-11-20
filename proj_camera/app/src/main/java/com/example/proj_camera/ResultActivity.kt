@@ -23,6 +23,7 @@ class ResultActivity : AppCompatActivity() {
     private lateinit var viewBinding: ResultActivityBinding
     private var resultBmp : Bitmap? = null
     private var resultBmp2 : Bitmap? = null
+    private var croppedCheckImg : Array<Bitmap>? = null
     private var croppedImgList : Array<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?){
@@ -77,6 +78,7 @@ class ResultActivity : AppCompatActivity() {
             resultBmp = findContours.update()
             if(resultBmp != null){
                 resultBmp2 = findContours.sqr
+                croppedCheckImg = findContours.checkCropImg()
                 croppedImgList = findContours.getCropImgFileList()
             }
 
@@ -141,46 +143,79 @@ class ResultActivity : AppCompatActivity() {
                             0 -> {
                                 val cropImageView = viewBinding.cropImg1
                                 cropImageView.setImageBitmap(cropBmp)
+
+                                val cropCheckImageView = viewBinding.cropCheckImg1
+                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
                             }
                             1 -> {
                                 val cropImageView = viewBinding.cropImg2
                                 cropImageView.setImageBitmap(cropBmp)
+
+                                val cropCheckImageView = viewBinding.cropCheckImg2
+                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
                             }
                             2 -> {
                                 val cropImageView = viewBinding.cropImg3
                                 cropImageView.setImageBitmap(cropBmp)
+
+                                val cropCheckImageView = viewBinding.cropCheckImg3
+                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
                             }
                             3 -> {
                                 val cropImageView = viewBinding.cropImg4
                                 cropImageView.setImageBitmap(cropBmp)
+
+                                val cropCheckImageView = viewBinding.cropCheckImg4
+                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
                             }
                             4 -> {
                                 val cropImageView = viewBinding.cropImg5
                                 cropImageView.setImageBitmap(cropBmp)
+
+                                val cropCheckImageView = viewBinding.cropCheckImg5
+                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
                             }
                             5 -> {
                                 val cropImageView = viewBinding.cropImg6
                                 cropImageView.setImageBitmap(cropBmp)
+
+                                val cropCheckImageView = viewBinding.cropCheckImg6
+                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
                             }
                             6 -> {
                                 val cropImageView = viewBinding.cropImg7
                                 cropImageView.setImageBitmap(cropBmp)
+
+                                val cropCheckImageView = viewBinding.cropCheckImg7
+                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
                             }
                             7 -> {
                                 val cropImageView = viewBinding.cropImg8
                                 cropImageView.setImageBitmap(cropBmp)
+
+                                val cropCheckImageView = viewBinding.cropCheckImg8
+                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
                             }
                             8 -> {
                                 val cropImageView = viewBinding.cropImg9
                                 cropImageView.setImageBitmap(cropBmp)
+
+                                val cropCheckImageView = viewBinding.cropCheckImg9
+                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
                             }
                             9 -> {
                                 val cropImageView = viewBinding.cropImg10
                                 cropImageView.setImageBitmap(cropBmp)
+
+                                val cropCheckImageView = viewBinding.cropCheckImg10
+                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
                             }
                             10 -> {
                                 val cropImageView = viewBinding.cropImg11
                                 cropImageView.setImageBitmap(cropBmp)
+
+                                val cropCheckImageView = viewBinding.cropCheckImg11
+                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
                             }
                         }
                     }

@@ -862,7 +862,7 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                             Log.d("KSM", "Image Write Wrong!!!!")
                         }
 
-//                        outputStream?.close()
+                        outputStream?.close()
                     }
 
                     /** 이전의 흔적 (이미지 저장)

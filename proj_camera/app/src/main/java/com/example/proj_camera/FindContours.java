@@ -205,7 +205,8 @@ public class FindContours {
         //crop UrineStrip
         int w = cropOnlyUrineStrip.width(); //x = 10
         int h = cropOnlyUrineStrip.height();
-        double sqr_h = (4.0 / 123.0) * h; //origin : almost 0.04
+//        double sqr_h = (4.0 / 123.0) * h; //origin : almost 0.04
+        double sqr_h = (4.5 / 123.0) * h; //origin : almost 0.04
 //        int sqr_h = w;
         double fbh = (2.1 / 123.0) * h; //first blank height | origin : almost 0.02
         double bh = (3.55 / 123.0) * h; //blank height | origin : almost 0.021
@@ -221,15 +222,6 @@ public class FindContours {
         sqrArray[0] = new Rect(0, (int)fbh, w, (int) sqr_h); //0
         for (int i = 1; i < 11; i++) { //1~10
             int y = (int) (fbh + (sqr_h * i) + (bh * i));
-//            if(i >= 1 && i < 10){ //1,9
-//                y -= 10;
-//                if(i >= 2 && i < 9){ //2,8
-//                    y -= 10;
-//                    if(i >=3 && i < 7){ //3~6
-//                        y -= 7;
-//                    }
-//                }
-//            }
 
             Rect sqr = new Rect(0, y, w, (int) sqr_h);
             sqrArray[i] = sqr;
@@ -285,6 +277,73 @@ public class FindContours {
         return bmp;
     }
 
+    public Bitmap[] checkCropImg(){
+        Bitmap[] result = new Bitmap[cropImgFileList.length];
+        double perfectArea = 0;
+
+        for(int i = 0; i < cropImgFileList.length; i++){
+            Mat croppedSqr = Imgcodecs.imread(cropImgFileList[i]);
+            if(croppedSqr.empty()){
+                Log.e("KSM", "Cannot Read image : "+cropImgFileList[i]);
+                System.exit(0);
+            }
+
+            Mat croppedSqrGray = new Mat();
+            Imgproc.cvtColor(croppedSqr, croppedSqrGray, Imgproc.COLOR_BGR2GRAY);
+
+            Mat cannyOutput = new Mat();
+            int threshold = 40;
+            Imgproc.Canny(croppedSqrGray, cannyOutput, threshold, threshold*2);
+
+//            Mat adaptThresOutput = new Mat();
+//            int blockSize = 11;
+//            int C = 0;
+//            Imgproc.adaptiveThreshold(croppedSqrGray, adaptThresOutput, 255,
+//                    Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, blockSize, C);
+
+            List<MatOfPoint> contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(cannyOutput, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            Mat drawCropSqr = Mat.zeros(croppedSqrGray.size(), CvType.CV_8UC3);
+            for(int j = 0; j < contours.size(); j++){
+                Rect boundedRect = Imgproc.boundingRect(contours.get(j));
+                Imgproc.rectangle(drawCropSqr, boundedRect, new Scalar(255,0,0), 1);
+//                Imgproc.drawContours(drawCropSqr, contours, j, new Scalar(255, 0, 0), Imgproc.LINE_4, 1, hierarchy);
+            }
+
+            MatOfPoint largestContour = findMaxContour(contours);
+            double area = Imgproc.contourArea(largestContour);
+
+            if(i == 0){
+                perfectArea = area;
+            }
+
+            Log.d("KSM", "["+i+"]Largest Area size : "+area);
+            if(area > perfectArea-1000){
+                Log.d("KSM", "["+i+"] Area is True | perfectArea : "+perfectArea);
+            }else{
+                Log.d("KSM", "["+i+"] Area is False");
+            }
+
+            Rect boundedRect = Imgproc.boundingRect(largestContour);
+            Imgproc.rectangle(drawCropSqr, boundedRect, new Scalar(255,255,0), 1);
+//
+
+            try{
+//                Imgproc.cvtColor(croppedSqrGray, croppedSqrGray, Imgproc.COLOR_BGR2RGB);
+                Bitmap bmp = Bitmap.createBitmap(drawCropSqr.cols(), drawCropSqr.rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(drawCropSqr, bmp);
+
+                result[i] = bmp;
+            }catch(CvException e){
+                Log.e("KSM", "Mat to bitmap Error!!", e);
+            }
+        }
+
+        return result;
+    }
+
     public String[] getCropImgFileList(){
         return cropImgFileList;
     }
@@ -313,13 +372,13 @@ public class FindContours {
     }
 
     //mosaic
-//    private Mat mosaic(Mat img, int rate){
-//        Mat mosaic = new Mat();
-//        Imgproc.resize(img, mosaic, new Size(img.width() / rate, img.height() / rate));
-//        Imgproc.resize(mosaic, img, img.size(), 0, 0, Imgproc.INTER_AREA);
-//
-//        return img;
-//    }
+    private Mat mosaic(Mat img, int rate){
+        Mat mosaic = new Mat();
+        Imgproc.resize(img, mosaic, new Size(img.width() / rate, img.height() / rate));
+        Imgproc.resize(mosaic, img, img.size(), 0, 0, Imgproc.INTER_AREA);
+
+        return img;
+    }
 
     //rotateToVerticalityImg() - existing Method
 //    private Mat rotateToVerticalityImg(Mat img){
@@ -730,14 +789,14 @@ public class FindContours {
     }
 
     //startH, endH -> double형태로 8비트(0~255)
-    private Mat colorRangeCut(Mat img, double startH, double endH){
+    private Mat colorRange(Mat img, Scalar minHSV, Scalar maxHSV){
         Mat resMat = new Mat();
         Mat imgHSV = new Mat();
         img.copyTo(imgHSV);
         Imgproc.cvtColor(imgHSV, imgHSV, Imgproc.COLOR_BGR2HSV);
 
-        Scalar minHSV = new Scalar(startH, 50, 50);
-        Scalar maxHSV = new Scalar(endH, 235, 235); //(S,V 적정 값) 225, 225 / 230, 230 / 235, 235 / 240, 240 / 245, 245
+//        Scalar minHSV = new Scalar(startH, 110, 110);
+//        Scalar maxHSV = new Scalar(endH, 255, 255); //(S,V 적정 값) 225, 225 / 230, 230 / 235, 235 / 240, 240 / 245, 245
 
         Log.d("KSM", "colorRangeCut : minHSV : "+minHSV);
         Log.d("KSM", "colorRangeCut : maxHSV : "+maxHSV);

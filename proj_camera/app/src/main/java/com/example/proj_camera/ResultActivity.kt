@@ -8,6 +8,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -24,6 +25,7 @@ class ResultActivity : AppCompatActivity() {
     private var resultBmp : Bitmap? = null
     private var resultBmp2 : Bitmap? = null
     private var croppedCheckImg : Array<Bitmap>? = null
+    private var suitabilityList : BooleanArray? = null
     private var croppedImgList : Array<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?){
@@ -66,27 +68,26 @@ class ResultActivity : AppCompatActivity() {
         viewBinding.angleYZTextView.text = "angleYZ : ${angleYZ}"
 
         lifecycleScope.launch(Dispatchers.Default){
-            //existing method
-//            val findContours2 = FindContours2(bmpPath)
-//            resultBmp = findContours2.update()
-//            if(resultBmp != null){
-//                resultBmp2 = findContours2.update2()
-//                croppedImgList = findContours2.cropImgFileList
-//            }
+            val dialogBuilder = AlertDialog.Builder(this@ResultActivity)
+            val intent = Intent(this@ResultActivity, RawActivity::class.java)
 
             val findContours = FindContours(bmpPath)
-            resultBmp = findContours.update()
-            if(resultBmp != null){
-                resultBmp2 = findContours.sqr
-                croppedCheckImg = findContours.checkCropImg()
-                croppedImgList = findContours.getCropImgFileList()
+            try{
+                resultBmp = findContours.update()
+                if(resultBmp != null){
+                    resultBmp2 = findContours.sqr
+                }
+
+                if(resultBmp2 != null){
+                    croppedCheckImg = findContours.checkCropImg()
+                    suitabilityList = findContours.getSuitabilityList()
+                    croppedImgList = findContours.getCropImgFileList()
+                }
+            }catch(e : Exception){
+                Log.e("KSM", "findContour Error!", e)
             }
 
-
             lifecycleScope.launch(Dispatchers.Main){
-                val dialogBuilder = AlertDialog.Builder(this@ResultActivity)
-                val intent = Intent(this@ResultActivity, RawActivity::class.java)
-
                 if(resultBmp == null){
                     progressDialog.dismiss()
 
@@ -139,6 +140,8 @@ class ResultActivity : AppCompatActivity() {
                     for(i in 0 until 11){
                         val cropBmp = BitmapFactory.decodeFile(croppedImgList!![i])
 
+                        Log.d("KSM", "sqr[$i]'s suitability : ${suitabilityList!![i]}")
+
                         when(i){
                             0 -> {
                                 val cropImageView = viewBinding.cropImg1
@@ -146,6 +149,13 @@ class ResultActivity : AppCompatActivity() {
 
                                 val cropCheckImageView = viewBinding.cropCheckImg1
                                 cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
+
+                                val suitabilityTxtView = viewBinding.suitabilityTxtView1
+                                if(suitabilityList!![i] == true){
+                                    suitabilityTxtView.text = "OK"
+                                }else{
+                                    suitabilityTxtView.text = "NO"
+                                }
                             }
                             1 -> {
                                 val cropImageView = viewBinding.cropImg2
@@ -153,6 +163,13 @@ class ResultActivity : AppCompatActivity() {
 
                                 val cropCheckImageView = viewBinding.cropCheckImg2
                                 cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
+
+                                val suitabilityTxtView = viewBinding.suitabilityTxtView2
+                                if(suitabilityList!![i] == true){
+                                    suitabilityTxtView.text = "OK"
+                                }else{
+                                    suitabilityTxtView.text = "NO"
+                                }
                             }
                             2 -> {
                                 val cropImageView = viewBinding.cropImg3
@@ -160,6 +177,13 @@ class ResultActivity : AppCompatActivity() {
 
                                 val cropCheckImageView = viewBinding.cropCheckImg3
                                 cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
+
+                                val suitabilityTxtView = viewBinding.suitabilityTxtView3
+                                if(suitabilityList!![i] == true){
+                                    suitabilityTxtView.text = "OK"
+                                }else{
+                                    suitabilityTxtView.text = "NO"
+                                }
                             }
                             3 -> {
                                 val cropImageView = viewBinding.cropImg4
@@ -167,6 +191,13 @@ class ResultActivity : AppCompatActivity() {
 
                                 val cropCheckImageView = viewBinding.cropCheckImg4
                                 cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
+
+                                val suitabilityTxtView = viewBinding.suitabilityTxtView4
+                                if(suitabilityList!![i] == true){
+                                    suitabilityTxtView.text = "OK"
+                                }else{
+                                    suitabilityTxtView.text = "NO"
+                                }
                             }
                             4 -> {
                                 val cropImageView = viewBinding.cropImg5
@@ -174,6 +205,13 @@ class ResultActivity : AppCompatActivity() {
 
                                 val cropCheckImageView = viewBinding.cropCheckImg5
                                 cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
+
+                                val suitabilityTxtView = viewBinding.suitabilityTxtView5
+                                if(suitabilityList!![i] == true){
+                                    suitabilityTxtView.text = "OK"
+                                }else{
+                                    suitabilityTxtView.text = "NO"
+                                }
                             }
                             5 -> {
                                 val cropImageView = viewBinding.cropImg6
@@ -181,6 +219,13 @@ class ResultActivity : AppCompatActivity() {
 
                                 val cropCheckImageView = viewBinding.cropCheckImg6
                                 cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
+
+                                val suitabilityTxtView = viewBinding.suitabilityTxtView6
+                                if(suitabilityList!![i] == true){
+                                    suitabilityTxtView.text = "OK"
+                                }else{
+                                    suitabilityTxtView.text = "NO"
+                                }
                             }
                             6 -> {
                                 val cropImageView = viewBinding.cropImg7
@@ -188,6 +233,13 @@ class ResultActivity : AppCompatActivity() {
 
                                 val cropCheckImageView = viewBinding.cropCheckImg7
                                 cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
+
+                                val suitabilityTxtView = viewBinding.suitabilityTxtView7
+                                if(suitabilityList!![i] == true){
+                                    suitabilityTxtView.text = "OK"
+                                }else{
+                                    suitabilityTxtView.text = "NO"
+                                }
                             }
                             7 -> {
                                 val cropImageView = viewBinding.cropImg8
@@ -195,6 +247,13 @@ class ResultActivity : AppCompatActivity() {
 
                                 val cropCheckImageView = viewBinding.cropCheckImg8
                                 cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
+
+                                val suitabilityTxtView = viewBinding.suitabilityTxtView8
+                                if(suitabilityList!![i] == true){
+                                    suitabilityTxtView.text = "OK"
+                                }else{
+                                    suitabilityTxtView.text = "NO"
+                                }
                             }
                             8 -> {
                                 val cropImageView = viewBinding.cropImg9
@@ -202,6 +261,13 @@ class ResultActivity : AppCompatActivity() {
 
                                 val cropCheckImageView = viewBinding.cropCheckImg9
                                 cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
+
+                                val suitabilityTxtView = viewBinding.suitabilityTxtView9
+                                if(suitabilityList!![i] == true){
+                                    suitabilityTxtView.text = "OK"
+                                }else{
+                                    suitabilityTxtView.text = "NO"
+                                }
                             }
                             9 -> {
                                 val cropImageView = viewBinding.cropImg10
@@ -209,6 +275,13 @@ class ResultActivity : AppCompatActivity() {
 
                                 val cropCheckImageView = viewBinding.cropCheckImg10
                                 cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
+
+                                val suitabilityTxtView = viewBinding.suitabilityTxtView10
+                                if(suitabilityList!![i] == true){
+                                    suitabilityTxtView.text = "OK"
+                                }else{
+                                    suitabilityTxtView.text = "NO"
+                                }
                             }
                             10 -> {
                                 val cropImageView = viewBinding.cropImg11
@@ -216,6 +289,13 @@ class ResultActivity : AppCompatActivity() {
 
                                 val cropCheckImageView = viewBinding.cropCheckImg11
                                 cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
+
+                                val suitabilityTxtView = viewBinding.suitabilityTxtView11
+                                if(suitabilityList!![i] == true){
+                                    suitabilityTxtView.text = "OK"
+                                }else{
+                                    suitabilityTxtView.text = "NO"
+                                }
                             }
                         }
                     }

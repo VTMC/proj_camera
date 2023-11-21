@@ -34,6 +34,7 @@ public class FindContours {
     private Mat cropOnlyUrineStripDrawing = new Mat();
     private Mat rotateDrawing = new Mat();
     public String[] cropImgFileList = new String[11];
+    public boolean[] suitabilityList = new boolean[11];
     int croppedImg_x = 0;
     int croppedImg_y = 0;
     int croppedImg_w = 0;
@@ -205,11 +206,11 @@ public class FindContours {
         //crop UrineStrip
         int w = cropOnlyUrineStrip.width(); //x = 10
         int h = cropOnlyUrineStrip.height();
-//        double sqr_h = (4.0 / 123.0) * h; //origin : almost 0.04
-        double sqr_h = (4.5 / 123.0) * h; //origin : almost 0.04
+        double sqr_h = (4.0 / 123.0) * h; //origin : almost 0.04
+//        double sqr_h = (5.0 / 123.0) * h; //origin : almost 0.04
 //        int sqr_h = w;
         double fbh = (2.1 / 123.0) * h; //first blank height | origin : almost 0.02
-        double bh = (3.55 / 123.0) * h; //blank height | origin : almost 0.021
+        double bh = (3.5 / 123.0) * h; //blank height | origin : almost 0.021
 
         Log.d("KSM", "setting.... \nw : " + cropOnlyUrineStrip.width() + "\nh : " + cropOnlyUrineStrip.height()
                 + "\nsqr_h : " + sqr_h + "\nfbh : " + fbh + "\nbh : " + bh);
@@ -279,7 +280,7 @@ public class FindContours {
 
     public Bitmap[] checkCropImg(){
         Bitmap[] result = new Bitmap[cropImgFileList.length];
-        double perfectArea = 0;
+        boolean suitability = true;
 
         for(int i = 0; i < cropImgFileList.length; i++){
             Mat croppedSqr = Imgcodecs.imread(cropImgFileList[i]);
@@ -288,52 +289,50 @@ public class FindContours {
                 System.exit(0);
             }
 
+//            Mat kernel = new Mat(3, 3, CvType.CV_32F);
+//            kernel.put(0,0,0,-1,0,-1,5,-1,0,-1,0);
+//            Mat sharpenCroppedSqr = new Mat();
+//            Imgproc.filter2D(croppedSqr, sharpenCroppedSqr, -1, kernel);
+
             Mat croppedSqrGray = new Mat();
             Imgproc.cvtColor(croppedSqr, croppedSqrGray, Imgproc.COLOR_BGR2GRAY);
 
             Mat cannyOutput = new Mat();
-            int threshold = 40;
-            Imgproc.Canny(croppedSqrGray, cannyOutput, threshold, threshold*2);
+            int threshold = 10;
+            Imgproc.Canny(croppedSqrGray, cannyOutput, threshold, 50);
 
-//            Mat adaptThresOutput = new Mat();
-//            int blockSize = 11;
-//            int C = 0;
-//            Imgproc.adaptiveThreshold(croppedSqrGray, adaptThresOutput, 255,
-//                    Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, blockSize, C);
+            Mat lines = new Mat();
+            Imgproc.HoughLines(cannyOutput, lines, 1.0, Math.PI / 180, 35);
 
-            List<MatOfPoint> contours = new ArrayList<>();
-            Mat hierarchy = new Mat();
-            Imgproc.findContours(cannyOutput, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+            Log.d("KSM", "Square ["+i+"]");
+            for (int x = 0; x < lines.rows(); x++) {
+                double rho = lines.get(x, 0)[0];
+                double theta = lines.get(x, 0)[1];
+                double angle = theta * (180/Math.PI);
+                double a = Math.cos(theta);
+                double b = Math.sin(theta);
+                double x0 = a * rho;
+                double y0 = b * rho;
+                Point pt1 = new Point(Math.round(x0 + croppedSqr.rows() * (-b)), Math.round(y0 + croppedSqr.rows() * (a)));
+                Point pt2 = new Point(Math.round(x0 - croppedSqr.cols() * (-b)), Math.round(y0 - croppedSqr.cols() * (a)));
+                Log.d("KSM", "Angle : "+angle);
+                Log.d("KSM", "Point 1 : "+pt1+", 2 : "+pt2);
+                Imgproc.line(croppedSqr, pt1, pt2, new Scalar(255, 0, 0), 2);
 
-            Mat drawCropSqr = Mat.zeros(croppedSqrGray.size(), CvType.CV_8UC3);
-            for(int j = 0; j < contours.size(); j++){
-                Rect boundedRect = Imgproc.boundingRect(contours.get(j));
-                Imgproc.rectangle(drawCropSqr, boundedRect, new Scalar(255,0,0), 1);
-//                Imgproc.drawContours(drawCropSqr, contours, j, new Scalar(255, 0, 0), Imgproc.LINE_4, 1, hierarchy);
+                if(angle > 80 && angle < 100){
+                    if((pt1.y > 5 && pt1.y < croppedSqr.height()-5) && (pt2.y > 5 && pt2.y < croppedSqr.height()-5)){
+                        suitability = false;
+                    }
+                }
             }
 
-            MatOfPoint largestContour = findMaxContour(contours);
-            double area = Imgproc.contourArea(largestContour);
-
-            if(i == 0){
-                perfectArea = area;
-            }
-
-            Log.d("KSM", "["+i+"]Largest Area size : "+area);
-            if(area > perfectArea-1000){
-                Log.d("KSM", "["+i+"] Area is True | perfectArea : "+perfectArea);
-            }else{
-                Log.d("KSM", "["+i+"] Area is False");
-            }
-
-            Rect boundedRect = Imgproc.boundingRect(largestContour);
-            Imgproc.rectangle(drawCropSqr, boundedRect, new Scalar(255,255,0), 1);
-//
+            suitabilityList[i] = suitability;
+            suitability = true;
 
             try{
-//                Imgproc.cvtColor(croppedSqrGray, croppedSqrGray, Imgproc.COLOR_BGR2RGB);
-                Bitmap bmp = Bitmap.createBitmap(drawCropSqr.cols(), drawCropSqr.rows(), Bitmap.Config.ARGB_8888);
-                Utils.matToBitmap(drawCropSqr, bmp);
+                Imgproc.cvtColor(croppedSqr, croppedSqr, Imgproc.COLOR_BGR2RGB);
+                Bitmap bmp = Bitmap.createBitmap(croppedSqr.cols(), croppedSqr.rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(croppedSqr, bmp);
 
                 result[i] = bmp;
             }catch(CvException e){
@@ -342,6 +341,10 @@ public class FindContours {
         }
 
         return result;
+    }
+
+    public boolean[] getSuitabilityList(){
+        return suitabilityList;
     }
 
     public String[] getCropImgFileList(){

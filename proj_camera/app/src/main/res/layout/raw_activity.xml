@@ -122,6 +122,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="30dp"
+        android:visibility="invisible"
         android:background="@drawable/capture_btn"
         android:text="촬영하기"
         android:textAlignment="center"

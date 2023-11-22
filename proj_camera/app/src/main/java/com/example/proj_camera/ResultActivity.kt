@@ -155,6 +155,18 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
+                                    progressDialog.dismiss()
+
+                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-0)")
+                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
+                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                                        .setCancelable(false)
+                                        .setPositiveButton("확인",
+                                            DialogInterface.OnClickListener{ dialog, id ->
+                                                startActivity(intent)
+                                                finish()
+                                            })
+                                        .show()
                                 }
                             }
                             1 -> {
@@ -169,6 +181,18 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
+                                    progressDialog.dismiss()
+
+                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-1)")
+                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
+                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                                        .setCancelable(false)
+                                        .setPositiveButton("확인",
+                                            DialogInterface.OnClickListener{ dialog, id ->
+                                                startActivity(intent)
+                                                finish()
+                                            })
+                                        .show()
                                 }
                             }
                             2 -> {
@@ -183,6 +207,18 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
+                                    progressDialog.dismiss()
+
+                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-2)")
+                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
+                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                                        .setCancelable(false)
+                                        .setPositiveButton("확인",
+                                            DialogInterface.OnClickListener{ dialog, id ->
+                                                startActivity(intent)
+                                                finish()
+                                            })
+                                        .show()
                                 }
                             }
                             3 -> {
@@ -197,6 +233,18 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
+                                    progressDialog.dismiss()
+
+                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-3)")
+                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
+                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                                        .setCancelable(false)
+                                        .setPositiveButton("확인",
+                                            DialogInterface.OnClickListener{ dialog, id ->
+                                                startActivity(intent)
+                                                finish()
+                                            })
+                                        .show()
                                 }
                             }
                             4 -> {
@@ -211,6 +259,18 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
+                                    progressDialog.dismiss()
+
+                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-4)")
+                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
+                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                                        .setCancelable(false)
+                                        .setPositiveButton("확인",
+                                            DialogInterface.OnClickListener{ dialog, id ->
+                                                startActivity(intent)
+                                                finish()
+                                            })
+                                        .show()
                                 }
                             }
                             5 -> {
@@ -225,6 +285,18 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
+                                    progressDialog.dismiss()
+
+                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-5)")
+                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
+                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                                        .setCancelable(false)
+                                        .setPositiveButton("확인",
+                                            DialogInterface.OnClickListener{ dialog, id ->
+                                                startActivity(intent)
+                                                finish()
+                                            })
+                                        .show()
                                 }
                             }
                             6 -> {
@@ -239,6 +311,18 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
+                                    progressDialog.dismiss()
+
+                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-6)")
+                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
+                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                                        .setCancelable(false)
+                                        .setPositiveButton("확인",
+                                            DialogInterface.OnClickListener{ dialog, id ->
+                                                startActivity(intent)
+                                                finish()
+                                            })
+                                        .show()
                                 }
                             }
                             7 -> {
@@ -253,6 +337,18 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
+                                    progressDialog.dismiss()
+
+                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-7)")
+                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
+                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                                        .setCancelable(false)
+                                        .setPositiveButton("확인",
+                                            DialogInterface.OnClickListener{ dialog, id ->
+                                                startActivity(intent)
+                                                finish()
+                                            })
+                                        .show()
                                 }
                             }
                             8 -> {
@@ -267,6 +363,18 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
+                                    progressDialog.dismiss()
+
+                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-8)")
+                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
+                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                                        .setCancelable(false)
+                                        .setPositiveButton("확인",
+                                            DialogInterface.OnClickListener{ dialog, id ->
+                                                startActivity(intent)
+                                                finish()
+                                            })
+                                        .show()
                                 }
                             }
                             9 -> {
@@ -281,6 +389,18 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
+                                    progressDialog.dismiss()
+
+                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-9)")
+                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
+                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                                        .setCancelable(false)
+                                        .setPositiveButton("확인",
+                                            DialogInterface.OnClickListener{ dialog, id ->
+                                                startActivity(intent)
+                                                finish()
+                                            })
+                                        .show()
                                 }
                             }
                             10 -> {
@@ -295,6 +415,18 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
+                                    progressDialog.dismiss()
+
+                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-10)")
+                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
+                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+                                        .setCancelable(false)
+                                        .setPositiveButton("확인",
+                                            DialogInterface.OnClickListener{ dialog, id ->
+                                                startActivity(intent)
+                                                finish()
+                                            })
+                                        .show()
                                 }
                             }
                         }

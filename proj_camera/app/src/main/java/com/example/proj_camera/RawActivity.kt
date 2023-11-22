@@ -1045,6 +1045,20 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
         viewBinding.accZTextView.text = "accZ : ${accZ.toInt()}"
         viewBinding.angleXZTextView.text = "angleXZ : ${angleXZ.toInt()}"
         viewBinding.angleYZTextView.text = "angleYZ : ${angleYZ.toInt()}"
+
+        if(accX > -1.0 && accX < 1.0){
+            if(accY > -1.0 && accY < 2.0){
+                if(accZ >= 9.0 && accZ < 11.0){
+                    viewBinding.imageCaptureBtn.visibility = View.VISIBLE
+                }else{
+                    viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                }
+            }else{
+                viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+            }
+        }else{
+            viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+        }
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int)  = Unit

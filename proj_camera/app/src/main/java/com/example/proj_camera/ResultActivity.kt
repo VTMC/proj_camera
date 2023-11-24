@@ -27,6 +27,7 @@ class ResultActivity : AppCompatActivity() {
     private var croppedCheckImg : Array<Bitmap>? = null
     private var suitabilityList : BooleanArray? = null
     private var croppedImgList : Array<String>? = null
+    private var croppedImgRGB : Array<DoubleArray>? = null
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
@@ -82,6 +83,7 @@ class ResultActivity : AppCompatActivity() {
                     croppedCheckImg = findContours.checkCropImg()
                     suitabilityList = findContours.getSuitabilityList()
                     croppedImgList = findContours.getCropImgFileList()
+                    croppedImgRGB = findContours.getCropImgRGBList()
                 }
             }catch(e : Exception){
                 Log.e("KSM", "findContour Error!", e)
@@ -129,6 +131,25 @@ class ResultActivity : AppCompatActivity() {
                             })
                         .show()
                 }else{
+                    //check sqr for retake picture
+//                    for(i in 1 until 11){
+//                        if(suitabilityList!![i] == false){
+//                            progressDialog.dismiss()
+//
+//                            dialogBuilder.setTitle("이미지 처리 오류 발생 (5-${i})")
+//                                .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
+//                                .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+//                                .setCancelable(false)
+//                                .setPositiveButton("확인",
+//                                    DialogInterface.OnClickListener { dialog, id ->
+//                                        startActivity(intent)
+//                                        finish()
+//                                    })
+//                                .show()
+//                            break
+//                        }
+//                    }
+
                     val pointedImageView = viewBinding.pointedImageView
 
                     pointedImageView.setImageBitmap(resultBmp)
@@ -155,19 +176,9 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
-                                    progressDialog.dismiss()
-
-                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-0)")
-                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
-                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                                        .setCancelable(false)
-                                        .setPositiveButton("확인",
-                                            DialogInterface.OnClickListener{ dialog, id ->
-                                                startActivity(intent)
-                                                finish()
-                                            })
-                                        .show()
                                 }
+
+                                viewBinding.img1RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
                             }
                             1 -> {
                                 val cropImageView = viewBinding.cropImg2
@@ -181,19 +192,9 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
-                                    progressDialog.dismiss()
-
-                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-1)")
-                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
-                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                                        .setCancelable(false)
-                                        .setPositiveButton("확인",
-                                            DialogInterface.OnClickListener{ dialog, id ->
-                                                startActivity(intent)
-                                                finish()
-                                            })
-                                        .show()
                                 }
+
+                                viewBinding.img2RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
                             }
                             2 -> {
                                 val cropImageView = viewBinding.cropImg3
@@ -207,19 +208,9 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
-                                    progressDialog.dismiss()
-
-                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-2)")
-                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
-                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                                        .setCancelable(false)
-                                        .setPositiveButton("확인",
-                                            DialogInterface.OnClickListener{ dialog, id ->
-                                                startActivity(intent)
-                                                finish()
-                                            })
-                                        .show()
                                 }
+
+                                viewBinding.img3RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
                             }
                             3 -> {
                                 val cropImageView = viewBinding.cropImg4
@@ -233,19 +224,9 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
-                                    progressDialog.dismiss()
-
-                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-3)")
-                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
-                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                                        .setCancelable(false)
-                                        .setPositiveButton("확인",
-                                            DialogInterface.OnClickListener{ dialog, id ->
-                                                startActivity(intent)
-                                                finish()
-                                            })
-                                        .show()
                                 }
+
+                                viewBinding.img4RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
                             }
                             4 -> {
                                 val cropImageView = viewBinding.cropImg5
@@ -259,19 +240,9 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
-                                    progressDialog.dismiss()
-
-                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-4)")
-                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
-                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                                        .setCancelable(false)
-                                        .setPositiveButton("확인",
-                                            DialogInterface.OnClickListener{ dialog, id ->
-                                                startActivity(intent)
-                                                finish()
-                                            })
-                                        .show()
                                 }
+
+                                viewBinding.img5RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
                             }
                             5 -> {
                                 val cropImageView = viewBinding.cropImg6
@@ -285,19 +256,9 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
-                                    progressDialog.dismiss()
-
-                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-5)")
-                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
-                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                                        .setCancelable(false)
-                                        .setPositiveButton("확인",
-                                            DialogInterface.OnClickListener{ dialog, id ->
-                                                startActivity(intent)
-                                                finish()
-                                            })
-                                        .show()
                                 }
+
+                                viewBinding.img6RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
                             }
                             6 -> {
                                 val cropImageView = viewBinding.cropImg7
@@ -311,19 +272,9 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
-                                    progressDialog.dismiss()
-
-                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-6)")
-                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
-                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                                        .setCancelable(false)
-                                        .setPositiveButton("확인",
-                                            DialogInterface.OnClickListener{ dialog, id ->
-                                                startActivity(intent)
-                                                finish()
-                                            })
-                                        .show()
                                 }
+
+                                viewBinding.img7RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
                             }
                             7 -> {
                                 val cropImageView = viewBinding.cropImg8
@@ -337,19 +288,9 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
-                                    progressDialog.dismiss()
-
-                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-7)")
-                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
-                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                                        .setCancelable(false)
-                                        .setPositiveButton("확인",
-                                            DialogInterface.OnClickListener{ dialog, id ->
-                                                startActivity(intent)
-                                                finish()
-                                            })
-                                        .show()
                                 }
+
+                                viewBinding.img8RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
                             }
                             8 -> {
                                 val cropImageView = viewBinding.cropImg9
@@ -363,19 +304,9 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
-                                    progressDialog.dismiss()
-
-                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-8)")
-                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
-                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                                        .setCancelable(false)
-                                        .setPositiveButton("확인",
-                                            DialogInterface.OnClickListener{ dialog, id ->
-                                                startActivity(intent)
-                                                finish()
-                                            })
-                                        .show()
                                 }
+
+                                viewBinding.img9RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
                             }
                             9 -> {
                                 val cropImageView = viewBinding.cropImg10
@@ -389,19 +320,9 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
-                                    progressDialog.dismiss()
-
-                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-9)")
-                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
-                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                                        .setCancelable(false)
-                                        .setPositiveButton("확인",
-                                            DialogInterface.OnClickListener{ dialog, id ->
-                                                startActivity(intent)
-                                                finish()
-                                            })
-                                        .show()
                                 }
+
+                                viewBinding.img10RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
                             }
                             10 -> {
                                 val cropImageView = viewBinding.cropImg11
@@ -415,19 +336,9 @@ class ResultActivity : AppCompatActivity() {
                                     suitabilityTxtView.text = "OK"
                                 }else{
                                     suitabilityTxtView.text = "NO"
-                                    progressDialog.dismiss()
-
-                                    dialogBuilder.setTitle("이미지 처리 오류 발생 (4-10)")
-                                        .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
-                                        .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                                        .setCancelable(false)
-                                        .setPositiveButton("확인",
-                                            DialogInterface.OnClickListener{ dialog, id ->
-                                                startActivity(intent)
-                                                finish()
-                                            })
-                                        .show()
                                 }
+
+                                viewBinding.img11RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
                             }
                         }
                     }

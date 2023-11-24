@@ -1,6 +1,8 @@
 package com.example.proj_camera;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import org.opencv.android.Utils;
@@ -33,8 +35,10 @@ public class FindContours {
     private Mat drawing = new Mat();
     private Mat cropOnlyUrineStripDrawing = new Mat();
     private Mat rotateDrawing = new Mat();
-    public String[] cropImgFileList = new String[11];
-    public boolean[] suitabilityList = new boolean[11];
+    public String[] cropImgFileList = new String[11]; //each sqr image path
+    public boolean[] suitabilityList = new boolean[11]; //each sqr suitability
+    public double[][] cropImgRGBList = new double[11][3]; //each sqr RGB
+    int[] selectedSqr = new int[11]; //adopted drawable
     int croppedImg_x = 0;
     int croppedImg_y = 0;
     int croppedImg_w = 0;
@@ -43,8 +47,18 @@ public class FindContours {
     int croppedSqr_y = 0;
     int croppedSqr_w = 0;
     int croppedSqr_h = 0;
-    double movedAngle = 0;
-    Mat cropOnlyUrineStripOut = new Mat();
+
+    int[] test2 = {R.drawable.test2_1, R.drawable.test2_2, R.drawable.test2_3, R.drawable.test2_4, R.drawable.test2_5, R.drawable.test2_6, R.drawable.test2_7};
+    int[] test3 = {R.drawable.test3_1, R.drawable.test3_2, R.drawable.test3_3, R.drawable.test3_4};
+    int[] test4 = {R.drawable.test4_1, R.drawable.test4_2, R.drawable.test4_3, R.drawable.test4_4, R.drawable.test4_5, R.drawable.test4_6};
+    int[] test5 = {R.drawable.test5_1, R.drawable.test5_2, R.drawable.test5_3, R.drawable.test5_4, R.drawable.test5_5};
+    int[] test6 = {R.drawable.test6_1, R.drawable.test6_2, R.drawable.test6_3, R.drawable.test6_4, R.drawable.test6_5, R.drawable.test6_6};
+    int[] test7 = {R.drawable.test7_1, R.drawable.test7_2};
+    int[] test8 = {R.drawable.test8_1, R.drawable.test8_2, R.drawable.test8_3, R.drawable.test8_4, R.drawable.test8_5};
+    int[] test9 = {R.drawable.test9_1, R.drawable.test9_2, R.drawable.test9_3, R.drawable.test9_4, R.drawable.test9_5, R.drawable.test9_6};
+    int[] test10 = {R.drawable.test10_1, R.drawable.test10_2, R.drawable.test10_3, R.drawable.test10_4, R.drawable.test10_5, R.drawable.test10_6, R.drawable.test10_7};
+    int[] test11 = {R.drawable.test11_1, R.drawable.test11_2, R.drawable.test11_3, R.drawable.test11_4, R.drawable.test11_5};
+
 
     //ddeteed
     private Mat final_drawing = new Mat();
@@ -294,6 +308,9 @@ public class FindContours {
 //            Mat sharpenCroppedSqr = new Mat();
 //            Imgproc.filter2D(croppedSqr, sharpenCroppedSqr, -1, kernel);
 
+            Mat croppedSqrDrawing = new Mat();
+            croppedSqr.copyTo(croppedSqrDrawing);
+
             Mat croppedSqrGray = new Mat();
             Imgproc.cvtColor(croppedSqr, croppedSqrGray, Imgproc.COLOR_BGR2GRAY);
 
@@ -317,7 +334,7 @@ public class FindContours {
                 Point pt2 = new Point(Math.round(x0 - croppedSqr.cols() * (-b)), Math.round(y0 - croppedSqr.cols() * (a)));
                 Log.d("KSM", "Angle : "+angle);
                 Log.d("KSM", "Point 1 : "+pt1+", 2 : "+pt2);
-                Imgproc.line(croppedSqr, pt1, pt2, new Scalar(255, 0, 0), 2);
+                Imgproc.line(croppedSqrDrawing, pt1, pt2, new Scalar(255, 0, 0), 2);
 
                 if(angle > 80 && angle < 100){
                     if((pt1.y > 5 && pt1.y < croppedSqr.height()-5) && (pt2.y > 5 && pt2.y < croppedSqr.height()-5)){
@@ -329,15 +346,84 @@ public class FindContours {
             suitabilityList[i] = suitability;
             suitability = true;
 
+            //getRGB value from croppedSqr
+            Imgproc.cvtColor(croppedSqr, croppedSqr, Imgproc.COLOR_BGR2RGB);
+            double totalRed = 0.0;
+            double totalGreen = 0.0;
+            double totalBlue = 0.0;
+            int totalPxCn = croppedSqr.width() * croppedSqr.height();
+            for(int k = 0; k < croppedSqr.width(); k++){
+                for(int l = 0; l < croppedSqr.height(); l++){
+                    double[] rgb = croppedSqr.get(l, k);
+                    double r = rgb[0];
+                    double g = rgb[1];
+                    double b = rgb[2];
+
+                    totalRed += r;
+                    totalGreen += g;
+                    totalBlue += b;
+                }
+            }
+            cropImgRGBList[i][0] = totalRed/totalPxCn; //avgRed
+            cropImgRGBList[i][1] = totalGreen/totalPxCn; //avgGreen
+            cropImgRGBList[i][2] = totalBlue/totalPxCn; //avgBlue
+
+            //compare RGB to choice
+            int gapR = 0;
+            int gapG = 0;
+            int gapB = 0;
+
+            switch(i){
+                case(0) -> {
+                    selectedSqr[i] = 0;
+                }
+                case(1) -> {
+                    for(int j=0; j < test2.length; j++){
+                        Bitmap drawableBmp = test2[j];
+                    }
+                }
+                case(2) -> {
+
+                }
+                case(3) -> {
+
+                }
+                case(4) -> {
+
+                }
+                case(5) -> {
+
+                }
+                case(6) -> {
+
+                }
+                case(7) -> {
+
+                }
+                case(8) -> {
+
+                }
+                case(9) -> {
+
+                }
+                case(10) -> {
+
+                }
+            }
+
             try{
-                Imgproc.cvtColor(croppedSqr, croppedSqr, Imgproc.COLOR_BGR2RGB);
-                Bitmap bmp = Bitmap.createBitmap(croppedSqr.cols(), croppedSqr.rows(), Bitmap.Config.ARGB_8888);
-                Utils.matToBitmap(croppedSqr, bmp);
+                Imgproc.cvtColor(croppedSqrDrawing, croppedSqrDrawing, Imgproc.COLOR_BGR2RGB);
+                Bitmap bmp = Bitmap.createBitmap(croppedSqrDrawing.cols(), croppedSqrDrawing.rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(croppedSqrDrawing, bmp);
 
                 result[i] = bmp;
             }catch(CvException e){
                 Log.e("KSM", "Mat to bitmap Error!!", e);
             }
+        }
+
+        for(int i=0; i < cropImgRGBList.length; i++){
+            Log.d("KSM", "CheckCropImg - Sqr["+i+"] AVG R : "+cropImgRGBList[i][0]+" / G : "+cropImgRGBList[i][1]+" / B : "+cropImgRGBList[i][2]);
         }
 
         return result;
@@ -349,6 +435,10 @@ public class FindContours {
 
     public String[] getCropImgFileList(){
         return cropImgFileList;
+    }
+
+    public double[][] getCropImgRGBList(){
+        return cropImgRGBList;
     }
 
 

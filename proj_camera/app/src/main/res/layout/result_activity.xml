@@ -244,6 +244,14 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/selectedImg1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
                     <TextView
                         android:id="@+id/suitabilityTxtView1"
                         android:layout_width="match_parent"
@@ -251,6 +259,14 @@
                         android:textAlignment="center"
                         android:text="OK"
                         android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/img1RGBTxt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="R : G : B : "
+                        android:textSize="15sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
 
@@ -282,6 +298,14 @@
                         android:padding="1dp"
                         android:layout_margin="20dp"
                         tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/selectedImg2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
                     <TextView
                         android:id="@+id/suitabilityTxtView2"
                         android:layout_width="match_parent"
@@ -289,6 +313,14 @@
                         android:textAlignment="center"
                         android:text="OK"
                         android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/img2RGBTxt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="R : G : B : "
+                        android:textSize="15sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
 
@@ -320,6 +352,14 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/selectedImg3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
                     <TextView
                         android:id="@+id/suitabilityTxtView3"
                         android:layout_width="match_parent"
@@ -327,6 +367,14 @@
                         android:textAlignment="center"
                         android:text="OK"
                         android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/img3RGBTxt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="R : G : B : "
+                        android:textSize="15sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
 
@@ -358,6 +406,14 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/selectedImg4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
                     <TextView
                         android:id="@+id/suitabilityTxtView4"
                         android:layout_width="match_parent"
@@ -365,6 +421,14 @@
                         android:textAlignment="center"
                         android:text="OK"
                         android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/img4RGBTxt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="R : G : B : "
+                        android:textSize="15sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
 
@@ -396,6 +460,14 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/selectedImg5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
                     <TextView
                         android:id="@+id/suitabilityTxtView5"
                         android:layout_width="match_parent"
@@ -403,6 +475,14 @@
                         android:textAlignment="center"
                         android:text="OK"
                         android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/img5RGBTxt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="R : G : B : "
+                        android:textSize="15sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
 
@@ -434,6 +514,14 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/selectedImg6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
                     <TextView
                         android:id="@+id/suitabilityTxtView6"
                         android:layout_width="match_parent"
@@ -441,6 +529,14 @@
                         android:textAlignment="center"
                         android:text="OK"
                         android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/img6RGBTxt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="R : G : B : "
+                        android:textSize="15sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
 
@@ -472,6 +568,14 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/selectedImg7"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
                     <TextView
                         android:id="@+id/suitabilityTxtView7"
                         android:layout_width="match_parent"
@@ -479,6 +583,14 @@
                         android:textAlignment="center"
                         android:text="OK"
                         android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/img7RGBTxt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="R : G : B : "
+                        android:textSize="15sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
 
@@ -510,6 +622,14 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/selectedImg8"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
                     <TextView
                         android:id="@+id/suitabilityTxtView8"
                         android:layout_width="match_parent"
@@ -517,6 +637,14 @@
                         android:textAlignment="center"
                         android:text="OK"
                         android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/img8RGBTxt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="R : G : B : "
+                        android:textSize="15sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
 
@@ -548,6 +676,14 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/selectedImg9"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
                     <TextView
                         android:id="@+id/suitabilityTxtView9"
                         android:layout_width="match_parent"
@@ -555,6 +691,14 @@
                         android:textAlignment="center"
                         android:text="OK"
                         android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/img9RGBTxt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="R : G : B : "
+                        android:textSize="15sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
 
@@ -586,6 +730,14 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/selectedImg10"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
                     <TextView
                         android:id="@+id/suitabilityTxtView10"
                         android:layout_width="match_parent"
@@ -593,6 +745,14 @@
                         android:textAlignment="center"
                         android:text="OK"
                         android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/img10RGBTxt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="R : G : B : "
+                        android:textSize="15sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
 
@@ -624,6 +784,14 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/selectedImg11"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
                     <TextView
                         android:id="@+id/suitabilityTxtView11"
                         android:layout_width="match_parent"
@@ -631,6 +799,14 @@
                         android:textAlignment="center"
                         android:text="OK"
                         android:textSize="20sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/img11RGBTxt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text="R : G : B : "
+                        android:textSize="15sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
             </LinearLayout>

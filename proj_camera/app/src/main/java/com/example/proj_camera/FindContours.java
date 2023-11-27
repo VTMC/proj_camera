@@ -1,6 +1,6 @@
 package com.example.proj_camera;
 
-import android.content.res.Resources;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
@@ -37,7 +37,7 @@ public class FindContours {
     private Mat rotateDrawing = new Mat();
     public String[] cropImgFileList = new String[11]; //each sqr image path
     public boolean[] suitabilityList = new boolean[11]; //each sqr suitability
-    public double[][] cropImgRGBList = new double[11][3]; //each sqr RGB
+    public int[][] cropImgRGBList = new int[11][3]; //each sqr RGB
     int[] selectedSqr = new int[11]; //adopted drawable
     int croppedImg_x = 0;
     int croppedImg_y = 0;
@@ -364,52 +364,9 @@ public class FindContours {
                     totalBlue += b;
                 }
             }
-            cropImgRGBList[i][0] = totalRed/totalPxCn; //avgRed
-            cropImgRGBList[i][1] = totalGreen/totalPxCn; //avgGreen
-            cropImgRGBList[i][2] = totalBlue/totalPxCn; //avgBlue
-
-            //compare RGB to choice
-            int gapR = 0;
-            int gapG = 0;
-            int gapB = 0;
-
-            switch(i){
-                case(0) -> {
-                    selectedSqr[i] = 0;
-                }
-                case(1) -> {
-                    for(int j=0; j < test2.length; j++){
-                        Bitmap drawableBmp = test2[j];
-                    }
-                }
-                case(2) -> {
-
-                }
-                case(3) -> {
-
-                }
-                case(4) -> {
-
-                }
-                case(5) -> {
-
-                }
-                case(6) -> {
-
-                }
-                case(7) -> {
-
-                }
-                case(8) -> {
-
-                }
-                case(9) -> {
-
-                }
-                case(10) -> {
-
-                }
-            }
+            cropImgRGBList[i][0] = (int)(totalRed/totalPxCn); //avgRed
+            cropImgRGBList[i][1] = (int)(totalGreen/totalPxCn); //avgGreen
+            cropImgRGBList[i][2] = (int)(totalBlue/totalPxCn); //avgBlue
 
             try{
                 Imgproc.cvtColor(croppedSqrDrawing, croppedSqrDrawing, Imgproc.COLOR_BGR2RGB);
@@ -437,7 +394,7 @@ public class FindContours {
         return cropImgFileList;
     }
 
-    public double[][] getCropImgRGBList(){
+    public int[][] getCropImgRGBList(){
         return cropImgRGBList;
     }
 
@@ -905,5 +862,9 @@ public class FindContours {
         String[] newArray = Arrays.copyOf(originArray, originArray.length + 1);
         newArray[originArray.length] = val;
         return newArray;
+    }
+
+    private Bitmap decodeResource(Context context, int resourceId){
+        return BitmapFactory.decodeResource(context.getResources(), resourceId);
     }
 }

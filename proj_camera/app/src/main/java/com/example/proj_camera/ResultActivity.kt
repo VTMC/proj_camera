@@ -3,13 +3,17 @@ package com.example.proj_camera
 import Utils.RotateTransformation
 import android.app.AlertDialog
 import android.app.ProgressDialog
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
@@ -21,13 +25,89 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 class ResultActivity : AppCompatActivity() {
+    var test2 = intArrayOf(
+        R.drawable.test2_1,
+        R.drawable.test2_2,
+        R.drawable.test2_3,
+        R.drawable.test2_4,
+        /*R.drawable.test2_5,
+        R.drawable.test2_6,
+        R.drawable.test2_7*/
+    )
+    var test3 =
+        intArrayOf(R.drawable.test3_1, R.drawable.test3_2, R.drawable.test3_3, R.drawable.test3_4)
+    var test4 = intArrayOf(
+        R.drawable.test4_1,
+        R.drawable.test4_2,
+        R.drawable.test4_3,
+        R.drawable.test4_4,
+        R.drawable.test4_5,
+        R.drawable.test4_6
+    )
+    var test5 = intArrayOf(
+        R.drawable.test5_1,
+        R.drawable.test5_2,
+        R.drawable.test5_3,
+        R.drawable.test5_4,
+        R.drawable.test5_5
+    )
+    var test6 = intArrayOf(
+        R.drawable.test6_1,
+        R.drawable.test6_2,
+        R.drawable.test6_3,
+        R.drawable.test6_4,
+        R.drawable.test6_5,
+        R.drawable.test6_6
+    )
+    var test7 = intArrayOf(R.drawable.test7_1, R.drawable.test7_2)
+    var test8 = intArrayOf(
+        R.drawable.test8_1,
+        R.drawable.test8_2,
+        R.drawable.test8_3,
+        R.drawable.test8_4,
+        R.drawable.test8_5
+    )
+    var test9 = intArrayOf(
+        R.drawable.test9_1,
+        R.drawable.test9_2,
+        R.drawable.test9_3,
+        R.drawable.test9_4,
+        R.drawable.test9_5,
+        R.drawable.test9_6
+    )
+    var test10 = intArrayOf(
+        R.drawable.test10_1,
+        R.drawable.test10_2,
+        R.drawable.test10_3,
+        R.drawable.test10_4,
+        R.drawable.test10_5,
+        R.drawable.test10_6,
+        R.drawable.test10_7
+    )
+    var test11 = intArrayOf(
+        R.drawable.test11_1,
+        R.drawable.test11_2,
+        R.drawable.test11_3,
+        R.drawable.test11_4,
+        R.drawable.test11_5
+    )
+
     private lateinit var viewBinding: ResultActivityBinding
     private var resultBmp : Bitmap? = null
     private var resultBmp2 : Bitmap? = null
     private var croppedCheckImg : Array<Bitmap>? = null
     private var suitabilityList : BooleanArray? = null
     private var croppedImgList : Array<String>? = null
-    private var croppedImgRGB : Array<DoubleArray>? = null
+    private var croppedImgRGB : Array<IntArray>? = null
+    private var selectedRGB : IntArray? = null
+
+    private lateinit var suitabilityTxtList:List<TextView>
+    private lateinit var cropImgList:List<ImageView>
+    private lateinit var cropCheckImgList:List<ImageView>
+    private lateinit var imgRGBTxtList:List<TextView>
+
+    private lateinit var testDrawableList : List<IntArray>
+    private lateinit var selectedImgList : List <ImageView>
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
@@ -39,6 +119,36 @@ class ResultActivity : AppCompatActivity() {
 
         viewBinding = ResultActivityBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
+
+        suitabilityTxtList = listOf(
+            viewBinding.suitabilityTxtView1, viewBinding.suitabilityTxtView2, viewBinding.suitabilityTxtView3,
+            viewBinding.suitabilityTxtView4, viewBinding.suitabilityTxtView5, viewBinding.suitabilityTxtView6,
+            viewBinding.suitabilityTxtView7, viewBinding.suitabilityTxtView8, viewBinding.suitabilityTxtView9,
+            viewBinding.suitabilityTxtView10, viewBinding.suitabilityTxtView11
+        )
+        cropImgList = listOf(
+            viewBinding.cropImg1, viewBinding.cropImg2, viewBinding.cropImg3, viewBinding.cropImg4, viewBinding.cropImg5,
+            viewBinding.cropImg6, viewBinding.cropImg7, viewBinding.cropImg8, viewBinding.cropImg9, viewBinding.cropImg10,
+            viewBinding.cropImg11
+        )
+        cropCheckImgList = listOf(
+            viewBinding.cropCheckImg1, viewBinding.cropCheckImg2, viewBinding.cropCheckImg3, viewBinding.cropCheckImg4,
+            viewBinding.cropCheckImg5, viewBinding.cropCheckImg6, viewBinding.cropCheckImg7, viewBinding.cropCheckImg8,
+            viewBinding.cropCheckImg9, viewBinding.cropCheckImg10, viewBinding.cropCheckImg11
+        )
+        imgRGBTxtList = listOf(
+            viewBinding.img1RGBTxt, viewBinding.img2RGBTxt, viewBinding.img3RGBTxt, viewBinding.img4RGBTxt, viewBinding.img5RGBTxt,
+            viewBinding.img6RGBTxt, viewBinding.img7RGBTxt, viewBinding.img8RGBTxt, viewBinding.img9RGBTxt, viewBinding.img10RGBTxt,
+            viewBinding.img11RGBTxt
+        )
+        testDrawableList = listOf(
+            test2, test3, test4, test5, test6, test7, test8, test9, test10, test11
+        )
+        selectedImgList = listOf(
+            viewBinding.selectedImg1, viewBinding.selectedImg2, viewBinding.selectedImg3, viewBinding.selectedImg4,
+            viewBinding.selectedImg5, viewBinding.selectedImg6, viewBinding.selectedImg7, viewBinding.selectedImg8,
+            viewBinding.selectedImg9, viewBinding.selectedImg10, viewBinding.selectedImg11
+        )
 
 //        val cameraId = intent.getStringExtra("cameraId")
 //        val imgageFormat = intent.getStringExtra("imageFormat")
@@ -131,24 +241,8 @@ class ResultActivity : AppCompatActivity() {
                             })
                         .show()
                 }else{
-                    //check sqr for retake picture
-//                    for(i in 1 until 11){
-//                        if(suitabilityList!![i] == false){
-//                            progressDialog.dismiss()
-//
-//                            dialogBuilder.setTitle("이미지 처리 오류 발생 (5-${i})")
-//                                .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
-//                                .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-//                                .setCancelable(false)
-//                                .setPositiveButton("확인",
-//                                    DialogInterface.OnClickListener { dialog, id ->
-//                                        startActivity(intent)
-//                                        finish()
-//                                    })
-//                                .show()
-//                            break
-//                        }
-//                    }
+
+                    selectedRGB = selectRGB(croppedImgRGB!!)
 
                     val pointedImageView = viewBinding.pointedImageView
 
@@ -163,183 +257,36 @@ class ResultActivity : AppCompatActivity() {
 
                         Log.d("KSM", "sqr[$i]'s suitability : ${suitabilityList!![i]}")
 
-                        when(i){
-                            0 -> {
-                                val cropImageView = viewBinding.cropImg1
-                                cropImageView.setImageBitmap(cropBmp)
+                        cropImgList[i].setImageBitmap(cropBmp)
+                        cropCheckImgList[i].setImageBitmap(croppedCheckImg?.get(i) ?: null)
 
-                                val cropCheckImageView = viewBinding.cropCheckImg1
-                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
+                        if(suitabilityList!![i] == true){
+                            suitabilityTxtList[i].text = "OK"
+                        }else{
+                            suitabilityTxtList[i].text = "NO"
 
-                                val suitabilityTxtView = viewBinding.suitabilityTxtView1
-                                if(suitabilityList!![i] == true){
-                                    suitabilityTxtView.text = "OK"
-                                }else{
-                                    suitabilityTxtView.text = "NO"
-                                }
+//                            progressDialog.dismiss()
+//
+//                            dialogBuilder.setTitle("이미지 처리 오류 발생 (5-${i})")
+//                                .setMessage("UrineStrip 내 사각형이 제대로 이미지 처리가 안 됐습니다.\n다시 촬영해주세요.")
+//                                .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
+//                                .setCancelable(false)
+//                                .setPositiveButton("확인",
+//                                    DialogInterface.OnClickListener { dialog, id ->
+//                                        startActivity(intent)
+//                                        finish()
+//                                    })
+//                                .show()
+//                            break
+                        }
 
-                                viewBinding.img1RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
-                            }
-                            1 -> {
-                                val cropImageView = viewBinding.cropImg2
-                                cropImageView.setImageBitmap(cropBmp)
+                        imgRGBTxtList[i].text = "R : ${croppedImgRGB!![i][0]}\nG : ${croppedImgRGB!![i][1]}\nB : ${croppedImgRGB!![i][2]}"
 
-                                val cropCheckImageView = viewBinding.cropCheckImg2
-                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
+                        if(i != 0){
+                            val resBmp = decodeResource(this@ResultActivity, selectedRGB!![i])
+                            val res = Bitmap.createScaledBitmap(resBmp, 80, 64, true)
 
-                                val suitabilityTxtView = viewBinding.suitabilityTxtView2
-                                if(suitabilityList!![i] == true){
-                                    suitabilityTxtView.text = "OK"
-                                }else{
-                                    suitabilityTxtView.text = "NO"
-                                }
-
-                                viewBinding.img2RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
-                            }
-                            2 -> {
-                                val cropImageView = viewBinding.cropImg3
-                                cropImageView.setImageBitmap(cropBmp)
-
-                                val cropCheckImageView = viewBinding.cropCheckImg3
-                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
-
-                                val suitabilityTxtView = viewBinding.suitabilityTxtView3
-                                if(suitabilityList!![i] == true){
-                                    suitabilityTxtView.text = "OK"
-                                }else{
-                                    suitabilityTxtView.text = "NO"
-                                }
-
-                                viewBinding.img3RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
-                            }
-                            3 -> {
-                                val cropImageView = viewBinding.cropImg4
-                                cropImageView.setImageBitmap(cropBmp)
-
-                                val cropCheckImageView = viewBinding.cropCheckImg4
-                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
-
-                                val suitabilityTxtView = viewBinding.suitabilityTxtView4
-                                if(suitabilityList!![i] == true){
-                                    suitabilityTxtView.text = "OK"
-                                }else{
-                                    suitabilityTxtView.text = "NO"
-                                }
-
-                                viewBinding.img4RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
-                            }
-                            4 -> {
-                                val cropImageView = viewBinding.cropImg5
-                                cropImageView.setImageBitmap(cropBmp)
-
-                                val cropCheckImageView = viewBinding.cropCheckImg5
-                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
-
-                                val suitabilityTxtView = viewBinding.suitabilityTxtView5
-                                if(suitabilityList!![i] == true){
-                                    suitabilityTxtView.text = "OK"
-                                }else{
-                                    suitabilityTxtView.text = "NO"
-                                }
-
-                                viewBinding.img5RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
-                            }
-                            5 -> {
-                                val cropImageView = viewBinding.cropImg6
-                                cropImageView.setImageBitmap(cropBmp)
-
-                                val cropCheckImageView = viewBinding.cropCheckImg6
-                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
-
-                                val suitabilityTxtView = viewBinding.suitabilityTxtView6
-                                if(suitabilityList!![i] == true){
-                                    suitabilityTxtView.text = "OK"
-                                }else{
-                                    suitabilityTxtView.text = "NO"
-                                }
-
-                                viewBinding.img6RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
-                            }
-                            6 -> {
-                                val cropImageView = viewBinding.cropImg7
-                                cropImageView.setImageBitmap(cropBmp)
-
-                                val cropCheckImageView = viewBinding.cropCheckImg7
-                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
-
-                                val suitabilityTxtView = viewBinding.suitabilityTxtView7
-                                if(suitabilityList!![i] == true){
-                                    suitabilityTxtView.text = "OK"
-                                }else{
-                                    suitabilityTxtView.text = "NO"
-                                }
-
-                                viewBinding.img7RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
-                            }
-                            7 -> {
-                                val cropImageView = viewBinding.cropImg8
-                                cropImageView.setImageBitmap(cropBmp)
-
-                                val cropCheckImageView = viewBinding.cropCheckImg8
-                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
-
-                                val suitabilityTxtView = viewBinding.suitabilityTxtView8
-                                if(suitabilityList!![i] == true){
-                                    suitabilityTxtView.text = "OK"
-                                }else{
-                                    suitabilityTxtView.text = "NO"
-                                }
-
-                                viewBinding.img8RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
-                            }
-                            8 -> {
-                                val cropImageView = viewBinding.cropImg9
-                                cropImageView.setImageBitmap(cropBmp)
-
-                                val cropCheckImageView = viewBinding.cropCheckImg9
-                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
-
-                                val suitabilityTxtView = viewBinding.suitabilityTxtView9
-                                if(suitabilityList!![i] == true){
-                                    suitabilityTxtView.text = "OK"
-                                }else{
-                                    suitabilityTxtView.text = "NO"
-                                }
-
-                                viewBinding.img9RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
-                            }
-                            9 -> {
-                                val cropImageView = viewBinding.cropImg10
-                                cropImageView.setImageBitmap(cropBmp)
-
-                                val cropCheckImageView = viewBinding.cropCheckImg10
-                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
-
-                                val suitabilityTxtView = viewBinding.suitabilityTxtView10
-                                if(suitabilityList!![i] == true){
-                                    suitabilityTxtView.text = "OK"
-                                }else{
-                                    suitabilityTxtView.text = "NO"
-                                }
-
-                                viewBinding.img10RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
-                            }
-                            10 -> {
-                                val cropImageView = viewBinding.cropImg11
-                                cropImageView.setImageBitmap(cropBmp)
-
-                                val cropCheckImageView = viewBinding.cropCheckImg11
-                                cropCheckImageView.setImageBitmap(croppedCheckImg?.get(i) ?: null)
-
-                                val suitabilityTxtView = viewBinding.suitabilityTxtView11
-                                if(suitabilityList!![i] == true){
-                                    suitabilityTxtView.text = "OK"
-                                }else{
-                                    suitabilityTxtView.text = "NO"
-                                }
-
-                                viewBinding.img11RGBTxt.text = "R : ${croppedImgRGB!![i][0].toInt()}\nG : ${croppedImgRGB!![i][1].toInt()}\nB : ${croppedImgRGB!![i][2].toInt()}"
-                            }
+                            selectedImgList[i].setImageBitmap(res)
                         }
                     }
 
@@ -371,6 +318,76 @@ class ResultActivity : AppCompatActivity() {
             viewBinding.pointedImageView.visibility = View.VISIBLE
             viewBinding.pointedImageView3.visibility = View.INVISIBLE
         }
+    }
+
+    fun selectRGB(cropSqrRGB : Array<IntArray>) : IntArray{
+        var resArray = IntArray(11, {0})
+
+        resArray[0] = 0 // The first Sqr have no meaning
+
+        for(i in 1 until cropSqrRGB.size){
+            val testArray = testDrawableList[i-1]
+
+            var minDistance = 0.0
+            var testArrayDis = DoubleArray(testArray.size, {0.0})
+
+            //get min distance by RGB Point.
+            for(j in testArray.indices){ //testArray.indices = 0 until testArray.size
+                val bmp = decodeResource(this, testArray[j])
+                val x = bmp.width/2
+                val y = bmp.height/2
+
+                val testRGB = getRGB(bmp, x, y)
+                val distance = getDistance(cropSqrRGB[i], testRGB)
+
+                if(j == 0){
+                    minDistance = distance
+                }else{
+                    if(distance < minDistance){
+                        minDistance = distance
+                    }
+                }
+
+                testArrayDis[j] = distance
+            }
+
+            //get drawable which is min distance
+            for(j in testArrayDis.indices){
+                if(minDistance == testArrayDis[j]){
+                    resArray[i] = testArray[j]
+                }
+            }
+        }
+
+        return resArray
+    }
+
+    private fun getRGB(bmp1 : Bitmap, x : Int, y : Int) : IntArray {
+
+        val bmp1RGB = bmp1.getPixel(x, y)
+
+        val a = Color.alpha(bmp1RGB)
+        val r = Color.red(bmp1RGB)
+        val g = Color.green(bmp1RGB)
+        val b = Color.blue(bmp1RGB)
+
+        val intArray = intArrayOf(r,g,b)
+
+        return intArray
+    }
+
+    private fun getDistance(RGBIntArray1 : IntArray, RGBIntArray2 : IntArray) : Double{
+        val R_dis = Math.pow((RGBIntArray1[0].toDouble() - RGBIntArray2[0].toDouble()),2.0)
+        val G_dis = Math.pow((RGBIntArray1[1].toDouble() - RGBIntArray2[1].toDouble()),2.0)
+        val B_dis = Math.pow((RGBIntArray1[2].toDouble() - RGBIntArray2[2].toDouble()),2.0)
+
+        val RGB_dis = Math.sqrt(R_dis+G_dis+B_dis)
+
+        return RGB_dis
+    }
+
+    fun decodeResource(context : Context, resourceId : Int): Bitmap{
+        return BitmapFactory.decodeResource(context.resources, resourceId)
     }
 
     companion object{

@@ -245,6 +245,14 @@
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
                     <ImageView
+                        android:id="@+id/RGBtoBitmap1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
                         android:id="@+id/selectedImg1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -299,6 +307,14 @@
                         android:layout_margin="20dp"
                         tools:srcCompat="@tools:sample/avatars" />
                     <ImageView
+                        android:id="@+id/RGBtoBitmap2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
                         android:id="@+id/selectedImg2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -346,6 +362,14 @@
                         tools:srcCompat="@tools:sample/avatars"/>
                     <ImageView
                         android:id="@+id/cropCheckImg3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/RGBtoBitmap3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="20dp"
@@ -407,6 +431,14 @@
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
                     <ImageView
+                        android:id="@+id/RGBtoBitmap4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
                         android:id="@+id/selectedImg4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -454,6 +486,14 @@
                         tools:srcCompat="@tools:sample/avatars"/>
                     <ImageView
                         android:id="@+id/cropCheckImg5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/RGBtoBitmap5"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="20dp"
@@ -515,6 +555,14 @@
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
                     <ImageView
+                        android:id="@+id/RGBtoBitmap6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
                         android:id="@+id/selectedImg6"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -569,6 +617,14 @@
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
                     <ImageView
+                        android:id="@+id/RGBtoBitmap7"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
                         android:id="@+id/selectedImg7"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -614,6 +670,14 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars"/>
+                    <ImageView
+                        android:id="@+id/RGBtoBitmap8"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
                     <ImageView
                         android:id="@+id/cropCheckImg8"
                         android:layout_width="wrap_content"
@@ -677,6 +741,14 @@
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
                     <ImageView
+                        android:id="@+id/RGBtoBitmap9"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
                         android:id="@+id/selectedImg9"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -731,6 +803,14 @@
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
                     <ImageView
+                        android:id="@+id/RGBtoBitmap10"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
                         android:id="@+id/selectedImg10"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -778,6 +858,14 @@
                         tools:srcCompat="@tools:sample/avatars"/>
                     <ImageView
                         android:id="@+id/cropCheckImg11"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/urine_square"
+                        android:padding="1dp"
+                        tools:srcCompat="@tools:sample/avatars" />
+                    <ImageView
+                        android:id="@+id/RGBtoBitmap11"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="20dp"

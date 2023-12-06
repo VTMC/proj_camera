@@ -8,7 +8,9 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -107,6 +109,7 @@ class ResultActivity : AppCompatActivity() {
     private lateinit var imgRGBTxtList:List<TextView>
 
     private lateinit var testDrawableList : List<IntArray>
+    private lateinit var RGBtoBitmap : List<ImageView>
     private lateinit var selectedImgList : List <ImageView>
 
     override fun onCreate(savedInstanceState: Bundle?){
@@ -143,6 +146,11 @@ class ResultActivity : AppCompatActivity() {
         )
         testDrawableList = listOf(
             test2, test3, test4, test5, test6, test7, test8, test9, test10, test11
+        )
+        RGBtoBitmap = listOf(
+            viewBinding.RGBtoBitmap1, viewBinding.RGBtoBitmap2, viewBinding.RGBtoBitmap3, viewBinding.RGBtoBitmap3, viewBinding.RGBtoBitmap4,
+            viewBinding.RGBtoBitmap5, viewBinding.RGBtoBitmap6, viewBinding.RGBtoBitmap7, viewBinding.RGBtoBitmap8, viewBinding.RGBtoBitmap9,
+            viewBinding.RGBtoBitmap10, viewBinding.RGBtoBitmap11
         )
         selectedImgList = listOf(
             viewBinding.selectedImg1, viewBinding.selectedImg2, viewBinding.selectedImg3, viewBinding.selectedImg4,
@@ -281,6 +289,14 @@ class ResultActivity : AppCompatActivity() {
                         }
 
                         imgRGBTxtList[i].text = "R : ${croppedImgRGB!![i][0]}\nG : ${croppedImgRGB!![i][1]}\nB : ${croppedImgRGB!![i][2]}"
+
+                        val avgRGBbmp = Bitmap.createBitmap(cropBmp.width, cropBmp.height, Bitmap.Config.ARGB_8888)
+                        val avgRGBcanvas = Canvas(avgRGBbmp)
+                        val paint = Paint()
+                        paint.color = Color.rgb(croppedImgRGB!![i][0], croppedImgRGB!![i][1], croppedImgRGB!![i][2])
+                        avgRGBcanvas.drawRect(0f, 0f, cropBmp.width.toFloat(), cropBmp.height.toFloat(), paint)
+
+                        RGBtoBitmap[i].setImageBitmap(avgRGBbmp)
 
                         if(i != 0){
                             val resBmp = decodeResource(this@ResultActivity, selectedRGB!![i])

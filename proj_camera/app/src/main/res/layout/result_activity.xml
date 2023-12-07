@@ -671,7 +671,7 @@
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars"/>
                     <ImageView
-                        android:id="@+id/RGBtoBitmap8"
+                        android:id="@+id/cropCheckImg8"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="20dp"
@@ -679,7 +679,7 @@
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
                     <ImageView
-                        android:id="@+id/cropCheckImg8"
+                        android:id="@+id/RGBtoBitmap8"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="20dp"

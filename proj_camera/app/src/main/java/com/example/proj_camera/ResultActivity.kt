@@ -148,9 +148,9 @@ class ResultActivity : AppCompatActivity() {
             test2, test3, test4, test5, test6, test7, test8, test9, test10, test11
         )
         RGBtoBitmap = listOf(
-            viewBinding.RGBtoBitmap1, viewBinding.RGBtoBitmap2, viewBinding.RGBtoBitmap3, viewBinding.RGBtoBitmap3, viewBinding.RGBtoBitmap4,
-            viewBinding.RGBtoBitmap5, viewBinding.RGBtoBitmap6, viewBinding.RGBtoBitmap7, viewBinding.RGBtoBitmap8, viewBinding.RGBtoBitmap9,
-            viewBinding.RGBtoBitmap10, viewBinding.RGBtoBitmap11
+            viewBinding.RGBtoBitmap1, viewBinding.RGBtoBitmap2, viewBinding.RGBtoBitmap3, viewBinding.RGBtoBitmap4, viewBinding.RGBtoBitmap5,
+            viewBinding.RGBtoBitmap6, viewBinding.RGBtoBitmap7, viewBinding.RGBtoBitmap8, viewBinding.RGBtoBitmap9, viewBinding.RGBtoBitmap10,
+            viewBinding.RGBtoBitmap11
         )
         selectedImgList = listOf(
             viewBinding.selectedImg1, viewBinding.selectedImg2, viewBinding.selectedImg3, viewBinding.selectedImg4,

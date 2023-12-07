@@ -36,6 +36,7 @@ public class FindContours {
     private Mat cropOnlyUrineStripDrawing = new Mat();
     private Mat rotateDrawing = new Mat();
     public String[] cropImgFileList = new String[11]; //each sqr image path
+//    public boolean[] suitabilityList = new boolean[11]; //each sqr suitability
     public boolean[] suitabilityList = new boolean[11]; //each sqr suitability
     public int[][] cropImgRGBList = new int[11][3]; //each sqr RGB
     int[] selectedSqr = new int[11]; //adopted drawable
@@ -134,123 +135,126 @@ public class FindContours {
         Log.d("KSM", "rotatedImg : " +
                 "\nw : "+cropOnlyUrineStrip.width()+"/ h : "+cropOnlyUrineStrip.height());
 
-        //rotatedImg make gray
-//        Mat rotatedImgGray = new Mat();
-//        Imgproc.cvtColor(rotatedImg, rotatedImgGray, Imgproc.COLOR_BGR2GRAY);
-//
-//        //threshold it
-//        Mat thresholdOutput = new Mat();
-//        Imgproc.threshold(rotatedImgGray, thresholdOutput, 130, 255, Imgproc.THRESH_BINARY);
-//
-//        //contour it
-//        List<MatOfPoint> contours = new ArrayList<>();
-//        Mat hierarchy = new Mat();
-//        Imgproc.findContours(thresholdOutput, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-//
-////        //crop and resize to Only UrineStrip
-//        Mat cropOnlyUrineStrip = cropUrineStrip(rotatedImg, contours, 50, 1000);
-//        Log.d("KSM", "cropOnlyUrineStrip : " +
-//                "\nw : "+cropOnlyUrineStrip.width()+"/ h : "+cropOnlyUrineStrip.height());
-//
-//        cropOnlyUrineStripOut = cropOnlyUrineStrip;
-//
-////        Log.i("KSM", "SOOOMTHINGGGGG");
-//
-//        //drawing cropOnlyUrineStrip to check result.
-//        drawing = Mat.zeros(cropOnlyUrineStrip.size(), CvType.CV_8UC3);
-//        Core.add(drawing, cropOnlyUrineStrip, drawing);
-//
-////        //cropOnlyUrineStrip gray
-////        Mat cropOnlyUrineStripGray = new Mat();
-////        Imgproc.cvtColor(cropOnlyUrineStrip, cropOnlyUrineStripGray, Imgproc.COLOR_BGR2GRAY);
-//
-//        //threshold to find sqr
-//        Mat sqr = colorRangeCut(cropOnlyUrineStrip, 90, 120);
-//
-////        Mat blurSqr = new Mat();
-////        Imgproc.medianBlur(sqr, blurSqr,9);
-////
-////        Mat mosaicSqr = mosaic(blurSqr, 4);
-//
-//        Mat sqrGray = new Mat();
-//        Imgproc.cvtColor(sqr, sqrGray, Imgproc.COLOR_BGR2GRAY);
-//
-//        Mat thresholdSqr = new Mat();
-//        Imgproc.threshold(sqrGray, thresholdSqr, 130, 255, Imgproc.THRESH_BINARY);
-//
-//        List<MatOfPoint> contoursSqr = new ArrayList<>();
-//        Mat hierarchySqr = new Mat();
-//        Imgproc.findContours(thresholdSqr, contoursSqr, hierarchySqr, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-//
-//        Mat croppedSqr = cropSqr(cropOnlyUrineStrip, contoursSqr, 30, 30);
-//
-//        Rect[] cropSqrRect = new Rect[11];
-//
-//        Log.d("KSM", "x : "+croppedSqr_x+" y : "+croppedSqr_y+" w : "+croppedSqr_w+" h : "+croppedSqr_h);
-//        cropSqrRect[7] = new Rect(croppedSqr_x, croppedSqr_y, croppedSqr_w, croppedSqr_h);
-//        Imgproc.rectangle(drawing, cropSqrRect[7], new Scalar(255, 255, 0), 1);
-//
-//        int j = 1;
-//
-//        //get below 3 sqr
-//        for(int i = 8; i < 11; i++){
-////            double y = croppedSqr_y + (croppedSqr_h * j) + ((croppedSqr_h * 0.5) * j);
-//            double y = croppedSqr_y + (croppedSqr_h * j) + ((croppedSqr_h * 0.4) * j);
-//            cropSqrRect[i] = new Rect(croppedSqr_x, (int)y, croppedSqr_w, croppedSqr_h);
-//            Imgproc.rectangle(drawing, cropSqrRect[i], new Scalar(255, 0, 0), 1);
-//            j++;
-//        }
-//
-//        j = 1;
-//
-//        //get upper 7 sqr
-//        for(int i= 6; i >= 0; i--){
-////            double y = croppedSqr_y - (croppedSqr_h * j) - ((croppedSqr_h * 0.5) * j);
-//            double y = croppedSqr_y - (croppedSqr_h * j) - ((croppedSqr_h * 0.4) * j) + (2 * j);
-//            cropSqrRect[i] = new Rect(croppedSqr_x, (int)y, croppedSqr_w, croppedSqr_h);
-//            Imgproc.rectangle(drawing, cropSqrRect[i], new Scalar(0, 0, 255), 1);
-//            j++;
-//        }
-//
-////        for(Rect sqrqr : cropSqrRect){
-////            Imgproc.rectangle(drawing, sqrqr, new Scalar(255, 0, 0), 1);
-////        }
-
         //getSqr existing method
         //crop UrineStrip
         int w = cropOnlyUrineStrip.width(); //x = 10
         int h = cropOnlyUrineStrip.height();
         double sqr_h = (4.0 / 123.0) * h; //origin : almost 0.04
-//        double sqr_h = (5.0 / 123.0) * h; //origin : almost 0.04
-//        int sqr_h = w;
-        double fbh = (2.1 / 123.0) * h; //first blank height | origin : almost 0.02
-        double bh = (3.5 / 123.0) * h; //blank height | origin : almost 0.021
+//        double fbh = (2.1 / 123.0) * h; //first blank height | origin : almost 0.02
+//        double bh = (3.5 / 123.0) * h; //blank height | origin : almost 0.021
 
-        Log.d("KSM", "setting.... \nw : " + cropOnlyUrineStrip.width() + "\nh : " + cropOnlyUrineStrip.height()
-                + "\nsqr_h : " + sqr_h + "\nfbh : " + fbh + "\nbh : " + bh);
-
+        //fbh 2.0~3.0 / bh 3.0~4.0 반복
         Rect[] sqrArray = new Rect[11];
+        Mat[] croppedSqr = new Mat[11];
+        boolean suitability = true;
+        boolean allSuitability = false;
+
+        for(double i = 2.0; i < 3.1; i+=0.1) {
+            for (double j = 3.0; j < 4.1; j+=0.1) {
+                double fbh = (i / 123.0) * h; //first blank height | origin : almost 0.02
+                double bh = (j / 123.0) * h; //blank height | origin : almost 0.021
+
+                Log.d("KSM", "setting.... \nw : " + cropOnlyUrineStrip.width() + "\nh : " + cropOnlyUrineStrip.height()
+                        + "\nsqr_h : " + sqr_h + "\nfbh : " + fbh + "("+i+")\nbh : " + bh+"("+j+")");
+
+                sqrArray[0] = new Rect(0, (int) fbh, w, (int) sqr_h); //0
+                croppedSqr[0] = new Mat(cropOnlyUrineStrip, sqrArray[0]);
+
+                for (int k = 1; k < 11; k++) { //1~10
+                    int y = (int) (fbh + (sqr_h * k) + (bh * k));
+
+                    Rect sqr = new Rect(0, y, w, (int) sqr_h);
+                    sqrArray[k] = sqr;
+
+                    Log.d("KSM", "Rect [" + k + "] : " + sqrArray[k]);
+
+                    croppedSqr[k] = new Mat(cropOnlyUrineStrip, sqrArray[k]);
+                }
+
+                for(int k=0; k < 11; i++){
+                    String fileName = "croppedSqr_"+k;
+                    Imgcodecs.imwrite(fileName, croppedSqr[k]);
+                }
+
+                for (int k = 0; k < croppedSqr.length; k++) {
+                    Mat croppedSqrGray = new Mat();
+                    Imgproc.cvtColor(croppedSqr[k], croppedSqrGray, Imgproc.COLOR_BGR2GRAY);
+
+                    Mat cannyOutput = new Mat();
+                    int threshold = 10;
+                    Imgproc.Canny(croppedSqrGray, cannyOutput, threshold, 50);
+
+                    Mat lines = new Mat();
+                    Imgproc.HoughLines(cannyOutput, lines, 1.0, Math.PI / 180, 80);
+
+                    Log.d("KSM", "Square ["+k+"]");
+                    Log.i("KSM", "lines.rows() : "+lines.rows());
+                    for (int x = 0; x < lines.rows(); x++) {
+                        double rho = lines.get(x, 0)[0];
+                        double theta = lines.get(x, 0)[1];
+                        double angle = theta * (180 / Math.PI);
+                        double a = Math.cos(theta);
+                        double b = Math.sin(theta);
+                        double x0 = a * rho;
+                        double y0 = b * rho;
+                        Point pt1 = new Point(Math.round(x0 + croppedSqr[k].rows() * (-b)), Math.round(y0 + croppedSqr[k].rows() * (a)));
+                        Point pt2 = new Point(Math.round(x0 - croppedSqr[k].cols() * (-b)), Math.round(y0 - croppedSqr[k].cols() * (a)));
+                        Log.d("KSM", "Angle : "+angle);
+                        Log.d("KSM", "Point 1 : "+pt1+", 2 : "+pt2);
+
+                        if (angle > 80 && angle < 100) {
+                            if ((pt1.y > 5 && pt1.y < croppedSqr[k].height() - 5) || (pt2.y > 5 && pt2.y < croppedSqr[k].height() - 5)) {
+                                suitability = false;
+                            }
+                        }
+                    }
+
+                    Log.d("KSM", "suitabilityList[" + k + "] = " + suitability);
+
+                    if (suitability == false) {
+                        Log.i("KSM", "-- suitabilityList have false BREAK!!!!");
+                        suitabilityList[k] = suitability;
+
+                        suitability = true;
+                        break;
+                    }else{
+                        suitabilityList[k] = suitability;
+                    }
+
+                    if(k == (croppedSqr.length - 1)){
+                        for (int l = 0; l < suitabilityList.length; l++) {
+                            if (suitabilityList[l] == false) {
+                                allSuitability = false;
+                                break;
+                            } else {
+                                allSuitability = true;
+                            }
+                        }
+                    }
+
+                    if (allSuitability == true) {
+                        Log.i("KSM", "-- suitabilityList all true cropSqr BREAK!!!!");
+                        break;
+                    }
+                }
+
+                if (allSuitability == true) {
+                    Log.i("KSM", "-- suitabilityList all true fbh BREAK!!!!");
+                    break;
+                }
+            }
+
+            if (allSuitability == true) {
+                Log.i("KSM", "-- suitabilityList all true fbh BREAK!!!!");
+                break;
+            }
+        }
 
         drawing = Mat.zeros(cropOnlyUrineStrip.size(), CvType.CV_8UC3);
         Core.add(drawing, cropOnlyUrineStrip, drawing);
 
-        sqrArray[0] = new Rect(0, (int)fbh, w, (int) sqr_h); //0
-        for (int i = 1; i < 11; i++) { //1~10
-            int y = (int) (fbh + (sqr_h * i) + (bh * i));
-
-            Rect sqr = new Rect(0, y, w, (int) sqr_h);
-            sqrArray[i] = sqr;
-        }
-
-        for (int i = 0; i < 11; i++) {
-            Log.d("KSM", "Rect [" + (i + 1) + "] : " + sqrArray[i]);
-        }
-
         //croppedImg = new Mat(img, rectCrop);
-        Mat[] croppedSqr = new Mat[11];
         for (int i = 0; i < 11; i++) {
-            croppedSqr[i] = new Mat(cropOnlyUrineStrip, sqrArray[i]);
-
             Imgproc.rectangle(drawing, sqrArray[i], new Scalar(255, 0, 0), 1);
 
             String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
@@ -320,8 +324,8 @@ public class FindContours {
 
             Mat lines = new Mat();
             Imgproc.HoughLines(cannyOutput, lines, 1.0, Math.PI / 180, 35);
-
-            Log.d("KSM", "Square ["+i+"]");
+//
+//            Log.d("KSM", "Square ["+i+"]");
             for (int x = 0; x < lines.rows(); x++) {
                 double rho = lines.get(x, 0)[0];
                 double theta = lines.get(x, 0)[1];
@@ -332,19 +336,19 @@ public class FindContours {
                 double y0 = b * rho;
                 Point pt1 = new Point(Math.round(x0 + croppedSqr.rows() * (-b)), Math.round(y0 + croppedSqr.rows() * (a)));
                 Point pt2 = new Point(Math.round(x0 - croppedSqr.cols() * (-b)), Math.round(y0 - croppedSqr.cols() * (a)));
-                Log.d("KSM", "Angle : "+angle);
-                Log.d("KSM", "Point 1 : "+pt1+", 2 : "+pt2);
+//                Log.d("KSM", "Angle : "+angle);
+//                Log.d("KSM", "Point 1 : "+pt1+", 2 : "+pt2);
                 Imgproc.line(croppedSqrDrawing, pt1, pt2, new Scalar(255, 0, 0), 2);
 
-                if(angle > 80 && angle < 100){
-                    if((pt1.y > 5 && pt1.y < croppedSqr.height()-5) && (pt2.y > 5 && pt2.y < croppedSqr.height()-5)){
-                        suitability = false;
-                    }
-                }
+//                if(angle > 80 && angle < 100){
+//                    if((pt1.y > 5 && pt1.y < croppedSqr.height()-5) && (pt2.y > 5 && pt2.y < croppedSqr.height()-5)){
+//                        suitability = false;
+//                    }
+//                }
             }
-
-            suitabilityList[i] = suitability;
-            suitability = true;
+//
+//            suitabilityList[i] = suitability;
+//            suitability = true;
 
             //getRGB value from croppedSqr
             Imgproc.cvtColor(croppedSqr, croppedSqr, Imgproc.COLOR_BGR2RGB);

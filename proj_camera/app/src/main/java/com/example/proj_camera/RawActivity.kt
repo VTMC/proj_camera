@@ -421,8 +421,8 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                         //get ScaleRatio width, height by (result.image => horizontal/previewSize => vertical)
 //                        val scaleRatio_w = dngWHBmp.width.toFloat() / previewSize.height.toFloat()
 //                        val scaleRatio_h = dngWHBmp.height.toFloat() / previewSize.width.toFloat()
-                        val scaleRatio_w = dngWHBmp.width.toFloat() / viewBinding.rawViewFinder.height.toFloat()
-                        val scaleRatio_h = dngWHBmp.height.toFloat() / viewBinding.rawViewFinder.width.toFloat()
+                        val scaleRatio_w = dngWHBmp.width.toDouble() / viewBinding.rawViewFinder.height.toDouble()
+                        val scaleRatio_h = dngWHBmp.height.toDouble() / viewBinding.rawViewFinder.width.toDouble()
                         Log.d("KSM", "scaleRatio[w, h] = ${scaleRatio_w}, ${scaleRatio_h}")
 
                         //set borderView size to result.image size
@@ -441,6 +441,9 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                                 "${rotatedWidth}, ${rotatedHeight}")
                         Log.d("KSM", "border[l,t,w,h] = ${borderLeft}, ${borderTop}, ${borderWidth}, ${borderHeight}")
 
+                        Log.i("KSM", "== DNG to TIFF START! ==")
+                        var timeStart = System.currentTimeMillis()
+
                         val ac_str = if(borderLeft != 0 || borderTop != 0 || borderWidth != 0 || borderHeight != 0){
                             arrayOf("-v", "-T", "-B", "${borderLeft}",
                                 "${borderTop}", "${borderWidth}", "${borderHeight}", "${pathName}")
@@ -452,7 +455,12 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 //                        val resultTiff = unprocessed_raw(ac_str, tiff_path)
 //                        val resultTiff = dngToTiff(pathName, tiff_path)
 //                        val resultBitmap = dngToBitmap(pathName)
+                        var timeEnd = System.currentTimeMillis()
                         Log.d("KSM", "resultTiff Result : ${resultTiff}")
+
+                        var takeTime = timeEnd - timeStart
+                        Log.i("KSM", "== DNG to TIFF END! ==")
+                        Log.i("KSM", "== IT Takes "+takeTime+"ms")
 
 //                        val tiffBmp = TiffConverter.convertTiffBmp(tiff_path+".tiff", tiffbmp_path, null, null)
 //
@@ -462,20 +470,28 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 //                            Log.d("KSM", "tiff convert to bmp failed!!")
 //                        }
 
+                        Log.i("KSM", "== TIFF to BMP START! ==")
+                        timeStart = System.currentTimeMillis()
                         val a_bmp = TiffBitmapFactory.decodeFile(File(tiff_path+".tiff"))
                         Log.d("KSM", "tiff size (w*h) : ${a_bmp.width}*${a_bmp.height}")
 
                         var pixel_x = (a_bmp.width) / 2
                         var pixel_y = (a_bmp.height) / 2
 
-                        val a_bmpRGB = getRGB(a_bmp, pixel_x, pixel_y)
-                        Log.d("KSM", "tiff to androidBitmap R/G/B : Pos[${pixel_x},${pixel_y}] = ${a_bmpRGB[0]}/${a_bmpRGB[1]}/${a_bmpRGB[2]}")
+                        /*val a_bmpRGB = getRGB(a_bmp, pixel_x, pixel_y)
+                        Log.d("KSM", "tiff to androidBitmap R/G/B : Pos[${pixel_x},${pixel_y}] = ${a_bmpRGB[0]}/${a_bmpRGB[1]}/${a_bmpRGB[2]}")*/
 
                         val saveBmp = AndroidBmpUtil.save(a_bmp, bmp_path)
+                        timeEnd = System.currentTimeMillis()
 
                         if(saveBmp){
+                            var takeTime = timeEnd - timeStart
+                            Log.i("KSM", "== TIFF to BMP END! ==")
+                            Log.i("KSM", "== IT Takes "+takeTime+"ms")
                             Log.d("KSM", "AndroidBmpUtil Bitmap saved bmp!!")
                         }else{
+                            Log.i("KSM", "== TIFF to BMP END! ==")
+                            Log.i("KSM", "== IT Takes "+takeTime+"ms")
                             Log.d("KSM", "AndroidBmpUtil Bitmap saved bmp failed!!")
                         }
 

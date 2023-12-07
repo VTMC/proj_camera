@@ -60,6 +60,10 @@ public class FindContours {
     int[] test10 = {R.drawable.test10_1, R.drawable.test10_2, R.drawable.test10_3, R.drawable.test10_4, R.drawable.test10_5, R.drawable.test10_6, R.drawable.test10_7};
     int[] test11 = {R.drawable.test11_1, R.drawable.test11_2, R.drawable.test11_3, R.drawable.test11_4, R.drawable.test11_5};
 
+    int houghLineThresholdValue = 50; //50
+    int cannyThreshold1 = 10; //10
+    int cannyThreshold2 = 30; //50
+
 
     //ddeteed
     private Mat final_drawing = new Mat();
@@ -171,21 +175,20 @@ public class FindContours {
                     croppedSqr[k] = new Mat(cropOnlyUrineStrip, sqrArray[k]);
                 }
 
-                for(int k=0; k < 11; i++){
-                    String fileName = "croppedSqr_"+k;
-                    Imgcodecs.imwrite(fileName, croppedSqr[k]);
-                }
+//                for(int k=0; k < 11; i++){
+//                    String fileName = "croppedSqr_"+k;
+//                    Imgcodecs.imwrite(fileName, croppedSqr[k]);
+//                }
 
                 for (int k = 0; k < croppedSqr.length; k++) {
                     Mat croppedSqrGray = new Mat();
                     Imgproc.cvtColor(croppedSqr[k], croppedSqrGray, Imgproc.COLOR_BGR2GRAY);
 
                     Mat cannyOutput = new Mat();
-                    int threshold = 10;
-                    Imgproc.Canny(croppedSqrGray, cannyOutput, threshold, 50);
+                    Imgproc.Canny(croppedSqrGray, cannyOutput, cannyThreshold1, cannyThreshold2);
 
                     Mat lines = new Mat();
-                    Imgproc.HoughLines(cannyOutput, lines, 1.0, Math.PI / 180, 80);
+                    Imgproc.HoughLines(cannyOutput, lines, 1.0, Math.PI / 180, houghLineThresholdValue);
 
                     Log.d("KSM", "Square ["+k+"]");
                     Log.i("KSM", "lines.rows() : "+lines.rows());
@@ -203,7 +206,7 @@ public class FindContours {
                         Log.d("KSM", "Point 1 : "+pt1+", 2 : "+pt2);
 
                         if (angle > 80 && angle < 100) {
-                            if ((pt1.y > 5 && pt1.y < croppedSqr[k].height() - 5) || (pt2.y > 5 && pt2.y < croppedSqr[k].height() - 5)) {
+                            if ((pt1.y > 2 && pt1.y < croppedSqr[k].height() - 2) || (pt2.y > 2 && pt2.y < croppedSqr[k].height() - 2)) {
                                 suitability = false;
                             }
                         }
@@ -319,11 +322,10 @@ public class FindContours {
             Imgproc.cvtColor(croppedSqr, croppedSqrGray, Imgproc.COLOR_BGR2GRAY);
 
             Mat cannyOutput = new Mat();
-            int threshold = 10;
-            Imgproc.Canny(croppedSqrGray, cannyOutput, threshold, 50);
+            Imgproc.Canny(croppedSqrGray, cannyOutput, cannyThreshold1, cannyThreshold2);
 
             Mat lines = new Mat();
-            Imgproc.HoughLines(cannyOutput, lines, 1.0, Math.PI / 180, 35);
+            Imgproc.HoughLines(cannyOutput, lines, 1.0, Math.PI / 180, houghLineThresholdValue);
 //
 //            Log.d("KSM", "Square ["+i+"]");
             for (int x = 0; x < lines.rows(); x++) {

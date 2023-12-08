@@ -376,8 +376,15 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 //                    res_plane[0].buffer.limit((crop_top + crop_h) * resultImage.width + crop_left + crop_w)
 //                    crop_buf.put(res_plane[0].buffer)
 
+                    Log.i("KSM", "== save DNG file START! ==")
+                    var timeStart = System.currentTimeMillis()
 
                     outputUri = saveResult(result)
+
+                    var timeEnd = System.currentTimeMillis()
+                    var takeTime = timeEnd - timeStart
+                    Log.i("KSM", "== save DNG file END! ==")
+                    Log.i("KSM", "== IT Takes "+takeTime+"ms ==")
 //                    Log.d("KSM", "Image saved: ${outputUri.toString()}") //- 이전의 흔적 (이미지 저장)
 
                     //Path를 얻기 위한 과정
@@ -460,7 +467,7 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 
                         var takeTime = timeEnd - timeStart
                         Log.i("KSM", "== DNG to TIFF END! ==")
-                        Log.i("KSM", "== IT Takes "+takeTime+"ms")
+                        Log.i("KSM", "== IT Takes "+takeTime+"ms ==")
 
 //                        val tiffBmp = TiffConverter.convertTiffBmp(tiff_path+".tiff", tiffbmp_path, null, null)
 //
@@ -487,11 +494,11 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                         if(saveBmp){
                             var takeTime = timeEnd - timeStart
                             Log.i("KSM", "== TIFF to BMP END! ==")
-                            Log.i("KSM", "== IT Takes "+takeTime+"ms")
+                            Log.i("KSM", "== IT Takes "+takeTime+"ms ==")
                             Log.d("KSM", "AndroidBmpUtil Bitmap saved bmp!!")
                         }else{
                             Log.i("KSM", "== TIFF to BMP END! ==")
-                            Log.i("KSM", "== IT Takes "+takeTime+"ms")
+                            Log.i("KSM", "== IT Takes "+takeTime+"ms ==")
                             Log.d("KSM", "AndroidBmpUtil Bitmap saved bmp failed!!")
                         }
 

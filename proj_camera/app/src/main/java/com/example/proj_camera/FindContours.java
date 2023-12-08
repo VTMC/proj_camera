@@ -49,6 +49,9 @@ public class FindContours {
     int croppedSqr_w = 0;
     int croppedSqr_h = 0;
 
+    Mat[] croppedSqr = new Mat[11];
+    Mat[] croppedSqrDrawing = new Mat[11];
+
     int[] test2 = {R.drawable.test2_1, R.drawable.test2_2, R.drawable.test2_3, R.drawable.test2_4, R.drawable.test2_5, R.drawable.test2_6, R.drawable.test2_7};
     int[] test3 = {R.drawable.test3_1, R.drawable.test3_2, R.drawable.test3_3, R.drawable.test3_4};
     int[] test4 = {R.drawable.test4_1, R.drawable.test4_2, R.drawable.test4_3, R.drawable.test4_4, R.drawable.test4_5, R.drawable.test4_6};
@@ -70,6 +73,9 @@ public class FindContours {
     //eedbdde
 
     public FindContours(String path){
+        Log.i("KSM", "== FindContours contstructor START! ==");
+        var timeStart = System.currentTimeMillis();
+
         src = Imgcodecs.imread(path);
         if(src.empty()){
             Log.e("KSM", "Cannot Read image : "+path);
@@ -82,10 +88,16 @@ public class FindContours {
         Imgproc.cvtColor(enhancedSrc, srcGray, Imgproc.COLOR_BGR2GRAY);
 
 //        Imgproc.blur(srcGray, srcGray, new Size(3,3));
+        var timeEnd = System.currentTimeMillis();
+        var takeTime = timeEnd - timeStart;
+        Log.i("KSM", "== FindContours contstructor END! ==");
+        Log.i("KSM", "== IT Takes "+takeTime+"ms ==");
     }
 
     public Bitmap update(){
-        Log.d("KSM", "update STARTED!!");
+        Log.i("KSM", "== FindContours.update() START! ==");
+        var timeStart = System.currentTimeMillis();
+
         Bitmap bmp = null;
 
         //new method - threshold
@@ -126,12 +138,18 @@ public class FindContours {
 
         Log.d("KSM", "bmp width : "+bmp.getWidth()+" / height : "+bmp.getHeight());
 
-        Log.d("KSM", "update END!!");
+        var timeEnd = System.currentTimeMillis();
+        var takeTime = timeEnd - timeStart;
+        Log.i("KSM", "== FindContours.update() END! ==");
+        Log.i("KSM", "== IT Takes "+takeTime+"ms ==");
+
         return bmp;
     }
 
     public Bitmap getSqr() {
-        Log.d("KSM", "getSqr STARTED!!");
+        Log.i("KSM", "== FindContours.getSqr() START! ==");
+        var timeStart = System.currentTimeMillis();
+
         Bitmap bmp = null;
 
 
@@ -149,7 +167,6 @@ public class FindContours {
 
         //fbh 2.0~3.0 / bh 3.0~4.0 반복
         Rect[] sqrArray = new Rect[11];
-        Mat[] croppedSqr = new Mat[11];
         boolean suitability = true;
         boolean allSuitability = false;
 
@@ -163,6 +180,7 @@ public class FindContours {
 
                 sqrArray[0] = new Rect(0, (int) fbh, w, (int) sqr_h); //0
                 croppedSqr[0] = new Mat(cropOnlyUrineStrip, sqrArray[0]);
+                croppedSqrDrawing[0] = croppedSqr[0].clone();
 
                 for (int k = 1; k < 11; k++) { //1~10
                     int y = (int) (fbh + (sqr_h * k) + (bh * k));
@@ -173,12 +191,8 @@ public class FindContours {
                     Log.d("KSM", "Rect [" + k + "] : " + sqrArray[k]);
 
                     croppedSqr[k] = new Mat(cropOnlyUrineStrip, sqrArray[k]);
+                    croppedSqrDrawing[k] = croppedSqr[k].clone();
                 }
-
-//                for(int k=0; k < 11; i++){
-//                    String fileName = "croppedSqr_"+k;
-//                    Imgcodecs.imwrite(fileName, croppedSqr[k]);
-//                }
 
                 for (int k = 0; k < croppedSqr.length; k++) {
                     Mat croppedSqrGray = new Mat();
@@ -191,7 +205,7 @@ public class FindContours {
                     Imgproc.HoughLines(cannyOutput, lines, 1.0, Math.PI / 180, houghLineThresholdValue);
 
                     Log.d("KSM", "Square ["+k+"]");
-                    Log.i("KSM", "lines.rows() : "+lines.rows());
+//                    Log.i("KSM", "lines.rows() : "+lines.rows());
                     for (int x = 0; x < lines.rows(); x++) {
                         double rho = lines.get(x, 0)[0];
                         double theta = lines.get(x, 0)[1];
@@ -202,14 +216,23 @@ public class FindContours {
                         double y0 = b * rho;
                         Point pt1 = new Point(Math.round(x0 + croppedSqr[k].rows() * (-b)), Math.round(y0 + croppedSqr[k].rows() * (a)));
                         Point pt2 = new Point(Math.round(x0 - croppedSqr[k].cols() * (-b)), Math.round(y0 - croppedSqr[k].cols() * (a)));
-                        Log.d("KSM", "Angle : "+angle);
-                        Log.d("KSM", "Point 1 : "+pt1+", 2 : "+pt2);
+//                        Log.d("KSM", "Angle : "+angle);
+//                        Log.d("KSM", "Point 1 : "+pt1+", 2 : "+pt2);
+                        Imgproc.line(croppedSqrDrawing[k], pt1, pt2, new Scalar(255, 0, 0), 2);
 
+                        //USUALLY CASE
                         if (angle > 80 && angle < 100) {
                             if ((pt1.y > 2 && pt1.y < croppedSqr[k].height() - 2) || (pt2.y > 2 && pt2.y < croppedSqr[k].height() - 2)) {
                                 suitability = false;
                             }
                         }
+
+                        //BAD CASE
+                        /*if(k == croppedSqr.length - 1){
+                            suitability = false;
+                        }else{
+                            suitability = true;
+                        }*/
                     }
 
                     Log.d("KSM", "suitabilityList[" + k + "] = " + suitability);
@@ -256,7 +279,7 @@ public class FindContours {
         drawing = Mat.zeros(cropOnlyUrineStrip.size(), CvType.CV_8UC3);
         Core.add(drawing, cropOnlyUrineStrip, drawing);
 
-        //croppedImg = new Mat(img, rectCrop);
+        //save cropped Img
         for (int i = 0; i < 11; i++) {
             Imgproc.rectangle(drawing, sqrArray[i], new Scalar(255, 0, 0), 1);
 
@@ -295,72 +318,78 @@ public class FindContours {
             Log.e("KSM", "Mat to bitmap Error!!", e);
         }
 
-        Log.d("KSM", "update END!!");
+        var timeEnd = System.currentTimeMillis();
+        var takeTime = timeEnd - timeStart;
+        Log.i("KSM", "== FindContours.getSqr() END! ==");
+        Log.i("KSM", "== IT Takes "+takeTime+"ms ==");
         return bmp;
     }
 
     public Bitmap[] checkCropImg(){
-        Bitmap[] result = new Bitmap[cropImgFileList.length];
-        boolean suitability = true;
+        Log.i("KSM", "== FindContours.ckeckCropImg() START! ==");
+        var timeStart = System.currentTimeMillis();
 
-        for(int i = 0; i < cropImgFileList.length; i++){
-            Mat croppedSqr = Imgcodecs.imread(cropImgFileList[i]);
-            if(croppedSqr.empty()){
-                Log.e("KSM", "Cannot Read image : "+cropImgFileList[i]);
-                System.exit(0);
-            }
+        Bitmap[] result = new Bitmap[cropImgFileList.length];
+//        boolean suitability = true;
+
+        for(int i = 0; i < croppedSqr.length; i++){
+//            Mat croppedSqr = Imgcodecs.imread(cropImgFileList[i]);
+//            if(croppedSqr.empty()){
+//                Log.e("KSM", "Cannot Read image : "+cropImgFileList[i]);
+//                System.exit(0);
+//            }
 
 //            Mat kernel = new Mat(3, 3, CvType.CV_32F);
 //            kernel.put(0,0,0,-1,0,-1,5,-1,0,-1,0);
 //            Mat sharpenCroppedSqr = new Mat();
 //            Imgproc.filter2D(croppedSqr, sharpenCroppedSqr, -1, kernel);
 
-            Mat croppedSqrDrawing = new Mat();
-            croppedSqr.copyTo(croppedSqrDrawing);
-
-            Mat croppedSqrGray = new Mat();
-            Imgproc.cvtColor(croppedSqr, croppedSqrGray, Imgproc.COLOR_BGR2GRAY);
-
-            Mat cannyOutput = new Mat();
-            Imgproc.Canny(croppedSqrGray, cannyOutput, cannyThreshold1, cannyThreshold2);
-
-            Mat lines = new Mat();
-            Imgproc.HoughLines(cannyOutput, lines, 1.0, Math.PI / 180, houghLineThresholdValue);
+//            Mat croppedSqrDrawing = new Mat();
+//            croppedSqr.copyTo(croppedSqrDrawing);
 //
+//            Mat croppedSqrGray = new Mat();
+//            Imgproc.cvtColor(croppedSqr, croppedSqrGray, Imgproc.COLOR_BGR2GRAY);
+//
+//            Mat cannyOutput = new Mat();
+//            Imgproc.Canny(croppedSqrGray, cannyOutput, cannyThreshold1, cannyThreshold2);
+//
+//            Mat lines = new Mat();
+//            Imgproc.HoughLines(cannyOutput, lines, 1.0, Math.PI / 180, houghLineThresholdValue);
+
 //            Log.d("KSM", "Square ["+i+"]");
-            for (int x = 0; x < lines.rows(); x++) {
-                double rho = lines.get(x, 0)[0];
-                double theta = lines.get(x, 0)[1];
-                double angle = theta * (180/Math.PI);
-                double a = Math.cos(theta);
-                double b = Math.sin(theta);
-                double x0 = a * rho;
-                double y0 = b * rho;
-                Point pt1 = new Point(Math.round(x0 + croppedSqr.rows() * (-b)), Math.round(y0 + croppedSqr.rows() * (a)));
-                Point pt2 = new Point(Math.round(x0 - croppedSqr.cols() * (-b)), Math.round(y0 - croppedSqr.cols() * (a)));
-//                Log.d("KSM", "Angle : "+angle);
+//            for (int x = 0; x < lines.rows(); x++) {
+//                double rho = lines.get(x, 0)[0];
+//                double theta = lines.get(x, 0)[1];
+//                double angle = theta * (180/Math.PI);
+//                double a = Math.cos(theta);
+//                double b = Math.sin(theta);
+//                double x0 = a * rho;
+//                double y0 = b * rho;
+//                Point pt1 = new Point(Math.round(x0 + croppedSqr.rows() * (-b)), Math.round(y0 + croppedSqr.rows() * (a)));
+//                Point pt2 = new Point(Math.round(x0 - croppedSqr.cols() * (-b)), Math.round(y0 - croppedSqr.cols() * (a)));
+////                Log.d("KSM", "Angle : "+angle);
 //                Log.d("KSM", "Point 1 : "+pt1+", 2 : "+pt2);
-                Imgproc.line(croppedSqrDrawing, pt1, pt2, new Scalar(255, 0, 0), 2);
+//                Imgproc.line(croppedSqrDrawing, pt1, pt2, new Scalar(255, 0, 0), 2);
 
 //                if(angle > 80 && angle < 100){
 //                    if((pt1.y > 5 && pt1.y < croppedSqr.height()-5) && (pt2.y > 5 && pt2.y < croppedSqr.height()-5)){
 //                        suitability = false;
 //                    }
 //                }
-            }
+//            }
 //
 //            suitabilityList[i] = suitability;
 //            suitability = true;
 
             //getRGB value from croppedSqr
-            Imgproc.cvtColor(croppedSqr, croppedSqr, Imgproc.COLOR_BGR2RGB);
+            Imgproc.cvtColor(croppedSqr[i], croppedSqr[i], Imgproc.COLOR_BGR2RGB);
             double totalRed = 0.0;
             double totalGreen = 0.0;
             double totalBlue = 0.0;
-            int totalPxCn = croppedSqr.width() * croppedSqr.height();
-            for(int k = 0; k < croppedSqr.width(); k++){
-                for(int l = 0; l < croppedSqr.height(); l++){
-                    double[] rgb = croppedSqr.get(l, k);
+            int totalPxCn = croppedSqr[i].width() * croppedSqr[i].height();
+            for(int k = 0; k < croppedSqr[i].width(); k++){
+                for(int l = 0; l < croppedSqr[i].height(); l++){
+                    double[] rgb = croppedSqr[i].get(l, k);
                     double r = rgb[0];
                     double g = rgb[1];
                     double b = rgb[2];
@@ -375,9 +404,9 @@ public class FindContours {
             cropImgRGBList[i][2] = (int)(totalBlue/totalPxCn); //avgBlue
 
             try{
-                Imgproc.cvtColor(croppedSqrDrawing, croppedSqrDrawing, Imgproc.COLOR_BGR2RGB);
-                Bitmap bmp = Bitmap.createBitmap(croppedSqrDrawing.cols(), croppedSqrDrawing.rows(), Bitmap.Config.ARGB_8888);
-                Utils.matToBitmap(croppedSqrDrawing, bmp);
+                Imgproc.cvtColor(croppedSqrDrawing[i], croppedSqrDrawing[i], Imgproc.COLOR_BGR2RGB);
+                Bitmap bmp = Bitmap.createBitmap(croppedSqrDrawing[i].cols(), croppedSqrDrawing[i].rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(croppedSqrDrawing[i], bmp);
 
                 result[i] = bmp;
             }catch(CvException e){
@@ -388,6 +417,11 @@ public class FindContours {
         for(int i=0; i < cropImgRGBList.length; i++){
             Log.d("KSM", "CheckCropImg - Sqr["+i+"] AVG R : "+cropImgRGBList[i][0]+" / G : "+cropImgRGBList[i][1]+" / B : "+cropImgRGBList[i][2]);
         }
+
+        var timeEnd = System.currentTimeMillis();
+        var takeTime = timeEnd - timeStart;
+        Log.i("KSM", "== FindContours.checkCropImg() END! ==");
+        Log.i("KSM", "== IT Takes "+takeTime+"ms ==");
 
         return result;
     }

@@ -182,6 +182,40 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
     private var angleXZ : Double = 0.0
     private var angleYZ : Double = 0.0
 
+    private val mCaptureCallback = object : CameraCaptureSession.CaptureCallback() {
+        override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
+            // AF 상태를 확인하거나 다른 작업을 수행할 수 있습니다.
+            val afState = result.get(CaptureResult.CONTROL_AF_STATE)
+
+            when(afState) {
+                null -> {
+                    Log.d("KSM", "Auto-focus state: null")
+                }
+                CaptureResult.CONTROL_AF_STATE_INACTIVE -> {
+                    Log.d("KSM", "Auto-focus state: Inactive")
+                }
+                CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN ->{
+                    Log.d("KSM", "Auto-focus state: Passive Scan")
+                }
+                CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED -> {
+                    Log.d("KSM", "Auto-focus state: Passive Focused")
+                }
+                CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED -> {
+                    Log.d("KSM", "Auto-focus state: Passive Unfocused")
+                }
+                CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN -> {
+                    Log.d("KSM", "Auto-focus state: Active Scan")
+                }
+                CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED -> {
+                    Log.d("KSM", "Auto-focus state: Focused Locked")
+                }
+                CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED -> {
+                    Log.d("KSM", "Auto-focus state: Not Focused Locked")
+                }
+            }
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -336,8 +370,7 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                 addTarget(viewBinding.rawViewFinder.holder.surface)
             }
 
-        session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
-
+        session.setRepeatingRequest(captureRequest.build(), mCaptureCallback, cameraHandler)
 
         //캡처버튼을 클릭했을 경우
         viewBinding.imageCaptureBtn.setOnClickListener{
@@ -667,15 +700,15 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 
         Log.d("KSM", "captureRequest's JPEG_ORIENTATION : ${captureRequest.get(CaptureRequest.JPEG_ORIENTATION)}")
 
-        //autoFocus 진행했다면 정해진 AF_REGIONS를 값으로 저장
-        val autoFocusRegion = captureRequest.get(CaptureRequest.CONTROL_AF_REGIONS)
-
-        //맞춰진 Focus를 captureRequest에 적용.
-        captureRequest.apply{
-            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO)
-            set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE)
-            set(CaptureRequest.CONTROL_AF_REGIONS, autoFocusRegion)
-        }
+//        //autoFocus 진행했다면 정해진 AF_REGIONS를 값으로 저장
+//        val autoFocusRegion = captureRequest.get(CaptureRequest.CONTROL_AF_REGIONS)
+//
+//        //맞춰진 Focus를 captureRequest에 적용.
+//        captureRequest.apply{
+//            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO)
+//            set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE)
+//            set(CaptureRequest.CONTROL_AF_REGIONS, autoFocusRegion)
+//        }
 
         session.capture(captureRequest.build(), object : CameraCaptureSession.CaptureCallback() {
 
@@ -688,6 +721,49 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 
                 val resultTimestamp = result.get(CaptureResult.SENSOR_TIMESTAMP)
                 Log.d("KSM", "Capture result received: $resultTimestamp")
+
+                // AF 상태를 확인합니다.
+                val afState = result[CaptureResult.CONTROL_AF_STATE]
+                if (afState == null) {
+                    Log.d(TAG, "Auto-focus state is null")
+                } else {
+                    when (afState) {
+                        CaptureResult.CONTROL_AF_STATE_INACTIVE -> Log.d(
+                            "KSM",
+                            "Auto-focus state: Inactive"
+                        )
+
+                        CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN -> Log.d(
+                            "KSM",
+                            "Auto-focus state: Passive Scan"
+                        )
+
+                        CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED -> Log.d(
+                            "KSM",
+                            "Auto-focus state: Passive Focused"
+                        )
+
+                        CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED -> Log.d(
+                            "KSM",
+                            "Auto-focus state: Passive Unfocused"
+                        )
+
+                        CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN -> Log.d(
+                            "KSM",
+                            "Auto-focus state: Active Scan"
+                        )
+
+                        CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED -> Log.d(
+                            "KSM",
+                            "Auto-focus state: Focused Locked"
+                        )
+
+                        CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED -> Log.d(
+                            "KSM",
+                            "Auto-focus state: Not Focused Locked"
+                        )
+                    }
+                }
 
                 // Set a timeout in case image captured is dropped from the pipeline
                 val exc = TimeoutException("Image dequeuing took too long")

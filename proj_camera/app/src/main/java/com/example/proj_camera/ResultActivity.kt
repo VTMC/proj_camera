@@ -250,6 +250,14 @@ class ResultActivity : AppCompatActivity() {
                         .show()
                 }else{
 
+                    val sqr_h = findContours.sqr_h_return
+                    val fbh = findContours.fbh_return
+                    val bh = findContours.bh_return
+
+                    viewBinding.sqrHTxtView.text = "sqr_h : ${sqr_h}"
+                    viewBinding.fbhTxtView.text = "fbh : ${fbh}"
+                    viewBinding.bhTxtView.text = "bh : ${bh}"
+
                     selectedRGB = selectRGB(croppedImgRGB!!)
 
                     val pointedImageView = viewBinding.pointedImageView

@@ -63,9 +63,13 @@ public class FindContours {
     int[] test10 = {R.drawable.test10_1, R.drawable.test10_2, R.drawable.test10_3, R.drawable.test10_4, R.drawable.test10_5, R.drawable.test10_6, R.drawable.test10_7};
     int[] test11 = {R.drawable.test11_1, R.drawable.test11_2, R.drawable.test11_3, R.drawable.test11_4, R.drawable.test11_5};
 
-    int houghLineThresholdValue = 50; //50
+    int houghLineThresholdValue = 35; //50
     int cannyThreshold1 = 10; //10
-    int cannyThreshold2 = 30; //50
+    int cannyThreshold2 = 50; //50
+
+    public double sqr_h_return = 0.0;
+    public double fbh_return = 0.0;
+    public double bh_return = 0.0;
 
 
     //ddeteed
@@ -182,6 +186,10 @@ public class FindContours {
                 croppedSqr[0] = new Mat(cropOnlyUrineStrip, sqrArray[0]);
                 croppedSqrDrawing[0] = croppedSqr[0].clone();
 
+                sqr_h_return = 4.0;
+                fbh_return = i;
+                bh_return = j;
+
                 for (int k = 1; k < 11; k++) { //1~10
                     int y = (int) (fbh + (sqr_h * k) + (bh * k));
 
@@ -195,17 +203,21 @@ public class FindContours {
                 }
 
                 for (int k = 0; k < croppedSqr.length; k++) {
+                    Mat blurredSqr = new Mat();
+                    Imgproc.blur(croppedSqr[k], blurredSqr, new Size(3,3));
+
                     Mat croppedSqrGray = new Mat();
-                    Imgproc.cvtColor(croppedSqr[k], croppedSqrGray, Imgproc.COLOR_BGR2GRAY);
+                    Imgproc.cvtColor(blurredSqr, croppedSqrGray, Imgproc.COLOR_BGR2GRAY);
 
                     Mat cannyOutput = new Mat();
                     Imgproc.Canny(croppedSqrGray, cannyOutput, cannyThreshold1, cannyThreshold2);
+                    croppedSqrDrawing[k] = cannyOutput;
 
                     Mat lines = new Mat();
                     Imgproc.HoughLines(cannyOutput, lines, 1.0, Math.PI / 180, houghLineThresholdValue);
 
                     Log.d("KSM", "Square ["+k+"]");
-//                    Log.i("KSM", "lines.rows() : "+lines.rows());
+                    Log.i("KSM", "lines.rows() : "+lines.rows());
                     for (int x = 0; x < lines.rows(); x++) {
                         double rho = lines.get(x, 0)[0];
                         double theta = lines.get(x, 0)[1];
@@ -216,8 +228,8 @@ public class FindContours {
                         double y0 = b * rho;
                         Point pt1 = new Point(Math.round(x0 + croppedSqr[k].rows() * (-b)), Math.round(y0 + croppedSqr[k].rows() * (a)));
                         Point pt2 = new Point(Math.round(x0 - croppedSqr[k].cols() * (-b)), Math.round(y0 - croppedSqr[k].cols() * (a)));
-//                        Log.d("KSM", "Angle : "+angle);
-//                        Log.d("KSM", "Point 1 : "+pt1+", 2 : "+pt2);
+                        Log.d("KSM", "Angle : "+angle);
+                        Log.d("KSM", "Point 1 : "+pt1+", 2 : "+pt2);
                         Imgproc.line(croppedSqrDrawing[k], pt1, pt2, new Scalar(255, 0, 0), 2);
 
                         //USUALLY CASE
@@ -403,6 +415,7 @@ public class FindContours {
             cropImgRGBList[i][1] = (int)(totalGreen/totalPxCn); //avgGreen
             cropImgRGBList[i][2] = (int)(totalBlue/totalPxCn); //avgBlue
 
+            Log.i("KSM", "croppedSqrDrawaing.length ["+i+"] = "+croppedSqrDrawing.length);
             try{
                 Imgproc.cvtColor(croppedSqrDrawing[i], croppedSqrDrawing[i], Imgproc.COLOR_BGR2RGB);
                 Bitmap bmp = Bitmap.createBitmap(croppedSqrDrawing[i].cols(), croppedSqrDrawing[i].rows(), Bitmap.Config.ARGB_8888);

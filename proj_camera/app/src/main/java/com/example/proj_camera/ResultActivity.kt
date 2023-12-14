@@ -167,6 +167,7 @@ class ResultActivity : AppCompatActivity() {
         val accZ = intent.getStringExtra("accZ")
         val angleXZ = intent.getStringExtra("angleXZ")
         val angleYZ = intent.getStringExtra("angleYZ")
+        val afState = intent.getStringExtra("stringAfState")
 
         val options = RequestOptions.skipMemoryCacheOf(true).diskCacheStrategy(DiskCacheStrategy.NONE)
         options.transform(RotateTransformation(this, -90f))
@@ -185,6 +186,7 @@ class ResultActivity : AppCompatActivity() {
         viewBinding.accZTextView.text = "accZ : ${accZ}"
         viewBinding.angleXZTextView.text = "angleXZ : ${angleXZ}"
         viewBinding.angleYZTextView.text = "angleYZ : ${angleYZ}"
+        viewBinding.afStateTxtView.text = "AF state : ${afState}"
 
         lifecycleScope.launch(Dispatchers.Default){
             val dialogBuilder = AlertDialog.Builder(this@ResultActivity)
@@ -254,9 +256,9 @@ class ResultActivity : AppCompatActivity() {
                     val fbh = findContours.fbh_return
                     val bh = findContours.bh_return
 
-                    viewBinding.sqrHTxtView.text = "sqr_h : ${sqr_h}"
-                    viewBinding.fbhTxtView.text = "fbh : ${fbh}"
-                    viewBinding.bhTxtView.text = "bh : ${bh}"
+                    viewBinding.sqrHTxtView.text = "sqr_h : ${String.format("%.1f", sqr_h)}"
+                    viewBinding.fbhTxtView.text = "fbh : ${String.format("%.1f", fbh)}"
+                    viewBinding.bhTxtView.text = "bh : ${String.format("%.1f", bh)}"
 
                     selectedRGB = selectRGB(croppedImgRGB!!)
 

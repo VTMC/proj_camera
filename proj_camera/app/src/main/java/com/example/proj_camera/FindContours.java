@@ -120,22 +120,23 @@ public class FindContours {
 //            Scalar color = new Scalar(255, 0, 0);
 //            Imgproc.drawContours(drawing, contoursSimple, i, color, 5, Imgproc.LINE_8, hierarchy, 2, new Point());
 //        }
+        Core.add(drawing, src, drawing);
 
-            Mat croppedImg = cropImg(src, contoursSimple, 70, 1200);
+        Mat croppedImg = cropImg(src, contoursSimple, 70, 1200);
 
-            if(croppedImg.width() > 500){
-                Log.d("KSM", "DDDDDD~~!!~!");
-                return bmp;
-            }
+        if(croppedImg.width() > 500){
+            Log.d("KSM", "DDDDDD~~!!~!");
+            return bmp;
+        }
 
-            //Crop src like croppedImg
-            Rect roi = new Rect(croppedImg_x, croppedImg_y, croppedImg_w, croppedImg_h);
-            croppedSrc = new Mat(src, roi);
+        //Crop src like croppedImg
+        Rect roi = new Rect(croppedImg_x, croppedImg_y, croppedImg_w, croppedImg_h);
+        croppedSrc = new Mat(src, roi);
 
         try{
-//            Imgproc.cvtColor(croppedSrc, croppedSrc, Imgproc.COLOR_BGR2RGB);
-            bmp = Bitmap.createBitmap(croppedSrc.cols(), croppedSrc.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(croppedSrc, bmp);
+//            Imgproc.cvtColor(drawing, drawing, Imgproc.COLOR_BGR2RGB);
+            bmp = Bitmap.createBitmap(drawing.cols(), drawing.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(drawing, bmp);
         }catch(CvException e){
             Log.e("KSM", "OPENCV - update : Mat to bitmap Error!!", e);
         }
@@ -156,6 +157,16 @@ public class FindContours {
 
         Bitmap bmp = null;
 
+        if(croppedSrc.width() == 0 || croppedSrc.height() == 0){
+            Log.e("KSM", "getSqr CroppedSrc Error!!!");
+
+            var timeEnd = System.currentTimeMillis();
+            var takeTime = timeEnd - timeStart;
+            Log.i("KSM", "== FindContours.getSqr() END! ==");
+            Log.i("KSM", "== IT Takes "+takeTime+"ms ==");
+
+            return bmp;
+        }
 
         Mat cropOnlyUrineStrip = fitImg(croppedSrc, 80, (int)(80*(24.6)));
         Log.d("KSM", "rotatedImg : " +
@@ -203,6 +214,13 @@ public class FindContours {
                 }
 
                 for (int k = 0; k < croppedSqr.length; k++) {
+                    //sharpen
+//                    Mat kernel = new Mat(3, 3, CvType.CV_32F);
+//                    kernel.put(0,0,0,-1,0,-1,5,-1,0,-1,0);
+//                    Mat sharpenCroppedSqr = new Mat();
+//                    Imgproc.filter2D(croppedSqr[k], sharpenCroppedSqr, -1, kernel);
+//                    croppedSqrDrawing[k] = sharpenCroppedSqr;
+
                     Mat blurredSqr = new Mat();
                     Imgproc.blur(croppedSqr[k], blurredSqr, new Size(3,3));
 
@@ -211,7 +229,10 @@ public class FindContours {
 
                     Mat cannyOutput = new Mat();
                     Imgproc.Canny(croppedSqrGray, cannyOutput, cannyThreshold1, cannyThreshold2);
-                    croppedSqrDrawing[k] = cannyOutput;
+
+                    if(!cannyOutput.empty()){
+                        croppedSqrDrawing[k] = cannyOutput;
+                    }
 
                     Mat lines = new Mat();
                     Imgproc.HoughLines(cannyOutput, lines, 1.0, Math.PI / 180, houghLineThresholdValue);
@@ -234,7 +255,7 @@ public class FindContours {
 
                         //USUALLY CASE
                         if (angle > 80 && angle < 100) {
-                            if ((pt1.y > 2 && pt1.y < croppedSqr[k].height() - 2) || (pt2.y > 2 && pt2.y < croppedSqr[k].height() - 2)) {
+                            if ((pt1.y > 5 && pt1.y < croppedSqr[k].height() - 5) || (pt2.y > 5 && pt2.y < croppedSqr[k].height() - 5)) {
                                 suitability = false;
                             }
                         }
@@ -308,12 +329,16 @@ public class FindContours {
             }
         }
 
+        Mat cropOnlyUrinStripGray = new Mat();
+        Imgproc.cvtColor(cropOnlyUrineStrip, cropOnlyUrinStripGray, Imgproc.COLOR_BGR2GRAY);
+
         String FILENAME_FORMAT = "yyyy-MM-dd_HH_mm_ss";
         SimpleDateFormat sdf = new SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA);
         String timeStamp = sdf.format(System.currentTimeMillis());
-        String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/DRAWING_"+timeStamp+".bmp";
-//        String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/URINESTRIP_" + timeStamp + ".bmp";
-        boolean saveRes = Imgcodecs.imwrite(imgName, drawing);
+//        String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/DRAWING_"+timeStamp+".bmp";
+        String imgName = "/storage/emulated/0/Pictures/CameraProj-Image Raw/URINESTRIP_" + timeStamp + ".bmp";
+//        boolean saveRes = Imgcodecs.imwrite(imgName, drawing);
+        boolean saveRes = Imgcodecs.imwrite(imgName, cropOnlyUrinStripGray);
         if (saveRes) {
             Log.d("KSM", "SAVE SUCCESSED!\n" + imgName);
         } else {
@@ -796,15 +821,9 @@ public class FindContours {
             int y = boundingRect.y;
             int w = boundingRect.width;
             int h = boundingRect.height;
-
+            Rect rectCrop = new Rect(x,y,w,h);
 
             if(w>=width && h>=height && w<img.width() && h<img.height()){
-//                x-=10;
-//                y-=10;
-//                w+=20;
-//                h+=20;
-
-                Rect rectCrop = new Rect(x,y,w,h);
                 Imgproc.rectangle(drawing, rectCrop, new Scalar(255, 255, 0));
 
                 croppedImg = new Mat(img, rectCrop);
@@ -824,6 +843,8 @@ public class FindContours {
 //                }else{
 //                    Log.d("KSM", "SAVE ERROR!!");
 //                }
+            }else{
+                Imgproc.rectangle(drawing, rectCrop, new Scalar(255, 0, 0));
             }
         }
 

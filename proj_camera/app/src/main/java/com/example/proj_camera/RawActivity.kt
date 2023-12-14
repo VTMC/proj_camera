@@ -70,9 +70,11 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.Timer
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeoutException
+import kotlin.concurrent.timer
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -182,37 +184,142 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
     private var angleXZ : Double = 0.0
     private var angleYZ : Double = 0.0
 
-    private val mCaptureCallback = object : CameraCaptureSession.CaptureCallback() {
-        override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
-            // AF 상태를 확인하거나 다른 작업을 수행할 수 있습니다.
-            val afState = result.get(CaptureResult.CONTROL_AF_STATE)
+    //set waitingTimer
+    private var timer : Timer?= null
+    private var progress = 0
 
-            when(afState) {
+    //check AF state
+    private lateinit var stringAfState : String
+    private val mCaptureCallback = object : CameraCaptureSession.CaptureCallback() {
+        override fun onCaptureCompleted(
+            session: CameraCaptureSession,
+            request: CaptureRequest,
+            result: TotalCaptureResult
+        ) {
+            super.onCaptureCompleted(session, request, result)
+
+            //check AF
+            val afState = result.get(CaptureResult.CONTROL_AF_STATE)
+            //change CaptureBtn to visible Handler
+            val mainHandler = Handler(Looper.getMainLooper())
+
+            when(afState){
                 null -> {
-                    Log.d("KSM", "Auto-focus state: null")
+//                    Log.d("KSM", "Auto-focus state: null")
+                    stringAfState = "null"
+                    progress = 0
+                    mainHandler.post{
+                        viewBinding.waitingLayout.visibility = View.GONE
+                        viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                    }
                 }
                 CaptureResult.CONTROL_AF_STATE_INACTIVE -> {
-                    Log.d("KSM", "Auto-focus state: Inactive")
+//                    Log.d("KSM", "Auto-focus state: Inactive")
+                    stringAfState = "inActive"
+                    progress = 0
+                    mainHandler.post{
+                        viewBinding.waitingLayout.visibility = View.GONE
+                        viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                    }
                 }
                 CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN ->{
-                    Log.d("KSM", "Auto-focus state: Passive Scan")
+//                    Log.d("KSM", "Auto-focus state: Passive Scan")
+                    stringAfState = "passiveScan"
+                    progress = 0
+                    mainHandler.post{
+                        viewBinding.waitingLayout.visibility = View.GONE
+                        viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                    }
                 }
-                CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED -> {
-                    Log.d("KSM", "Auto-focus state: Passive Focused")
+                CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED -> { //초점 잡힌 상태
+//                    Log.d("KSM", "Auto-focus state: Passive Focused")
+                    stringAfState = "passiveFocused"
+                    mainHandler.post{
+                        if(accX > -1 && accX < 1){
+                            if(accY > -1 && accY < 2){
+                                if(accZ >= 9 && accZ < 11){
+                                    viewBinding.waitingLayout.visibility = View.VISIBLE
+
+                                    val waitingBar = viewBinding.waitingBar
+
+                                    if(timer != null){
+                                        timer!!.cancel()
+                                    }
+
+                                    timer = timer(period = 10){
+                                        progress++
+                                        waitingBar.progress = progress
+                                        if(progress == 200){ //200 * 10 = 2000ms = 2s
+                                            this@timer.cancel()
+                                            mainHandler.post{
+                                                viewBinding.waitingLayout.visibility = View.GONE
+                                                viewBinding.imageCaptureBtn.visibility = View.VISIBLE
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                                    viewBinding.waitingLayout.visibility = View.GONE
+                                }
+                            }else{
+                                viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                                viewBinding.waitingLayout.visibility = View.GONE
+                            }
+                        }else{
+                            viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                            viewBinding.waitingLayout.visibility = View.GONE
+                        }
+                    }
                 }
                 CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED -> {
-                    Log.d("KSM", "Auto-focus state: Passive Unfocused")
+//                    Log.d("KSM", "Auto-focus state: Passive Unfocused")
+                    stringAfState = "passiveUnfocused"
+                    progress = 0
+                    mainHandler.post{
+                        viewBinding.waitingLayout.visibility = View.GONE
+                        viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                    }
                 }
                 CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN -> {
-                    Log.d("KSM", "Auto-focus state: Active Scan")
+//                    Log.d("KSM", "Auto-focus state: Active Scan")
+                    stringAfState = "activeScan"
+                    progress = 0
+                    mainHandler.post{
+                        viewBinding.waitingLayout.visibility = View.GONE
+                        viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                    }
                 }
-                CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED -> {
-                    Log.d("KSM", "Auto-focus state: Focused Locked")
+                CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED -> { //초점 잡힌 상태
+//                    Log.d("KSM", "Auto-focus state: Focused Locked")
+                    stringAfState = "focusedLocked"
+                    progress = 0
+//                    mainHandler.post{
+//                        if(accX > -1.0 && accX < 1.0){
+//                            if(accY > -1.0 && accY < 2.0){
+//                                if(accZ >= 9.0 && accZ < 11.0){
+//                                    viewBinding.imageCaptureBtn.visibility = View.VISIBLE
+//                                }else{
+//                                    viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+//                                }
+//                            }else{
+//                                viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+//                            }
+//                        }else{
+//                            viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+//                        }
+//                    }
                 }
                 CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED -> {
-                    Log.d("KSM", "Auto-focus state: Not Focused Locked")
+//                    Log.d("KSM", "Auto-focus state: Not Focused Locked")
+                    stringAfState = "notFocusedLocked"
+                    progress = 0
+                    mainHandler.post{
+                        viewBinding.waitingLayout.visibility = View.GONE
+                        viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                    }
                 }
             }
+
         }
     }
 
@@ -578,6 +685,7 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                         intent.putExtra("accZ", captureAccZ)
                         intent.putExtra("angleXZ", captureAngleXZ)
                         intent.putExtra("angleYZ", captureAngleYZ)
+                        intent.putExtra("stringAfState", stringAfState)
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         startActivity(intent)
                         finish()
@@ -723,47 +831,47 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                 Log.d("KSM", "Capture result received: $resultTimestamp")
 
                 // AF 상태를 확인합니다.
-                val afState = result[CaptureResult.CONTROL_AF_STATE]
-                if (afState == null) {
-                    Log.d(TAG, "Auto-focus state is null")
-                } else {
-                    when (afState) {
-                        CaptureResult.CONTROL_AF_STATE_INACTIVE -> Log.d(
-                            "KSM",
-                            "Auto-focus state: Inactive"
-                        )
-
-                        CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN -> Log.d(
-                            "KSM",
-                            "Auto-focus state: Passive Scan"
-                        )
-
-                        CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED -> Log.d(
-                            "KSM",
-                            "Auto-focus state: Passive Focused"
-                        )
-
-                        CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED -> Log.d(
-                            "KSM",
-                            "Auto-focus state: Passive Unfocused"
-                        )
-
-                        CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN -> Log.d(
-                            "KSM",
-                            "Auto-focus state: Active Scan"
-                        )
-
-                        CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED -> Log.d(
-                            "KSM",
-                            "Auto-focus state: Focused Locked"
-                        )
-
-                        CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED -> Log.d(
-                            "KSM",
-                            "Auto-focus state: Not Focused Locked"
-                        )
-                    }
-                }
+//                val afState = result[CaptureResult.CONTROL_AF_STATE]
+//                if (afState == null) {
+//                    Log.d(TAG, "Auto-focus state is null")
+//                } else {
+//                    when (afState) {
+//                        CaptureResult.CONTROL_AF_STATE_INACTIVE -> Log.d(
+//                            "KSM",
+//                            "Auto-focus state: Inactive"
+//                        )
+//
+//                        CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN -> Log.d(
+//                            "KSM",
+//                            "Auto-focus state: Passive Scan"
+//                        )
+//
+//                        CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED -> Log.d(
+//                            "KSM",
+//                            "Auto-focus state: Passive Focused"
+//                        )
+//
+//                        CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED -> Log.d(
+//                            "KSM",
+//                            "Auto-focus state: Passive Unfocused"
+//                        )
+//
+//                        CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN -> Log.d(
+//                            "KSM",
+//                            "Auto-focus state: Active Scan"
+//                        )
+//
+//                        CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED -> Log.d(
+//                            "KSM",
+//                            "Auto-focus state: Focused Locked"
+//                        )
+//
+//                        CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED -> Log.d(
+//                            "KSM",
+//                            "Auto-focus state: Not Focused Locked"
+//                        )
+//                    }
+//                }
 
                 // Set a timeout in case image captured is dropped from the pipeline
                 val exc = TimeoutException("Image dequeuing took too long")
@@ -1144,20 +1252,6 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
         viewBinding.accZTextView.text = "accZ : ${accZ.toInt()}"
         viewBinding.angleXZTextView.text = "angleXZ : ${angleXZ.toInt()}"
         viewBinding.angleYZTextView.text = "angleYZ : ${angleYZ.toInt()}"
-
-        if(accX > -1.0 && accX < 1.0){
-            if(accY > -1.0 && accY < 2.0){
-                if(accZ >= 9.0 && accZ < 11.0){
-                    viewBinding.imageCaptureBtn.visibility = View.VISIBLE
-                }else{
-                    viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
-                }
-            }else{
-                viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
-            }
-        }else{
-            viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
-        }
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int)  = Unit

@@ -5,4 +5,5 @@
     <string name="torchOff">FLASH OFF</string>
     <string name="torchAutoOn">AUTO ON</string>
     <string name="torchAutoOff">AUTO OFF</string>
+    <string name="waiting_bar_text">Please wait until in focus.</string>
 </resources>

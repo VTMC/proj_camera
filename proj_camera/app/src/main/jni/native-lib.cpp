@@ -94,6 +94,9 @@ Java_com_example_proj_1camera_RawActivity_simple_1dcraw(JNIEnv *env, jobject thi
                             " %d cameras supported\n"
                             "Usage: %s [-D] [-T] [-v] [-e] raw-files....\n"
                             "\t-4 - 16-bit mode\n"
+                            "\t-6 - 24-bit mode\n"
+                            "\t-w - if camera white balanced possible, set auto white balance\n"
+                            "\t-a - Aeverage the whole image for white balance\n"
                             "\t-L - list supported cameras and exit\n"
                             "\t-v - verbose output\n"
                             "\t-T - output TIFF files instead of .pgm/ppm\n"
@@ -157,6 +160,22 @@ Java_com_example_proj_1camera_RawActivity_simple_1dcraw(JNIEnv *env, jobject thi
                 OUT.output_bps = 16;
                 __android_log_print(ANDROID_LOG_INFO,"KSM","NATIVE : output bps 16bit setted\n");
             }
+
+            if(argv[i][1] == '6' && argv[i][2] == 0){
+                OUT.output_bps  = 24;
+                __android_log_print(ANDROID_LOG_INFO, "KSM", "NATIVE : output bps 24bit setted\n");
+            }
+
+            if(argv[i][1] == 'w' && argv[i][2] == 0){
+                OUT.use_camera_wb = 1;
+                __android_log_print(ANDROID_LOG_INFO, "KSM", "NATIVE : white balanced of CameraInfo setted\n");
+            }
+
+            if(argv[i][1] == 'a' && argv[i][2] == 0){
+                OUT.use_auto_wb = 1;
+                __android_log_print(ANDROID_LOG_INFO, "KSM", "NATIVE : white balanced of Average of whole Image\n");
+            }
+
 //            if (argv[i][1] == 'C' && argv[i][2] == 0){
 //                RawProcessor->set_progress_handler(my_progress_callback, NULL);
 //                __android_log_print(ANDROID_LOG_INFO,"KSM","set_progress_handler setted\n");

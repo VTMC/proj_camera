@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.ImageFormat
 import android.graphics.Matrix
+import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.SurfaceTexture
 import android.hardware.Sensor
@@ -334,6 +335,26 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
         viewBinding = RawActivityBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
+        //get display width size
+        val display = windowManager.defaultDisplay
+        val displaySize = Point()
+        display.getRealSize(displaySize)
+        val displayWidth = displaySize.x
+        val displayHeight = displaySize.y
+        Log.d("KSM", "smartphone display width : ${displayWidth}")
+
+        //if displayWidth under 1000px then change borderView width size
+        if(displayWidth <= 1000){
+            val density = this.resources.displayMetrics.density
+            val widthPx = 800
+            val widthDp = (widthPx/density).toInt()
+
+            val params = viewBinding.borderView.layoutParams
+            params.width = widthDp
+            viewBinding.borderView.layoutParams = params
+            Log.d("KSM", "border size resized!")
+        }
+
         //현재 실행중인 카메라 리스트 확인 및 cameraId, pixelFormat 저장
         cameraId = getCameraId(this@RawActivity, CameraSelector.LENS_FACING_BACK)
 
@@ -562,21 +583,22 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 
                         val rotatedWidth = viewBinding.borderView.height
                         val rotatedHeight = viewBinding.borderView.width
-                        val rotatedTop = viewBinding.borderView.left
-                        val rotatedLeft = viewBinding.borderView.top
+                        val rotated_y = viewBinding.borderView.left
+                        val rotated_x = viewBinding.borderView.top
 
                         //get ScaleRatio width, height by (result.image => horizontal/previewSize => vertical)
 //                        val scaleRatio_w = dngWHBmp.width.toFloat() / previewSize.height.toFloat()
 //                        val scaleRatio_h = dngWHBmp.height.toFloat() / previewSize.width.toFloat()
                         val scaleRatio_w = dngWHBmp.width.toDouble() / viewBinding.rawViewFinder.height.toDouble()
                         val scaleRatio_h = dngWHBmp.height.toDouble() / viewBinding.rawViewFinder.width.toDouble()
+                        Log.d("KSM", "viewFinder Size (w*h) : ${viewBinding.rawViewFinder.width} * ${viewBinding.rawViewFinder.height}")
                         Log.d("KSM", "scaleRatio[w, h] = ${scaleRatio_w}, ${scaleRatio_h}")
 
                         //set borderView size to result.image size
-                        val borderLeft = (rotatedLeft * scaleRatio_w).toInt()
-                        val borderTop = (rotatedTop * scaleRatio_h).toInt()
-                        val borderWidth = (rotatedWidth * scaleRatio_w).toInt()
-                        val borderHeight = (rotatedHeight * scaleRatio_h).toInt()
+                        var border_x = (rotated_x * scaleRatio_w).toInt()
+                        var border_y = (rotated_y * scaleRatio_h).toInt()
+                        var borderWidth = (rotatedWidth * scaleRatio_w).toInt()
+                        var borderHeight = (rotatedHeight * scaleRatio_h).toInt()
 
                         Log.d("KSM", "origin border[l,t,w,h] = " +
                                 "${viewBinding.borderView.left}, " +
@@ -584,16 +606,23 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                                 "${viewBinding.borderView.height}, " +
                                 "${viewBinding.borderView.width}")
                         Log.d("KSM", "rotated border[l,t,w,h] = " +
-                                "${rotatedLeft}, ${rotatedTop}, " +
+                                "${rotated_x}, ${rotated_y}, " +
                                 "${rotatedWidth}, ${rotatedHeight}")
-                        Log.d("KSM", "border[l,t,w,h] = ${borderLeft}, ${borderTop}, ${borderWidth}, ${borderHeight}")
+                        Log.d("KSM", "border[l,t,w,h] = ${border_x}, ${border_y}, ${borderWidth}, ${borderHeight}")
+
+                        //revise x and width value
+                        val revise_y_value = 100
+//                    borderLeft += revise_x_value
+                        border_y += revise_y_value
+                        borderHeight -= (revise_y_value * 2)
+                        Log.d("KSM", "revise border[l,t,w,h] = $border_x, $border_y, $borderWidth, $borderHeight")
 
                         Log.i("KSM", "== DNG to TIFF START! ==")
                         var timeStart = System.currentTimeMillis()
 
-                        val ac_str = if(borderLeft != 0 || borderTop != 0 || borderWidth != 0 || borderHeight != 0){
-                            arrayOf("-v", "-T", "-B", "${borderLeft}",
-                                "${borderTop}", "${borderWidth}", "${borderHeight}", "${pathName}")
+                        val ac_str = if(border_x != 0 || border_y != 0 || borderWidth != 0 || borderHeight != 0){
+                            arrayOf("-v", "-w", "-4", "-T", "-B", "${border_x}", //"-w", "-a",
+                                "${border_y}", "${borderWidth}", "${borderHeight}", "${pathName}")
                         }else{
                             arrayOf("-v", "-T", "${pathName}")
                         }

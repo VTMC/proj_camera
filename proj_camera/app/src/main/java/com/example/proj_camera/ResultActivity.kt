@@ -17,6 +17,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -25,6 +26,8 @@ import com.example.proj_camera.databinding.ResultActivityBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class ResultActivity : AppCompatActivity() {
     var test2 = intArrayOf(
@@ -101,7 +104,7 @@ class ResultActivity : AppCompatActivity() {
     private var suitabilityList : BooleanArray? = null
     private var croppedImgList : Array<String>? = null
     private var croppedImgRGB : Array<IntArray>? = null
-    private var selectedRGB : IntArray? = null
+    private var selectedRGB : Array<IntArray>? = null
 
     private lateinit var suitabilityTxtList:List<TextView>
     private lateinit var cropImgList:List<ImageView>
@@ -112,6 +115,9 @@ class ResultActivity : AppCompatActivity() {
     private lateinit var RGBtoBitmap : List<ImageView>
     private lateinit var selectedImgList : List <ImageView>
 
+    //show logText
+    private lateinit var logText : String
+
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         val progressDialog = ProgressDialog(this)
@@ -119,6 +125,8 @@ class ResultActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
         progressDialog.setMessage("이미지 처리중...")
         progressDialog.show()
+
+        logText = "========== ResultActivity.kt LOG START ==========\n"
 
         viewBinding = ResultActivityBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
@@ -168,6 +176,11 @@ class ResultActivity : AppCompatActivity() {
         val angleXZ = intent.getStringExtra("angleXZ")
         val angleYZ = intent.getStringExtra("angleYZ")
         val afState = intent.getStringExtra("stringAfState")
+
+        //add LogText String
+        logText += "----- 1. capture Info -----\n"
+        logText += "dngPath : ${dngPath}\nbmpPath : ${bmpPath}\naccX : ${accX}\naccY : $accY\naccZ : $accZ\nangleXZ : $angleXZ\nangleYZ : $angleYZ\nafState : $afState\n"
+        logText += "---------------------------\n\n"
 
         val options = RequestOptions.skipMemoryCacheOf(true).diskCacheStrategy(DiskCacheStrategy.NONE)
         options.transform(RotateTransformation(this, -90f))
@@ -260,6 +273,12 @@ class ResultActivity : AppCompatActivity() {
                     viewBinding.fbhTxtView.text = "fbh : ${String.format("%.1f", fbh)}"
                     viewBinding.bhTxtView.text = "bh : ${String.format("%.1f", bh)}"
 
+                    //add LogText String
+                    logText += "----- 2. Image process Info -----\n" //LOGTEXT
+                    logText += "sqr_h : $sqr_h\nfbh : $fbh\nbh : $bh\n" //LOGTEXT
+                    logText += "---------------------------\n\n" //LOGTEXT
+                    logText += "----- 3. RGB Distance Log -----\n" //LOGTEXT
+
                     selectedRGB = selectRGB(croppedImgRGB!!)
 
                     val pointedImageView = viewBinding.pointedImageView
@@ -270,10 +289,24 @@ class ResultActivity : AppCompatActivity() {
 
                     pointedImageView2.setImageBitmap(resultBmp2)
 
+                    for (i in selectedRGB!!.indices) {
+                        Log.d(
+                            "KSM",
+                            "selectedRGB[$i] | ${selectedRGB!![i][0]} | ${selectedRGB!![i][1]}"
+                        )
+                        logText += "selectedRGB[$i] | ${selectedRGB!![i][0]} | ${selectedRGB!![i][1]}\n" //LOGTEXT
+                    }
+
+                    //add LogText String
+                    logText += "---------------------------\n\n" //LOGTEXT
+                    logText += "----- 4. Suitability Info -----\n" //LOGTEXT
+
+
                     for(i in 0 until 11){
                         val cropBmp = BitmapFactory.decodeFile(croppedImgList!![i])
 
                         Log.d("KSM", "sqr[$i]'s suitability : ${suitabilityList!![i]}")
+                        logText += "sqr[$i]'s suitability : ${suitabilityList!![i]}\n" //LOGTEXT
 
                         cropImgList[i].setImageBitmap(cropBmp)
                         cropCheckImgList[i].setImageBitmap(croppedCheckImg?.get(i) ?: null)
@@ -297,6 +330,7 @@ class ResultActivity : AppCompatActivity() {
 //                                .show()
 //                            break
                         }
+                        logText += "---------------------------\n\n" //LOGTEXT
 
                         imgRGBTxtList[i].text = "R : ${croppedImgRGB!![i][0]}\nG : ${croppedImgRGB!![i][1]}\nB : ${croppedImgRGB!![i][2]}"
 
@@ -309,11 +343,13 @@ class ResultActivity : AppCompatActivity() {
                         RGBtoBitmap[i].setImageBitmap(avgRGBbmp)
 
                         if(i != 0){
-                            val resBmp = decodeResource(this@ResultActivity, selectedRGB!![i])
+                            val resBmp = decodeResource(this@ResultActivity, selectedRGB!![i][0])
                             val res = Bitmap.createScaledBitmap(resBmp, 80, 64, true)
 
                             selectedImgList[i].setImageBitmap(res)
                         }
+
+                        viewBinding.logText.text = logText
                     }
 
                     progressDialog.dismiss()
@@ -346,43 +382,63 @@ class ResultActivity : AppCompatActivity() {
         }
     }
 
-    fun selectRGB(cropSqrRGB : Array<IntArray>) : IntArray{
-        var resArray = IntArray(11, {0})
+    fun selectRGB(cropSqrRGB : Array<IntArray>) : Array<IntArray>{
+        val resArray = Array(11) { IntArray(2) { 0 } }
+        val testArray = testDrawableList
 
-        resArray[0] = 0 // The first Sqr have no meaning
+        // distance list of diffrence between testRGB with startPointRGB
+        val testArrayDis: MutableList<DoubleArray> = mutableListOf()
+        val minDistance = DoubleArray(cropSqrRGB.size - 1) { 0.0 }
+//        resArray[0] = 0 // The first Sqr have no meaning
 
-        for(i in 1 until cropSqrRGB.size){
-            val testArray = testDrawableList[i-1]
+        for(i in 1 until cropSqrRGB.size) {
+            val innerTestArrayDis = DoubleArray(testArray[i - 1].size) { 0.0 }
 
-            var minDistance = 0.0
-            var testArrayDis = DoubleArray(testArray.size, {0.0})
+            Log.d("KSM", "=== CropSqr[$i] ===")
+            logText += "=== CropSqr[$i] ===\n" //LOGTEXT
 
             //get min distance by RGB Point.
-            for(j in testArray.indices){ //testArray.indices = 0 until testArray.size
-                val bmp = decodeResource(this, testArray[j])
-                val x = bmp.width/2
-                val y = bmp.height/2
+            for (j in testArray[i-1].indices) { //testArray.indices = 0 until testArray.size
+                val bmp = decodeResource(this, testArray[i-1][j])
+                val x = bmp.width / 2
+                val y = bmp.height / 2
 
                 val testRGB = getRGB(bmp, x, y)
+
+                Log.d("KSM", "=== testSqr[$j] ===")
+                logText += "=== testSqr[$j] ===\n" //LOGTEXT
                 val distance = getDistance(cropSqrRGB[i], testRGB)
 
-                if(j == 0){
-                    minDistance = distance
-                }else{
-                    if(distance < minDistance){
-                        minDistance = distance
+                if (j == 0) {
+                    minDistance[i - 1] = distance
+                } else {
+                    if (distance < minDistance[i - 1]) {
+                        minDistance[i - 1] = distance
                     }
                 }
 
-                testArrayDis[j] = distance
+                innerTestArrayDis[j] = distance
             }
 
+            testArrayDis.add(innerTestArrayDis)
+        }
+
+        for(i in 0 until cropSqrRGB.size - 1){
             //get drawable which is min distance
-            for(j in testArrayDis.indices){
-                if(minDistance == testArrayDis[j]){
-                    resArray[i] = testArray[j]
+            for(j in testArrayDis[i].indices){
+                Log.d(
+                    "KSM",
+                    "Test$i-$j | minDistance : ${minDistance[i]} | testDistance : ${testArrayDis[i][j]}"
+                )
+                logText += "Test$i-$j | minDistance : ${minDistance[i]} | testDistance : ${testArrayDis[i][j]}\n" //LOGTEXT
+
+                if(minDistance[i] == testArrayDis[i][j]){
+                    resArray[i+1][0] = testArray[i][j]
+                    resArray[i+1][1] = j
                 }
             }
+            Log.d("KSM", "-----------------------------------")
+            logText += "-----------------------------------\n" //LOGTEXT
         }
 
         return resArray
@@ -402,15 +458,41 @@ class ResultActivity : AppCompatActivity() {
         return intArray
     }
 
-    private fun getDistance(RGBIntArray1 : IntArray, RGBIntArray2 : IntArray) : Double{
-        val R_dis = Math.pow((RGBIntArray1[0].toDouble() - RGBIntArray2[0].toDouble()),2.0)
-        val G_dis = Math.pow((RGBIntArray1[1].toDouble() - RGBIntArray2[1].toDouble()),2.0)
-        val B_dis = Math.pow((RGBIntArray1[2].toDouble() - RGBIntArray2[2].toDouble()),2.0)
+    //CIE-Labs_GetDistance()
+    private fun getDistance(RGBIntArray1: IntArray, RGBIntArray2: IntArray): Double {
+        val doubleLab1:DoubleArray = doubleArrayOf(0.0, 0.0, 0.0)
+        val doubleLab2:DoubleArray = doubleArrayOf(0.0, 0.0, 0.0)
+        ColorUtils.RGBToLAB(RGBIntArray1[0], RGBIntArray1[1], RGBIntArray1[2], doubleLab1)
+        ColorUtils.RGBToLAB(RGBIntArray2[0], RGBIntArray2[1], RGBIntArray2[2], doubleLab2)
 
-        val RGB_dis = Math.sqrt(R_dis+G_dis+B_dis)
+        Log.d("KSM", "RGB1_RGB : [R : ${RGBIntArray1[0]} / G : ${RGBIntArray1[1]} / B : ${RGBIntArray1[2]}]")
+        logText += "RGB1_RGB : [R : ${RGBIntArray1[0]} / G : ${RGBIntArray1[1]} / B : ${RGBIntArray1[2]}]\n" //LOGTEXT
+        Log.d("KSM", "RGB2_RGB : [R : ${RGBIntArray2[0]} / G : ${RGBIntArray2[1]} / B : ${RGBIntArray2[2]}]")
+        logText += "RGB2_RGB : [R : ${RGBIntArray2[0]} / G : ${RGBIntArray2[1]} / B : ${RGBIntArray2[2]}]\n" //LOGTEXT
+        Log.d("KSM", "RGB1_Lab : [L : ${doubleLab1[0]} / a : ${doubleLab1[1]} / b : ${doubleLab1[2]}]")
+        logText += "RGB1_Lab : [L : ${doubleLab1[0]} / a : ${doubleLab1[1]} / b : ${doubleLab1[2]}]\n" //LOGTEXT
+        Log.d("KSM", "RGB2_Lab : [L : ${doubleLab2[0]} / a : ${doubleLab2[1]} / b : ${doubleLab2[2]}]")
+        logText += "RGB2_Lab : [L : ${doubleLab2[0]} / a : ${doubleLab2[1]} / b : ${doubleLab2[2]}]\n" //LOGTEXT
 
-        return RGB_dis
+        val L_dis = (doubleLab1[0] - doubleLab2[0]).pow(2.0)
+        val A_dis = (doubleLab1[1] - doubleLab2[1]).pow(2.0)
+        val B_dis = (doubleLab1[2] - doubleLab2[2]).pow(2.0)
+
+        val LAB_dis = sqrt(L_dis + A_dis + B_dis)
+
+        return LAB_dis
     }
+
+    //RGB_GetDistance()
+//    private fun getDistance(RGBIntArray1 : IntArray, RGBIntArray2 : IntArray) : Double{
+//        val R_dis = Math.pow((RGBIntArray1[0].toDouble() - RGBIntArray2[0].toDouble()),2.0)
+//        val G_dis = Math.pow((RGBIntArray1[1].toDouble() - RGBIntArray2[1].toDouble()),2.0)
+//        val B_dis = Math.pow((RGBIntArray1[2].toDouble() - RGBIntArray2[2].toDouble()),2.0)
+//
+//        val RGB_dis = Math.sqrt(R_dis+G_dis+B_dis)
+//
+//        return RGB_dis
+//    }
 
     fun decodeResource(context : Context, resourceId : Int): Bitmap{
         return BitmapFactory.decodeResource(context.resources, resourceId)

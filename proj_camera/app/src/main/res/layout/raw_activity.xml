@@ -124,14 +124,16 @@
         android:layout_marginBottom="30dp"
         android:visibility="invisible"
         android:background="@drawable/capture_btn"
-        android:text="촬영하기"
+        android:text="@string/captured"
         android:textAlignment="center"
         android:textColor="@color/white"
         android:textSize="30sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/rawViewFinder"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/blackViewBottom"
+        app:layout_constraintVertical_bias="0.8" />
 
     <LinearLayout
         android:id="@+id/waitingLayout"
@@ -158,6 +160,7 @@
             tools:layout_editor_absoluteX="181dp"
             tools:layout_editor_absoluteY="643dp" />
         <TextView
+            android:id="@+id/waitingText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/waiting_bar_text"
@@ -165,6 +168,17 @@
             android:textSize="20dp"
             android:textStyle="bold"
             android:textColor="#FFFFFF" />
+        <Button
+            android:id="@+id/FocusedBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:background="@drawable/capture_btn"
+            android:text="@string/do_focus_text"
+            android:textAlignment="center"
+            android:textColor="#FFFFFF"
+            android:textSize="20dp"
+            android:textStyle="bold" />
     </LinearLayout>
 
 

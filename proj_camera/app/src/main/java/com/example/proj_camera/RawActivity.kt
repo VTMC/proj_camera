@@ -1,6 +1,7 @@
 package com.example.proj_camera
 
 import Utils.AndroidBmpUtil
+import Utils.SettingData
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
@@ -191,6 +192,9 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 
     //check AF state
     private lateinit var stringAfState : String
+    private var afState : Int = 0
+    private var isFocus : Boolean = false
+    private var timerMaxValue = 0
     private val mCaptureCallback = object : CameraCaptureSession.CaptureCallback() {
         override fun onCaptureCompleted(
             session: CameraCaptureSession,
@@ -199,16 +203,26 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
         ) {
             super.onCaptureCompleted(session, request, result)
 
+            var accXmin = SettingData.TRACE_SET_DEFAULT_ACCXMIN
+            var accXmax = SettingData.TRACE_SET_DEFAULT_ACCXMAX
+            var accYmin = SettingData.TRACE_SET_DEFAULT_ACCYMIN
+            var accYmax = SettingData.TRACE_SET_DEFAULT_ACCYMAX
+            var accZmin = SettingData.TRACE_SET_DEFAULT_ACCZMIN
+            var accZmax = SettingData.TRACE_SET_DEFAULT_ACCZMAX
+
             //check AF
-            val afState = result.get(CaptureResult.CONTROL_AF_STATE)
+            afState = result.get(CaptureResult.CONTROL_AF_STATE)!!
             //change CaptureBtn to visible Handler
             val mainHandler = Handler(Looper.getMainLooper())
+            val waitingBar = viewBinding.waitingBar
+            val waitingText = viewBinding.waitingText
 
             when(afState){
                 null -> {
 //                    Log.d("KSM", "Auto-focus state: null")
                     stringAfState = "null"
                     progress = 0
+                    waitingBar.progress = progress
                     mainHandler.post{
                         viewBinding.waitingLayout.visibility = View.GONE
                         viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
@@ -218,6 +232,7 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 //                    Log.d("KSM", "Auto-focus state: Inactive")
                     stringAfState = "inActive"
                     progress = 0
+                    waitingBar.progress = progress
                     mainHandler.post{
                         viewBinding.waitingLayout.visibility = View.GONE
                         viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
@@ -227,6 +242,7 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 //                    Log.d("KSM", "Auto-focus state: Passive Scan")
                     stringAfState = "passiveScan"
                     progress = 0
+                    waitingBar.progress = progress
                     mainHandler.post{
                         viewBinding.waitingLayout.visibility = View.GONE
                         viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
@@ -235,40 +251,63 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                 CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED -> { //초점 잡힌 상태
 //                    Log.d("KSM", "Auto-focus state: Passive Focused")
                     stringAfState = "passiveFocused"
-                    mainHandler.post{
-                        if(accX > -1 && accX < 1){
-                            if(accY > -1 && accY < 2){
-                                if(accZ >= 9 && accZ < 11){
-                                    viewBinding.waitingLayout.visibility = View.VISIBLE
+                    if(isFocus){
+                        mainHandler.post{
+                            viewBinding.waitingLayout.visibility = View.GONE
+                        }
+                    }else{
+                        mainHandler.post{
+                            waitingText.text = resources.getString(R.string.setting_urineStrip)
+                            timerMaxValue = 200
+                            waitingBar.max = timerMaxValue
 
-                                    val waitingBar = viewBinding.waitingBar
+                            viewBinding.waitingLayout.visibility = View.VISIBLE
+                            viewBinding.FocusedBtn.visibility = View.VISIBLE
 
-                                    if(timer != null){
-                                        timer!!.cancel()
-                                    }
+                            if(accX > accXmin && accX < accXmax){
+                                if(accY > accYmin && accY < accYmax){
+                                    if(accZ >= accZmin && accZ < accZmax){
 
-                                    timer = timer(period = 10){
-                                        progress++
-                                        waitingBar.progress = progress
-                                        if(progress == 200){ //200 * 10 = 2000ms = 2s
-                                            this@timer.cancel()
-                                            mainHandler.post{
-                                                viewBinding.waitingLayout.visibility = View.GONE
-                                                viewBinding.imageCaptureBtn.visibility = View.VISIBLE
+                                        if(timer != null){
+                                            timer!!.cancel()
+                                        }
+
+                                        timer = timer(period = 10){
+                                            progress++
+                                            waitingBar.progress = progress
+                                            if(progress == timerMaxValue){ //200 * 10 = 2000ms = 2s
+                                                this@timer.cancel()
+                                                mainHandler.post{
+                                                    viewBinding.waitingLayout.visibility = View.GONE
+                                                    progress = 0
+                                                    waitingBar.progress = progress
+                                                    startAutoFocus()
+                                                }
                                             }
                                         }
+
+                                        viewBinding.FocusedBtn.setOnClickListener {
+                                            progress = 0
+                                            waitingBar.progress = progress
+                                            viewBinding.waitingLayout.visibility = View.GONE
+                                            startAutoFocus()
+                                        }
+
+                                    }else{
+                                        progress = 0
+                                        waitingBar.progress = 0
+                                        viewBinding.waitingLayout.visibility = View.GONE
                                     }
                                 }else{
-                                    viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                                    progress = 0
+                                    waitingBar.progress = 0
                                     viewBinding.waitingLayout.visibility = View.GONE
                                 }
                             }else{
-                                viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                                progress = 0
+                                waitingBar.progress = 0
                                 viewBinding.waitingLayout.visibility = View.GONE
                             }
-                        }else{
-                            viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
-                            viewBinding.waitingLayout.visibility = View.GONE
                         }
                     }
                 }
@@ -276,6 +315,7 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 //                    Log.d("KSM", "Auto-focus state: Passive Unfocused")
                     stringAfState = "passiveUnfocused"
                     progress = 0
+                    waitingBar.progress = progress
                     mainHandler.post{
                         viewBinding.waitingLayout.visibility = View.GONE
                         viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
@@ -284,36 +324,78 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                 CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN -> {
 //                    Log.d("KSM", "Auto-focus state: Active Scan")
                     stringAfState = "activeScan"
-                    progress = 0
-                    mainHandler.post{
-                        viewBinding.waitingLayout.visibility = View.GONE
-                        viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+
+
+                    mainHandler.post {
+                        waitingText.text = resources.getString(R.string.waiting_bar_text)
+                        timerMaxValue = 100
+                        waitingBar.max = timerMaxValue
+
+                        viewBinding.FocusedBtn.visibility = View.GONE
+                        viewBinding.waitingLayout.visibility = View.VISIBLE
                     }
                 }
                 CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED -> { //초점 잡힌 상태
 //                    Log.d("KSM", "Auto-focus state: Focused Locked")
                     stringAfState = "focusedLocked"
-                    progress = 0
-//                    mainHandler.post{
-//                        if(accX > -1.0 && accX < 1.0){
-//                            if(accY > -1.0 && accY < 2.0){
-//                                if(accZ >= 9.0 && accZ < 11.0){
-//                                    viewBinding.imageCaptureBtn.visibility = View.VISIBLE
-//                                }else{
-//                                    viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
-//                                }
-//                            }else{
-//                                viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
-//                            }
-//                        }else{
-//                            viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
-//                        }
-//                    }
+
+                    //don't take photo when capturing
+                    session.stopRepeating()
+
+                    if (timer != null) {
+                        timer!!.cancel()
+                    }
+
+                    timer = timer(period = 10) {
+                        progress++
+                        waitingBar.progress = progress
+
+                        if (accX > accXmin && accX < accXmax) {
+                            if (accY > accYmin && accY < accYmax) {
+                                if (accZ >= accZmin && accZ < accZmax) {
+                                    if (progress == timerMaxValue) { //100 * 10 = 1000ms = 1s
+                                        this@timer.cancel()
+                                        mainHandler.post {
+                                            Log.i(
+                                                "KSM",
+                                                "CHECK!!!! isFocus : ${isFocus}"
+                                            )
+                                            viewBinding.waitingLayout.visibility = View.GONE
+                                            viewBinding.imageCaptureBtn.visibility = View.VISIBLE
+
+                                            runOnUiThread {
+                                                captureStart()
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    isFocus = false
+                                    progress = 0
+                                    waitingBar.progress = 0
+                                    timer!!.cancel()
+                                    cancelAutoFocus()
+                                }
+                            } else {
+                                isFocus = false
+                                progress = 0
+                                waitingBar.progress = 0
+                                timer!!.cancel()
+                                cancelAutoFocus()
+                            }
+                        } else {
+                            isFocus = false
+                            progress = 0
+                            waitingBar.progress = 0
+                            timer!!.cancel()
+                            cancelAutoFocus()
+                        }
+                    }
                 }
                 CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED -> {
 //                    Log.d("KSM", "Auto-focus state: Not Focused Locked")
                     stringAfState = "notFocusedLocked"
                     progress = 0
+                    waitingBar.progress = progress
                     mainHandler.post{
                         viewBinding.waitingLayout.visibility = View.GONE
                         viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
@@ -503,232 +585,8 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
         //캡처버튼을 클릭했을 경우
         viewBinding.imageCaptureBtn.setOnClickListener{
             it.isEnabled = false
-            val captureAccX = accX.toInt().toString()
-            val captureAccY = accY.toInt().toString()
-            val captureAccZ = accZ.toInt().toString()
-            val captureAngleXZ = angleXZ.toInt().toString()
-            val captureAngleYZ = angleYZ.toInt().toString()
 
-            Log.d("KSM", "CaptureBtn Clicked!!")
-
-            //capture animation
-            viewBinding.flashView.visibility = View.VISIBLE
-            val flashAni = AnimationUtils.loadAnimation(this@RawActivity,R.anim.alpha_anim)
-            viewBinding.flashView.startAnimation(flashAni)
-            Handler().postDelayed({
-                viewBinding.flashView.visibility = View.GONE }, 500)
-
-            lifecycleScope.launch(Dispatchers.IO) {
-                takePhoto().use { result ->
-                    Log.d("KSM", "Result received: $result")
-
-                    Log.d("KSM", "Result image size : ${result.image.width} x ${result.image.height}")
-
-                    //try to crop
-//                    val resultImage = result.image
-//                    val res_plane = resultImage.planes
-//                    val crop_top = viewBinding.borderView.top
-//                    val crop_left = viewBinding.borderView.left
-//                    val crop_w = viewBinding.borderView.width
-//                    val crop_h = viewBinding.borderView.height
-//                    val crop_buf = ByteBuffer.allocateDirect(crop_w*crop_h)
-//
-//                    res_plane[0].buffer.position(crop_top * resultImage.width + crop_left)
-//                    res_plane[0].buffer.limit((crop_top + crop_h) * resultImage.width + crop_left + crop_w)
-//                    crop_buf.put(res_plane[0].buffer)
-
-                    Log.i("KSM", "== save DNG file START! ==")
-                    var timeStart = System.currentTimeMillis()
-
-                    outputUri = saveResult(result)
-
-                    var timeEnd = System.currentTimeMillis()
-                    var takeTime = timeEnd - timeStart
-                    Log.i("KSM", "== save DNG file END! ==")
-                    Log.i("KSM", "== IT Takes "+takeTime+"ms ==")
-//                    Log.d("KSM", "Image saved: ${outputUri.toString()}") //- 이전의 흔적 (이미지 저장)
-
-                    //Path를 얻기 위한 과정
-                    val cursor = contentResolver.query(outputUri!!, null, null, null, null)
-                    cursor!!.moveToNext()
-                    val pathName = cursor.getString(cursor.getColumnIndex("_data") ?: 0)
-                    val dng_file = File(pathName)
-                    val path = dng_file.parent
-
-                    //for get dng's width, height
-                    val dngWHBmp = BitmapFactory.decodeFile(pathName)
-
-                    Log.d("KSM", "outputDirectory pathName : ${pathName}")
-                    Log.d("KSM", "outputDirectory path : ${path}")
-
-                    val timestamp = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA).format(System.currentTimeMillis())
-
-                    val bmp_fileName = "/BMP_$timestamp.bmp"
-                    val tiffbmp_convertName = "/TIFFBMP_$timestamp.bmp"
-                    val bmp_path = path+bmp_fileName
-                    val tiffbmp_path = path+tiffbmp_convertName
-                    val bmp_file = File(path+bmp_fileName)
-
-                    val tiff_fileName = "/TIFF_$timestamp"
-                    val tiff_path = path+tiff_fileName
-
-                    Log.d("KSM", "tiff path in Kotlin : ${tiff_path}")
-
-                    lifecycleScope.launch(Dispatchers.Main){
-                        //libraw
-//                        Log.d("KSM", "TESTING --- ${lib()}")
-
-                        Log.d("KSM", "DNG Size (w*h) : ${dngWHBmp.width}, ${dngWHBmp.height}")
-//                        Log.d("KSM", "DNG Size[H,W] : ${dngWHBmp.height}, ${dngWHBmp.width}")
-
-                        val rotatedWidth = viewBinding.borderView.height
-                        val rotatedHeight = viewBinding.borderView.width
-                        val rotated_y = viewBinding.borderView.left
-                        val rotated_x = viewBinding.borderView.top
-
-                        //get ScaleRatio width, height by (result.image => horizontal/previewSize => vertical)
-//                        val scaleRatio_w = dngWHBmp.width.toFloat() / previewSize.height.toFloat()
-//                        val scaleRatio_h = dngWHBmp.height.toFloat() / previewSize.width.toFloat()
-                        val scaleRatio_w = dngWHBmp.width.toDouble() / viewBinding.rawViewFinder.height.toDouble()
-                        val scaleRatio_h = dngWHBmp.height.toDouble() / viewBinding.rawViewFinder.width.toDouble()
-                        Log.d("KSM", "viewFinder Size (w*h) : ${viewBinding.rawViewFinder.width} * ${viewBinding.rawViewFinder.height}")
-                        Log.d("KSM", "scaleRatio[w, h] = ${scaleRatio_w}, ${scaleRatio_h}")
-
-                        //set borderView size to result.image size
-                        var border_x = (rotated_x * scaleRatio_w).toInt()
-                        var border_y = (rotated_y * scaleRatio_h).toInt()
-                        var borderWidth = (rotatedWidth * scaleRatio_w).toInt()
-                        var borderHeight = (rotatedHeight * scaleRatio_h).toInt()
-
-                        Log.d("KSM", "origin border[l,t,w,h] = " +
-                                "${viewBinding.borderView.left}, " +
-                                "${viewBinding.borderView.top}, " +
-                                "${viewBinding.borderView.height}, " +
-                                "${viewBinding.borderView.width}")
-                        Log.d("KSM", "rotated border[l,t,w,h] = " +
-                                "${rotated_x}, ${rotated_y}, " +
-                                "${rotatedWidth}, ${rotatedHeight}")
-                        Log.d("KSM", "border[l,t,w,h] = ${border_x}, ${border_y}, ${borderWidth}, ${borderHeight}")
-
-                        //revise x and width value
-                        val revise_y_value = 100
-//                    borderLeft += revise_x_value
-                        border_y += revise_y_value
-                        borderHeight -= (revise_y_value * 2)
-                        Log.d("KSM", "revise border[l,t,w,h] = $border_x, $border_y, $borderWidth, $borderHeight")
-
-                        Log.i("KSM", "== DNG to TIFF START! ==")
-                        var timeStart = System.currentTimeMillis()
-
-                        val ac_str = if(border_x != 0 || border_y != 0 || borderWidth != 0 || borderHeight != 0){
-                            arrayOf("-v", "-w", "-4", "-T", "-B", "${border_x}", //"-w", "-a",
-                                "${border_y}", "${borderWidth}", "${borderHeight}", "${pathName}")
-                        }else{
-                            arrayOf("-v", "-T", "${pathName}")
-                        }
-                        val resultTiff = simple_dcraw(ac_str, tiff_path)
-//                        val resultTiff = simple_dcraw2(ac_str)
-//                        val resultTiff = unprocessed_raw(ac_str, tiff_path)
-//                        val resultTiff = dngToTiff(pathName, tiff_path)
-//                        val resultBitmap = dngToBitmap(pathName)
-                        var timeEnd = System.currentTimeMillis()
-                        Log.d("KSM", "resultTiff Result : ${resultTiff}")
-
-                        var takeTime = timeEnd - timeStart
-                        Log.i("KSM", "== DNG to TIFF END! ==")
-                        Log.i("KSM", "== IT Takes "+takeTime+"ms ==")
-
-//                        val tiffBmp = TiffConverter.convertTiffBmp(tiff_path+".tiff", tiffbmp_path, null, null)
-//
-//                        if(tiffBmp){
-//                            Log.d("KSM", "tiff convert to bmp!!")
-//                        }else{
-//                            Log.d("KSM", "tiff convert to bmp failed!!")
-//                        }
-
-                        Log.i("KSM", "== TIFF to BMP START! ==")
-                        timeStart = System.currentTimeMillis()
-                        val a_bmp = TiffBitmapFactory.decodeFile(File(tiff_path+".tiff"))
-                        Log.d("KSM", "tiff size (w*h) : ${a_bmp.width}*${a_bmp.height}")
-
-                        var pixel_x = (a_bmp.width) / 2
-                        var pixel_y = (a_bmp.height) / 2
-
-                        /*val a_bmpRGB = getRGB(a_bmp, pixel_x, pixel_y)
-                        Log.d("KSM", "tiff to androidBitmap R/G/B : Pos[${pixel_x},${pixel_y}] = ${a_bmpRGB[0]}/${a_bmpRGB[1]}/${a_bmpRGB[2]}")*/
-
-                        val saveBmp = AndroidBmpUtil.save(a_bmp, bmp_path)
-                        timeEnd = System.currentTimeMillis()
-
-                        if(saveBmp){
-                            var takeTime = timeEnd - timeStart
-                            Log.i("KSM", "== TIFF to BMP END! ==")
-                            Log.i("KSM", "== IT Takes "+takeTime+"ms ==")
-                            Log.d("KSM", "AndroidBmpUtil Bitmap saved bmp!!")
-                        }else{
-                            Log.i("KSM", "== TIFF to BMP END! ==")
-                            Log.i("KSM", "== IT Takes "+takeTime+"ms ==")
-                            Log.d("KSM", "AndroidBmpUtil Bitmap saved bmp failed!!")
-                        }
-
-                        val dng_bitmap = BitmapFactory.decodeFile(pathName)
-                        pixel_x = (dng_bitmap.width) / 2
-                        pixel_y = (dng_bitmap.height) / 2
-                        val dng_bitmap_RGB = getRGB(dng_bitmap, pixel_x, pixel_y)
-                        Log.d("KSM", "dngToBitmap R/G/B : Pos[${pixel_x},${pixel_y}] = ${dng_bitmap_RGB[0]}/${dng_bitmap_RGB[1]}/${dng_bitmap_RGB[2]}")
-
-                        //call tiffbitmap, bmp to Andorid bitmap
-//                        var tiffbmp_bitmap = BitmapFactory.decodeFile(tiffbmp_path)
-//                        val tiffbmp_w = tiffbmp_bitmap.width
-//                        val tiffbmp_h = tiffbmp_bitmap.height
-                        var bmp_bitmap = BitmapFactory.decodeFile(bmp_path)
-                        val tiffbmp_w = bmp_bitmap.width
-                        val tiffbmp_h = bmp_bitmap.height
-
-//                        Log.d("KSM", "tiffbmp size : ${tiffbmp_bitmap.width}*${tiffbmp_bitmap.height}")
-                        Log.d("KSM", "bmp size (w*h) : ${bmp_bitmap.width}*${bmp_bitmap.height}")
-
-                        //tiffbmp_bitmap RGB
-//                        pixel_x = (tiffbmp_bitmap.width) / 2
-//                        pixel_y = (tiffbmp_bitmap.height) / 2
-//                        var tiffbmp_RGB = getRGB(tiffbmp_bitmap, pixel_x, pixel_y)
-//                        Log.d("KSM", "tiffbmp R/G/B : Pos[${pixel_x},${pixel_y}] = ${tiffbmp_RGB[0]}/${tiffbmp_RGB[1]}/${tiffbmp_RGB[2]}")
-
-                        //bmp_bitmap RGB
-//                        var bmp_RGB = getRGB(bmp_bitmap, saved_x, saved_y)
-//                        Log.d("KSM", "bmp R/G/B : Pos[${saved_x},${saved_y}] = ${bmp_RGB[0]}/${bmp_RGB[1]}/${bmp_RGB[2]}")
-                        pixel_x = (bmp_bitmap.width) / 2
-                        pixel_y = (bmp_bitmap.height) / 2
-                        var bmp_center_RGB = getRGB(bmp_bitmap, pixel_x, pixel_y)
-                        Log.d("KSM", "bmp R/G/B : Pos[${pixel_x},${pixel_y}] = ${bmp_center_RGB[0]}/${bmp_center_RGB[1]}/${bmp_center_RGB[2]}")
-
-                        val intent = Intent(this@RawActivity, ResultActivity::class.java)
-//                        intent.putExtra("cameraId", rawCameraInfo!!.cameraId)
-//                        intent.putExtra("imageFormat", rawCameraInfo!!.format)
-                        intent.putExtra("dngPath", pathName)
-                        intent.putExtra("bmpPath", bmp_path)
-                        Log.d("KSM", "accX : ${captureAccX}, accY : ${captureAccY}, accZ : ${captureAccZ}\n" +
-                                "angleXZ : ${captureAngleXZ}, angleYZ : ${captureAngleYZ}")
-                        intent.putExtra("accX", captureAccX)
-                        intent.putExtra("accY", captureAccY)
-                        intent.putExtra("accZ", captureAccZ)
-                        intent.putExtra("angleXZ", captureAngleXZ)
-                        intent.putExtra("angleYZ", captureAngleYZ)
-                        intent.putExtra("stringAfState", stringAfState)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        startActivity(intent)
-                        finish()
-                    }
-
-//                    //촬영 후 다시 자동 AF 모드로 설정
-//                    session.stopRepeating()
-//                    captureRequest.apply{
-//                        set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-//                    }
-//                    session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
-
-                }
-            }
+            captureStart()
 
             it.post{
 //                it.isEnabled = true
@@ -1184,23 +1042,69 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
         Toast.makeText(this@RawActivity, "Focused : ${meteringRectangle.x} / ${meteringRectangle.y}" ,Toast.LENGTH_SHORT).show()
     }
 
-    //이전에 설정해놓은 AutoFocus를 해제
-    private fun cancelAutoFocus(){
-        Handler(Looper.getMainLooper()).removeCallbacksAndMessages(null)
+    private fun startAutoFocus(){ //get AF in center in sensor.
+        session.stopRepeating()
 
-        val captureRequest = setCaptureRequest()
+        val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
+            addTarget(viewBinding.rawViewFinder.holder.surface)
+        }
+
+        //get centerpoint from sensor
+        val sensorRect = characteristics!!.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+        val centerX = sensorRect!!.width()/2
+        val centerY = sensorRect!!.height()/2
+
+        val halfTouchWidth = 50
+        val halfTouchHeight = 50
+        val focuseAreaTouch = MeteringRectangle(
+            Math.max(centerX - halfTouchWidth, 0),
+            Math.max(centerY - halfTouchHeight, 0),
+            Math.min(centerX - halfTouchWidth, sensorRect.right),
+            Math.min(centerY - halfTouchHeight, sensorRect.bottom),
+            MeteringRectangle.METERING_WEIGHT_MAX - 1
+        )
 
         captureRequest.apply{
-            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF)
+            set(CaptureRequest.CONTROL_AF_REGIONS, arrayOf(focuseAreaTouch))
+            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO)
             set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
+            if(torchState){
+                set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
+            }
+            setTag(AUTO_FOCUS_TAG)
+        }
+
+        session.setRepeatingRequest(captureRequest.build(), mCaptureCallback, cameraHandler)
+
+        Log.i(TAG, "AutoFocused")
+        isFocus = true
+//        Toast.makeText(this@StartRawTestActivity, "AUTO Focused : ${focuseAreaTouch.x} / ${focuseAreaTouch.y}" ,Toast.LENGTH_SHORT).show()
+    }
+
+    //이전에 설정해놓은 AutoFocus를 해제
+    private fun cancelAutoFocus(){
+        Log.i("KSM", "cancelAutoFocus() STARTED!!")
+//        Handler(Looper.getMainLooper()).removeCallbacksAndMessages(null)
+
+        session.stopRepeating()
+
+        val captureRequest = camera2!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply{
+            addTarget(viewBinding.rawViewFinder.holder.surface)
+        }
+
+        captureRequest.apply{
+            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+            set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE)
             if(torchState == true){
                 set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
             }
+            setTag(AUTO_FOCUS_CANCEL)
         }
 
-        session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+        session.setRepeatingRequest(captureRequest.build(), mCaptureCallback, cameraHandler)
 
-        Log.d("KSM", "AutoFocus Cancelled")
+        Log.i("KSM", "AutoFocus Cancelled")
+        Log.d(TAG, "AutoFocus Cancelled")
     }
 
     //captureRequest 설정 함수
@@ -1284,6 +1188,235 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int)  = Unit
+
+    private fun captureStart(){
+        val captureAccX = accX.toInt().toString()
+        val captureAccY = accY.toInt().toString()
+        val captureAccZ = accZ.toInt().toString()
+        val captureAngleXZ = angleXZ.toInt().toString()
+        val captureAngleYZ = angleYZ.toInt().toString()
+
+        Log.d("KSM", "CaptureBtn Clicked!!")
+
+        //capture animation
+        viewBinding.flashView.visibility = View.VISIBLE
+        val flashAni = AnimationUtils.loadAnimation(this@RawActivity,R.anim.alpha_anim)
+        viewBinding.flashView.startAnimation(flashAni)
+        Handler().postDelayed({
+            viewBinding.flashView.visibility = View.GONE }, 500)
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            takePhoto().use { result ->
+                Log.d("KSM", "Result received: $result")
+
+                Log.d("KSM", "Result image size : ${result.image.width} x ${result.image.height}")
+
+                //try to crop
+//                    val resultImage = result.image
+//                    val res_plane = resultImage.planes
+//                    val crop_top = viewBinding.borderView.top
+//                    val crop_left = viewBinding.borderView.left
+//                    val crop_w = viewBinding.borderView.width
+//                    val crop_h = viewBinding.borderView.height
+//                    val crop_buf = ByteBuffer.allocateDirect(crop_w*crop_h)
+//
+//                    res_plane[0].buffer.position(crop_top * resultImage.width + crop_left)
+//                    res_plane[0].buffer.limit((crop_top + crop_h) * resultImage.width + crop_left + crop_w)
+//                    crop_buf.put(res_plane[0].buffer)
+
+                Log.i("KSM", "== save DNG file START! ==")
+                var timeStart = System.currentTimeMillis()
+
+                outputUri = saveResult(result)
+
+                var timeEnd = System.currentTimeMillis()
+                var takeTime = timeEnd - timeStart
+                Log.i("KSM", "== save DNG file END! ==")
+                Log.i("KSM", "== IT Takes "+takeTime+"ms ==")
+//                    Log.d("KSM", "Image saved: ${outputUri.toString()}") //- 이전의 흔적 (이미지 저장)
+
+                //Path를 얻기 위한 과정
+                val cursor = contentResolver.query(outputUri!!, null, null, null, null)
+                cursor!!.moveToNext()
+                val pathName = cursor.getString(cursor.getColumnIndex("_data") ?: 0)
+                val dng_file = File(pathName)
+                val path = dng_file.parent
+
+                //for get dng's width, height
+                val dngWHBmp = BitmapFactory.decodeFile(pathName)
+
+                Log.d("KSM", "outputDirectory pathName : ${pathName}")
+                Log.d("KSM", "outputDirectory path : ${path}")
+
+                val timestamp = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA).format(System.currentTimeMillis())
+
+                val bmp_fileName = "/BMP_$timestamp.bmp"
+                val tiffbmp_convertName = "/TIFFBMP_$timestamp.bmp"
+                val bmp_path = path+bmp_fileName
+                val tiffbmp_path = path+tiffbmp_convertName
+                val bmp_file = File(path+bmp_fileName)
+
+                val tiff_fileName = "/TIFF_$timestamp"
+                val tiff_path = path+tiff_fileName
+
+                Log.d("KSM", "tiff path in Kotlin : ${tiff_path}")
+
+                lifecycleScope.launch(Dispatchers.Main){
+                    //libraw
+//                        Log.d("KSM", "TESTING --- ${lib()}")
+
+                    Log.d("KSM", "DNG Size (w*h) : ${dngWHBmp.width}, ${dngWHBmp.height}")
+//                        Log.d("KSM", "DNG Size[H,W] : ${dngWHBmp.height}, ${dngWHBmp.width}")
+
+                    val rotatedWidth = viewBinding.borderView.height
+                    val rotatedHeight = viewBinding.borderView.width
+                    val rotated_y = viewBinding.borderView.left
+                    val rotated_x = viewBinding.borderView.top
+
+                    //get ScaleRatio width, height by (result.image => horizontal/previewSize => vertical)
+//                        val scaleRatio_w = dngWHBmp.width.toFloat() / previewSize.height.toFloat()
+//                        val scaleRatio_h = dngWHBmp.height.toFloat() / previewSize.width.toFloat()
+                    val scaleRatio_w = dngWHBmp.width.toDouble() / viewBinding.rawViewFinder.height.toDouble()
+                    val scaleRatio_h = dngWHBmp.height.toDouble() / viewBinding.rawViewFinder.width.toDouble()
+                    Log.d("KSM", "viewFinder Size (w*h) : ${viewBinding.rawViewFinder.width} * ${viewBinding.rawViewFinder.height}")
+                    Log.d("KSM", "scaleRatio[w, h] = ${scaleRatio_w}, ${scaleRatio_h}")
+
+                    //set borderView size to result.image size
+                    var border_x = (rotated_x * scaleRatio_w).toInt()
+                    var border_y = (rotated_y * scaleRatio_h).toInt()
+                    var borderWidth = (rotatedWidth * scaleRatio_w).toInt()
+                    var borderHeight = (rotatedHeight * scaleRatio_h).toInt()
+
+                    Log.d("KSM", "origin border[l,t,w,h] = " +
+                            "${viewBinding.borderView.left}, " +
+                            "${viewBinding.borderView.top}, " +
+                            "${viewBinding.borderView.height}, " +
+                            "${viewBinding.borderView.width}")
+                    Log.d("KSM", "rotated border[l,t,w,h] = " +
+                            "${rotated_x}, ${rotated_y}, " +
+                            "${rotatedWidth}, ${rotatedHeight}")
+                    Log.d("KSM", "border[l,t,w,h] = ${border_x}, ${border_y}, ${borderWidth}, ${borderHeight}")
+
+                    //revise x and width value
+                    val revise_y_value = 100
+//                    borderLeft += revise_x_value
+                    border_y += revise_y_value
+                    borderHeight -= (revise_y_value * 2)
+                    Log.d("KSM", "revise border[l,t,w,h] = $border_x, $border_y, $borderWidth, $borderHeight")
+
+                    Log.i("KSM", "== DNG to TIFF START! ==")
+                    var timeStart = System.currentTimeMillis()
+
+                    val ac_str = if(border_x != 0 || border_y != 0 || borderWidth != 0 || borderHeight != 0){
+                        arrayOf("-v", "-w", "-4", "-T", "-B", "${border_x}", //"-w", "-a",
+                            "${border_y}", "${borderWidth}", "${borderHeight}", "${pathName}")
+                    }else{
+                        arrayOf("-v", "-T", "${pathName}")
+                    }
+                    val resultTiff = simple_dcraw(ac_str, tiff_path)
+//                        val resultTiff = simple_dcraw2(ac_str)
+//                        val resultTiff = unprocessed_raw(ac_str, tiff_path)
+//                        val resultTiff = dngToTiff(pathName, tiff_path)
+//                        val resultBitmap = dngToBitmap(pathName)
+                    var timeEnd = System.currentTimeMillis()
+                    Log.d("KSM", "resultTiff Result : ${resultTiff}")
+
+                    var takeTime = timeEnd - timeStart
+                    Log.i("KSM", "== DNG to TIFF END! ==")
+                    Log.i("KSM", "== IT Takes "+takeTime+"ms ==")
+
+//                        val tiffBmp = TiffConverter.convertTiffBmp(tiff_path+".tiff", tiffbmp_path, null, null)
+//
+//                        if(tiffBmp){
+//                            Log.d("KSM", "tiff convert to bmp!!")
+//                        }else{
+//                            Log.d("KSM", "tiff convert to bmp failed!!")
+//                        }
+
+                    Log.i("KSM", "== TIFF to BMP START! ==")
+                    timeStart = System.currentTimeMillis()
+                    val a_bmp = TiffBitmapFactory.decodeFile(File(tiff_path+".tiff"))
+                    Log.d("KSM", "tiff size (w*h) : ${a_bmp.width}*${a_bmp.height}")
+
+                    var pixel_x = (a_bmp.width) / 2
+                    var pixel_y = (a_bmp.height) / 2
+
+                    /*val a_bmpRGB = getRGB(a_bmp, pixel_x, pixel_y)
+                    Log.d("KSM", "tiff to androidBitmap R/G/B : Pos[${pixel_x},${pixel_y}] = ${a_bmpRGB[0]}/${a_bmpRGB[1]}/${a_bmpRGB[2]}")*/
+
+                    val saveBmp = AndroidBmpUtil.save(a_bmp, bmp_path)
+                    timeEnd = System.currentTimeMillis()
+
+                    if(saveBmp){
+                        var takeTime = timeEnd - timeStart
+                        Log.i("KSM", "== TIFF to BMP END! ==")
+                        Log.i("KSM", "== IT Takes "+takeTime+"ms ==")
+                        Log.d("KSM", "AndroidBmpUtil Bitmap saved bmp!!")
+                    }else{
+                        Log.i("KSM", "== TIFF to BMP END! ==")
+                        Log.i("KSM", "== IT Takes "+takeTime+"ms ==")
+                        Log.d("KSM", "AndroidBmpUtil Bitmap saved bmp failed!!")
+                    }
+
+                    val dng_bitmap = BitmapFactory.decodeFile(pathName)
+                    pixel_x = (dng_bitmap.width) / 2
+                    pixel_y = (dng_bitmap.height) / 2
+                    val dng_bitmap_RGB = getRGB(dng_bitmap, pixel_x, pixel_y)
+                    Log.d("KSM", "dngToBitmap R/G/B : Pos[${pixel_x},${pixel_y}] = ${dng_bitmap_RGB[0]}/${dng_bitmap_RGB[1]}/${dng_bitmap_RGB[2]}")
+
+                    //call tiffbitmap, bmp to Andorid bitmap
+//                        var tiffbmp_bitmap = BitmapFactory.decodeFile(tiffbmp_path)
+//                        val tiffbmp_w = tiffbmp_bitmap.width
+//                        val tiffbmp_h = tiffbmp_bitmap.height
+                    var bmp_bitmap = BitmapFactory.decodeFile(bmp_path)
+                    val tiffbmp_w = bmp_bitmap.width
+                    val tiffbmp_h = bmp_bitmap.height
+
+//                        Log.d("KSM", "tiffbmp size : ${tiffbmp_bitmap.width}*${tiffbmp_bitmap.height}")
+                    Log.d("KSM", "bmp size (w*h) : ${bmp_bitmap.width}*${bmp_bitmap.height}")
+
+                    //tiffbmp_bitmap RGB
+//                        pixel_x = (tiffbmp_bitmap.width) / 2
+//                        pixel_y = (tiffbmp_bitmap.height) / 2
+//                        var tiffbmp_RGB = getRGB(tiffbmp_bitmap, pixel_x, pixel_y)
+//                        Log.d("KSM", "tiffbmp R/G/B : Pos[${pixel_x},${pixel_y}] = ${tiffbmp_RGB[0]}/${tiffbmp_RGB[1]}/${tiffbmp_RGB[2]}")
+
+                    //bmp_bitmap RGB
+//                        var bmp_RGB = getRGB(bmp_bitmap, saved_x, saved_y)
+//                        Log.d("KSM", "bmp R/G/B : Pos[${saved_x},${saved_y}] = ${bmp_RGB[0]}/${bmp_RGB[1]}/${bmp_RGB[2]}")
+                    pixel_x = (bmp_bitmap.width) / 2
+                    pixel_y = (bmp_bitmap.height) / 2
+                    var bmp_center_RGB = getRGB(bmp_bitmap, pixel_x, pixel_y)
+                    Log.d("KSM", "bmp R/G/B : Pos[${pixel_x},${pixel_y}] = ${bmp_center_RGB[0]}/${bmp_center_RGB[1]}/${bmp_center_RGB[2]}")
+
+                    val intent = Intent(this@RawActivity, ResultActivity::class.java)
+//                        intent.putExtra("cameraId", rawCameraInfo!!.cameraId)
+//                        intent.putExtra("imageFormat", rawCameraInfo!!.format)
+                    intent.putExtra("dngPath", pathName)
+                    intent.putExtra("bmpPath", bmp_path)
+                    Log.d("KSM", "accX : ${captureAccX}, accY : ${captureAccY}, accZ : ${captureAccZ}\n" +
+                            "angleXZ : ${captureAngleXZ}, angleYZ : ${captureAngleYZ}")
+                    intent.putExtra("accX", captureAccX)
+                    intent.putExtra("accY", captureAccY)
+                    intent.putExtra("accZ", captureAccZ)
+                    intent.putExtra("angleXZ", captureAngleXZ)
+                    intent.putExtra("angleYZ", captureAngleYZ)
+                    intent.putExtra("stringAfState", stringAfState)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    startActivity(intent)
+                    finish()
+                }
+
+//                    //촬영 후 다시 자동 AF 모드로 설정
+//                    session.stopRepeating()
+//                    captureRequest.apply{
+//                        set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+//                    }
+//                    session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+
+            }
+        }
+    }
 
     override fun onResume() {
         super.onResume()
@@ -1429,6 +1562,7 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
         //METERING_RECTANGLE_SIZE 초기값 설정
         private const val METERING_RECTANGLE_SIZE = 0.15f
         private const val AUTO_FOCUS_TAG = "auto_focus_tag"
+        private const val AUTO_FOCUS_CANCEL = "auto_focus_cancel"
         private const val AUTO_FOCUS_TIMEOUT_MILLIS = 5_000L
     }
 }

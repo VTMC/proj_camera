@@ -5,5 +5,10 @@
     <string name="torchOff">FLASH OFF</string>
     <string name="torchAutoOn">AUTO ON</string>
     <string name="torchAutoOff">AUTO OFF</string>
-    <string name="waiting_bar_text">Please wait until in focus.</string>
+
+    <string name="captured">Captured...</string>
+
+    <string name="waiting_bar_text">taking photo, Please wait.</string>
+    <string name="setting_urineStrip">Please, set UrineStrip in center of white border.</string>
+    <string name="do_focus_text">focus now</string>
 </resources>

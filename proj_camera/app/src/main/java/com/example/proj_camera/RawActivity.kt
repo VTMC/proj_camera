@@ -365,6 +365,14 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 
                                             runOnUiThread {
                                                 captureStart()
+
+                                                Toast.makeText(this@RawActivity, "Image Captured! \n  location:${outputUri.toString()}", Toast.LENGTH_SHORT).show()
+
+                                                val dialog = ProgressDialog(this@RawActivity)
+                                                dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+                                                dialog.setCancelable(false)
+                                                dialog.setMessage("이미지 저장중...")
+                                                dialog.show()
                                             }
                                         }
                                     }
@@ -581,28 +589,6 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
             }
 
         session.setRepeatingRequest(captureRequest.build(), mCaptureCallback, cameraHandler)
-
-        //캡처버튼을 클릭했을 경우
-        viewBinding.imageCaptureBtn.setOnClickListener{
-            it.isEnabled = false
-
-            captureStart()
-
-            it.post{
-//                it.isEnabled = true
-                Toast.makeText(this@RawActivity, "Image Captured! \n  location:${outputUri.toString()}", Toast.LENGTH_SHORT).show()
-
-                val dialog = ProgressDialog(this@RawActivity)
-                dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
-                dialog.setCancelable(false)
-                dialog.setMessage("이미지 저장중...")
-                dialog.show()
-
-//                viewBinding.loadingCircle.visibility = View.VISIBLE
-
-            }
-        }
-
 
         //AutoFocus 관련 변수 및 제스처 설정
         var clickCount: Int = 0

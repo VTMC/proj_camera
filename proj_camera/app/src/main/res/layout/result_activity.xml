@@ -17,24 +17,24 @@
             android:id="@+id/croppedImageTxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
+            android:layout_marginTop="32dp"
             android:text="Cropped Image"
             android:textSize="25sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/resultImageView"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/resultImageView"
             android:layout_width="350dp"
             android:layout_height="250dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="32dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.501"
+            app:layout_constraintHorizontal_bias="0.491"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.15"
+            app:layout_constraintTop_toBottomOf="@+id/croppedImageTxt"
             tools:srcCompat="@tools:sample/avatars" />
 
         <TextView
@@ -58,22 +58,22 @@
             android:text="cropResult"
             android:textSize="25sp"
             android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/cropResult"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/pointedImageView2"
-            app:layout_constraintBottom_toTopOf="@+id/cropResult"/>
+            app:layout_constraintTop_toBottomOf="@+id/pointedImageView2" />
 
         <ImageView
             android:id="@+id/pointedImageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="20dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/infoLayout"
             app:layout_constraintBottom_toTopOf="@+id/cropResult"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.497"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/infoLayout"
             tools:layout_editor_absoluteY="513dp"
             tools:srcCompat="@tools:sample/avatars" />
 
@@ -109,10 +109,10 @@
             android:layout_height="wrap_content"
             android:layout_marginVertical="20dp"
             android:text="Back to Camera"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/logLayout"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@+id/logLayout" />
 
         <LinearLayout
             android:id="@+id/infoLayout"
@@ -270,13 +270,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="1"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <ImageView
                         android:id="@+id/cropImg1"
                         android:layout_width="wrap_content"
@@ -285,6 +287,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/cropCheckImg1"
                         android:layout_width="wrap_content"
@@ -293,6 +296,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/RGBtoBitmap1"
                         android:layout_width="wrap_content"
@@ -301,6 +305,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/selectedImg1"
                         android:layout_width="wrap_content"
@@ -309,22 +314,24 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <TextView
                         android:id="@+id/suitabilityTxtView1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="OK"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/img1RGBTxt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="R : G : B : "
+                        android:textAlignment="center"
                         android:textSize="15sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -332,13 +339,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="2"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <ImageView
                         android:id="@+id/cropImg2"
                         android:layout_width="wrap_content"
@@ -346,15 +355,17 @@
                         android:layout_margin="20dp"
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
-                        tools:srcCompat="@tools:sample/avatars"/>
+                        tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/cropCheckImg2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_margin="20dp"
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
-                        android:layout_margin="20dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/RGBtoBitmap2"
                         android:layout_width="wrap_content"
@@ -363,6 +374,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/selectedImg2"
                         android:layout_width="wrap_content"
@@ -371,22 +383,24 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <TextView
                         android:id="@+id/suitabilityTxtView2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="OK"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/img2RGBTxt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="R : G : B : "
+                        android:textAlignment="center"
                         android:textSize="15sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -394,13 +408,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="3"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <ImageView
                         android:id="@+id/cropImg3"
                         android:layout_width="wrap_content"
@@ -408,7 +424,8 @@
                         android:layout_margin="20dp"
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
-                        tools:srcCompat="@tools:sample/avatars"/>
+                        tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/cropCheckImg3"
                         android:layout_width="wrap_content"
@@ -417,6 +434,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/RGBtoBitmap3"
                         android:layout_width="wrap_content"
@@ -425,6 +443,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/selectedImg3"
                         android:layout_width="wrap_content"
@@ -433,22 +452,24 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <TextView
                         android:id="@+id/suitabilityTxtView3"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="OK"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/img3RGBTxt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="R : G : B : "
+                        android:textAlignment="center"
                         android:textSize="15sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -456,13 +477,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="4"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <ImageView
                         android:id="@+id/cropImg4"
                         android:layout_width="wrap_content"
@@ -470,7 +493,8 @@
                         android:layout_margin="20dp"
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
-                        tools:srcCompat="@tools:sample/avatars"/>
+                        tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/cropCheckImg4"
                         android:layout_width="wrap_content"
@@ -479,6 +503,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/RGBtoBitmap4"
                         android:layout_width="wrap_content"
@@ -487,6 +512,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/selectedImg4"
                         android:layout_width="wrap_content"
@@ -495,22 +521,24 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <TextView
                         android:id="@+id/suitabilityTxtView4"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="OK"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/img4RGBTxt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="R : G : B : "
+                        android:textAlignment="center"
                         android:textSize="15sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -518,13 +546,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="5"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <ImageView
                         android:id="@+id/cropImg5"
                         android:layout_width="wrap_content"
@@ -532,7 +562,8 @@
                         android:layout_margin="20dp"
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
-                        tools:srcCompat="@tools:sample/avatars"/>
+                        tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/cropCheckImg5"
                         android:layout_width="wrap_content"
@@ -541,6 +572,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/RGBtoBitmap5"
                         android:layout_width="wrap_content"
@@ -549,6 +581,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/selectedImg5"
                         android:layout_width="wrap_content"
@@ -557,22 +590,24 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <TextView
                         android:id="@+id/suitabilityTxtView5"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="OK"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/img5RGBTxt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="R : G : B : "
+                        android:textAlignment="center"
                         android:textSize="15sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -580,13 +615,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="6"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <ImageView
                         android:id="@+id/cropImg6"
                         android:layout_width="wrap_content"
@@ -594,7 +631,8 @@
                         android:layout_margin="20dp"
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
-                        tools:srcCompat="@tools:sample/avatars"/>
+                        tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/cropCheckImg6"
                         android:layout_width="wrap_content"
@@ -603,6 +641,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/RGBtoBitmap6"
                         android:layout_width="wrap_content"
@@ -611,6 +650,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/selectedImg6"
                         android:layout_width="wrap_content"
@@ -619,22 +659,24 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <TextView
                         android:id="@+id/suitabilityTxtView6"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="OK"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/img6RGBTxt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="R : G : B : "
+                        android:textAlignment="center"
                         android:textSize="15sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -642,13 +684,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="7"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <ImageView
                         android:id="@+id/cropImg7"
                         android:layout_width="wrap_content"
@@ -656,7 +700,8 @@
                         android:layout_margin="20dp"
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
-                        tools:srcCompat="@tools:sample/avatars"/>
+                        tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/cropCheckImg7"
                         android:layout_width="wrap_content"
@@ -665,6 +710,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/RGBtoBitmap7"
                         android:layout_width="wrap_content"
@@ -673,6 +719,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/selectedImg7"
                         android:layout_width="wrap_content"
@@ -681,22 +728,24 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <TextView
                         android:id="@+id/suitabilityTxtView7"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="OK"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/img7RGBTxt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="R : G : B : "
+                        android:textAlignment="center"
                         android:textSize="15sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -704,13 +753,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="8"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <ImageView
                         android:id="@+id/cropImg8"
                         android:layout_width="wrap_content"
@@ -718,7 +769,8 @@
                         android:layout_margin="20dp"
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
-                        tools:srcCompat="@tools:sample/avatars"/>
+                        tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/cropCheckImg8"
                         android:layout_width="wrap_content"
@@ -727,6 +779,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/RGBtoBitmap8"
                         android:layout_width="wrap_content"
@@ -735,6 +788,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/selectedImg8"
                         android:layout_width="wrap_content"
@@ -743,22 +797,24 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <TextView
                         android:id="@+id/suitabilityTxtView8"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="OK"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/img8RGBTxt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="R : G : B : "
+                        android:textAlignment="center"
                         android:textSize="15sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -766,13 +822,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="9"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <ImageView
                         android:id="@+id/cropImg9"
                         android:layout_width="wrap_content"
@@ -780,7 +838,8 @@
                         android:layout_margin="20dp"
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
-                        tools:srcCompat="@tools:sample/avatars"/>
+                        tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/cropCheckImg9"
                         android:layout_width="wrap_content"
@@ -789,6 +848,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/RGBtoBitmap9"
                         android:layout_width="wrap_content"
@@ -797,6 +857,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/selectedImg9"
                         android:layout_width="wrap_content"
@@ -805,22 +866,24 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <TextView
                         android:id="@+id/suitabilityTxtView9"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="OK"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/img9RGBTxt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="R : G : B : "
+                        android:textAlignment="center"
                         android:textSize="15sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -828,13 +891,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="10"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <ImageView
                         android:id="@+id/cropImg10"
                         android:layout_width="wrap_content"
@@ -842,7 +907,8 @@
                         android:layout_margin="20dp"
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
-                        tools:srcCompat="@tools:sample/avatars"/>
+                        tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/cropCheckImg10"
                         android:layout_width="wrap_content"
@@ -851,6 +917,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/RGBtoBitmap10"
                         android:layout_width="wrap_content"
@@ -859,6 +926,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/selectedImg10"
                         android:layout_width="wrap_content"
@@ -867,22 +935,24 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <TextView
                         android:id="@+id/suitabilityTxtView10"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="OK"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/img10RGBTxt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="R : G : B : "
+                        android:textAlignment="center"
                         android:textSize="15sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -890,13 +960,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="11"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <ImageView
                         android:id="@+id/cropImg11"
                         android:layout_width="wrap_content"
@@ -904,7 +976,8 @@
                         android:layout_margin="20dp"
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
-                        tools:srcCompat="@tools:sample/avatars"/>
+                        tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/cropCheckImg11"
                         android:layout_width="wrap_content"
@@ -913,6 +986,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/RGBtoBitmap11"
                         android:layout_width="wrap_content"
@@ -921,6 +995,7 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <ImageView
                         android:id="@+id/selectedImg11"
                         android:layout_width="wrap_content"
@@ -929,22 +1004,24 @@
                         android:background="@drawable/urine_square"
                         android:padding="1dp"
                         tools:srcCompat="@tools:sample/avatars" />
+
                     <TextView
                         android:id="@+id/suitabilityTxtView11"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="OK"
+                        android:textAlignment="center"
                         android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/img11RGBTxt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
                         android:text="R : G : B : "
+                        android:textAlignment="center"
                         android:textSize="15sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
         </HorizontalScrollView>
@@ -994,43 +1071,36 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/cropResult">
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="show log"
-                android:textSize="30sp"
                 android:textAlignment="center"
-                android:textStyle="bold"/>
+                android:textSize="30sp"
+                android:textStyle="bold" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="5dp"
                 android:layout_marginHorizontal="10dp"
-                android:background="@color/black"/>
-            <ScrollView
-                android:id="@+id/logScroll"
+                android:background="@color/black" />
+
+            <TextView
+                android:id="@+id/logText"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:fillViewport="true"
-                android:scrollbars="none">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-                    <TextView
-                        android:id="@+id/logText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="10dp"
-                        android:text="Nothing..."
-                        android:textSize="15sp"
-                        android:textAlignment="textStart"/>
-                </LinearLayout>
-            </ScrollView>
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginVertical="5dp"
+                android:text="nothing..."
+                android:textAlignment="textStart"
+                android:textSize="15sp" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="5dp"
                 android:layout_marginHorizontal="10dp"
-                android:background="@color/black"/>
+                android:background="@color/black" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

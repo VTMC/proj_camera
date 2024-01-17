@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Point
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -125,6 +126,12 @@ class ResultActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
         progressDialog.setMessage("이미지 처리중...")
         progressDialog.show()
+
+        //display info
+        val smartphoneDisplay = windowManager.defaultDisplay
+        val displaySize = Point()
+        smartphoneDisplay.getRealSize(displaySize)
+        val displayWidth = displaySize.x
 
         logText = "========== ResultActivity.kt LOG START ==========\n"
 
@@ -350,6 +357,9 @@ class ResultActivity : AppCompatActivity() {
                         }
 
                         viewBinding.logText.text = logText
+                        if(displayWidth < 2000){
+                            viewBinding.logText.textSize = 10F
+                        }
                     }
 
                     progressDialog.dismiss()

@@ -99,7 +99,7 @@ class ResultActivity : AppCompatActivity() {
     )
 
     private lateinit var viewBinding: ResultActivityBinding
-    private var resultBmp : Bitmap? = null
+    private var resultImages_1 : List<Bitmap>? = null
     private var resultBmp2 : Bitmap? = null
     private var croppedCheckImg : Array<Bitmap>? = null
     private var suitabilityList : BooleanArray? = null
@@ -214,8 +214,8 @@ class ResultActivity : AppCompatActivity() {
 
             val findContours = FindContours(bmpPath)
             try{
-                resultBmp = findContours.update()
-                if(resultBmp != null){
+                resultImages_1 = findContours.update()
+                if(resultImages_1!![0] != null){
                     resultBmp2 = findContours.sqr
                 }
 
@@ -230,13 +230,13 @@ class ResultActivity : AppCompatActivity() {
             }
 
             lifecycleScope.launch(Dispatchers.Main){
-                if(resultBmp == null){
+                if(resultImages_1!![0] == null){
                     progressDialog.dismiss()
 
                     dialogBuilder.setTitle("이미지 처리 오류 발생 (1)")
                         .setMessage("이미지 처리가 제대로 되지 않았습니다. \n다시 촬영해주세요.")
                         .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                        .setCancelable(false)
+                        .setCancelable(true)
                         .setPositiveButton("확인",
                             DialogInterface.OnClickListener{ dialog, id ->
                                 startActivity(intent)
@@ -250,7 +250,7 @@ class ResultActivity : AppCompatActivity() {
                     dialogBuilder.setTitle("이미지 처리 오류 발생 (2)")
                         .setMessage("이미지 처리가 제대로 되지 않았습니다. \n다시 촬영해주세요.")
                         .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                        .setCancelable(false)
+                        .setCancelable(true)
                         .setPositiveButton("확인",
                             DialogInterface.OnClickListener{ dialog, id ->
                                 startActivity(intent)
@@ -263,7 +263,7 @@ class ResultActivity : AppCompatActivity() {
                     dialogBuilder.setTitle("이미지 처리 오류 발생 (3)")
                         .setMessage("잘린 이미지를 로드할 수 없습니다. \n다시 촬영해주세요.")
                         .setIcon(com.google.android.material.R.drawable.ic_clear_black_24)
-                        .setCancelable(false)
+                        .setCancelable(true)
                         .setPositiveButton("확인",
                             DialogInterface.OnClickListener{ dialog, id ->
                                 startActivity(intent)
@@ -288,13 +288,17 @@ class ResultActivity : AppCompatActivity() {
 
                     selectedRGB = selectRGB(croppedImgRGB!!)
 
-                    val pointedImageView = viewBinding.pointedImageView
+                    //set Bitmaps [Constants ~ update()]
+                    viewBinding.resultImages1.setImageBitmap(resultImages_1!![0])
+                    viewBinding.resultImages2.setImageBitmap(resultImages_1!![1])
+                    viewBinding.resultImages3.setImageBitmap(resultImages_1!![2])
+                    viewBinding.resultImages4.setImageBitmap(resultImages_1!![3])
+                    viewBinding.resultImages5.setImageBitmap(resultImages_1!![4])
+                    viewBinding.resultImages6.setImageBitmap(resultImages_1!![5])
 
-                    pointedImageView.setImageBitmap(resultBmp)
+                    //set Bitmaps [getSqr()]
+                    viewBinding.resultImages7.setImageBitmap(resultBmp2)
 
-                    val pointedImageView2 = viewBinding.pointedImageView2
-
-                    pointedImageView2.setImageBitmap(resultBmp2)
 
                     for (i in selectedRGB!!.indices) {
                         Log.d(
@@ -375,20 +379,36 @@ class ResultActivity : AppCompatActivity() {
             finish()
         }
 
-        viewBinding.pointedImageView.setOnClickListener {
-            viewBinding.pointedImageView.visibility = View.INVISIBLE
-            viewBinding.pointedImageView2.visibility = View.VISIBLE
-        }
+        viewBinding.apply{
+            resultImages1.setOnClickListener {
+                resultImages1.visibility = View.INVISIBLE
+                resultImages2.visibility = View.VISIBLE
+            }
 
-        viewBinding.pointedImageView2.setOnClickListener {
-            viewBinding.pointedImageView.visibility = View.VISIBLE
-            viewBinding.pointedImageView2.visibility = View.INVISIBLE
-//            viewBinding.pointedImageView3.visibility = View.VISIBLE
-        }
+            resultImages2.setOnClickListener {
+                resultImages2.visibility = View.INVISIBLE
+                resultImages3.visibility = View.VISIBLE
+            }
 
-        viewBinding.pointedImageView3.setOnClickListener {
-            viewBinding.pointedImageView.visibility = View.VISIBLE
-            viewBinding.pointedImageView3.visibility = View.INVISIBLE
+            resultImages3.setOnClickListener {
+                resultImages3.visibility = View.INVISIBLE
+                resultImages4.visibility = View.VISIBLE
+            }
+
+            resultImages4.setOnClickListener {
+                resultImages4.visibility = View.INVISIBLE
+                resultImages5.visibility = View.VISIBLE
+            }
+
+            resultImages5.setOnClickListener {
+                resultImages5.visibility = View.INVISIBLE
+                resultImages6.visibility = View.VISIBLE
+            }
+
+            resultImages6.setOnClickListener {
+                resultImages6.visibility = View.INVISIBLE
+                resultImages1.visibility = View.VISIBLE
+            }
         }
     }
 

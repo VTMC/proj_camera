@@ -226,6 +226,7 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                     mainHandler.post{
                         viewBinding.waitingLayout.visibility = View.GONE
                         viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                        cancelAutoFocus()
                     }
                 }
                 CaptureResult.CONTROL_AF_STATE_INACTIVE -> {
@@ -236,6 +237,7 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                     mainHandler.post{
                         viewBinding.waitingLayout.visibility = View.GONE
                         viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                        cancelAutoFocus()
                     }
                 }
                 CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN ->{
@@ -319,6 +321,7 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                     mainHandler.post{
                         viewBinding.waitingLayout.visibility = View.GONE
                         viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                        cancelAutoFocus()
                     }
                 }
                 CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN -> {
@@ -364,6 +367,7 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                                             viewBinding.imageCaptureBtn.visibility = View.VISIBLE
 
                                             runOnUiThread {
+                                                sensorManager.unregisterListener(this@RawActivity)
                                                 captureStart()
 
                                                 Toast.makeText(this@RawActivity, "Image Captured! \n  location:${outputUri.toString()}", Toast.LENGTH_SHORT).show()
@@ -407,6 +411,7 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
                     mainHandler.post{
                         viewBinding.waitingLayout.visibility = View.GONE
                         viewBinding.imageCaptureBtn.visibility = View.INVISIBLE
+                        cancelAutoFocus()
                     }
                 }
             }
@@ -1091,6 +1096,8 @@ class RawActivity : AppCompatActivity(), SensorEventListener{
 
         Log.i("KSM", "AutoFocus Cancelled")
         Log.d(TAG, "AutoFocus Cancelled")
+
+        isFocus = false
     }
 
     //captureRequest 설정 함수

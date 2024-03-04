@@ -62,46 +62,216 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/pointedImageView2" />
+            app:layout_constraintTop_toBottomOf="@+id/resultImageViewLayout" />
 
-        <ImageView
-            android:id="@+id/pointedImageView"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/resultImageViewLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="20dp"
+            android:orientation="vertical"
             app:layout_constraintBottom_toTopOf="@+id/cropResult"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.497"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/infoLayout"
-            tools:layout_editor_absoluteY="513dp"
-            tools:srcCompat="@tools:sample/avatars" />
+            tools:layout_editor_absoluteY="513dp">
 
-        <ImageView
-            android:id="@+id/pointedImageView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="20dp"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@+id/pointedImageView"
-            app:layout_constraintEnd_toEndOf="@+id/pointedImageView"
-            app:layout_constraintStart_toStartOf="@+id/pointedImageView"
-            app:layout_constraintTop_toTopOf="@+id/pointedImageView"
-            tools:srcCompat="@tools:sample/avatars" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:text="FindContours constants ~ update()"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
-        <ImageView
-            android:id="@+id/pointedImageView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="20dp"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@+id/pointedImageView2"
-            app:layout_constraintEnd_toEndOf="@+id/pointedImageView2"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/pointedImageView2"
-            app:layout_constraintTop_toTopOf="@+id/pointedImageView2"
-            app:layout_constraintVertical_bias="1.0"
-            tools:srcCompat="@tools:sample/avatars" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/resultImages_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/resultImages_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/resultImages_1"
+                    app:layout_constraintEnd_toEndOf="@+id/resultImages_1"
+                    app:layout_constraintStart_toStartOf="@+id/resultImages_1"
+                    app:layout_constraintTop_toTopOf="@+id/resultImages_1"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/resultImages_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/resultImages_1"
+                    app:layout_constraintEnd_toEndOf="@+id/resultImages_1"
+                    app:layout_constraintStart_toStartOf="@+id/resultImages_1"
+                    app:layout_constraintTop_toTopOf="@+id/resultImages_1"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/resultImages_4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/resultImages_1"
+                    app:layout_constraintEnd_toEndOf="@+id/resultImages_1"
+                    app:layout_constraintStart_toStartOf="@+id/resultImages_1"
+                    app:layout_constraintTop_toTopOf="@+id/resultImages_1"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/resultImages_5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/resultImages_1"
+                    app:layout_constraintEnd_toEndOf="@+id/resultImages_1"
+                    app:layout_constraintStart_toStartOf="@+id/resultImages_1"
+                    app:layout_constraintTop_toTopOf="@+id/resultImages_1"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/resultImages_6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/resultImages_1"
+                    app:layout_constraintEnd_toEndOf="@+id/resultImages_1"
+                    app:layout_constraintStart_toStartOf="@+id/resultImages_1"
+                    app:layout_constraintTop_toTopOf="@+id/resultImages_1"
+                    tools:srcCompat="@tools:sample/avatars" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:text="getSqr()"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/resultImages_7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:visibility="visible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/resultImages_8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/resultImages_7"
+                    app:layout_constraintEnd_toEndOf="@+id/resultImages_7"
+                    app:layout_constraintStart_toStartOf="@+id/resultImages_7"
+                    app:layout_constraintTop_toTopOf="@+id/resultImages_7"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/resultImages_9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/resultImages_7"
+                    app:layout_constraintEnd_toEndOf="@+id/resultImages_7"
+                    app:layout_constraintStart_toStartOf="@+id/resultImages_7"
+                    app:layout_constraintTop_toTopOf="@+id/resultImages_7"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/resultImages_10"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/resultImages_7"
+                    app:layout_constraintEnd_toEndOf="@+id/resultImages_7"
+                    app:layout_constraintStart_toStartOf="@+id/resultImages_7"
+                    app:layout_constraintTop_toTopOf="@+id/resultImages_7"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/resultImages_11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/resultImages_7"
+                    app:layout_constraintEnd_toEndOf="@+id/resultImages_7"
+                    app:layout_constraintStart_toStartOf="@+id/resultImages_7"
+                    app:layout_constraintTop_toTopOf="@+id/resultImages_7"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/resultImages_12"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/resultImages_7"
+                    app:layout_constraintEnd_toEndOf="@+id/resultImages_7"
+                    app:layout_constraintStart_toStartOf="@+id/resultImages_7"
+                    app:layout_constraintTop_toTopOf="@+id/resultImages_7"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/resultImages_13"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/resultImages_7"
+                    app:layout_constraintEnd_toEndOf="@+id/resultImages_7"
+                    app:layout_constraintStart_toStartOf="@+id/resultImages_7"
+                    app:layout_constraintTop_toTopOf="@+id/resultImages_7"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <ImageView
+                    android:id="@+id/resultImages_14"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/resultImages_7"
+                    app:layout_constraintEnd_toEndOf="@+id/resultImages_7"
+                    app:layout_constraintStart_toStartOf="@+id/resultImages_7"
+                    app:layout_constraintTop_toTopOf="@+id/resultImages_7"
+                    tools:srcCompat="@tools:sample/avatars" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
 
         <Button
             android:id="@+id/backBtn"
@@ -119,7 +289,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             app:layout_constraintBottom_toTopOf="@+id/pointedImageView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
@@ -127,126 +297,147 @@
             app:layout_constraintTop_toBottomOf="@+id/pointedImageTxt">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="vertical">
+                android:layout_gravity="center_horizontal"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/accXTextView"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:text="accX : "
-                    android:textColor="@color/black"
-                    android:textSize="15dp"
-                    android:textStyle="bold"
-                    tools:layout_editor_absoluteX="0dp"
-                    tools:layout_editor_absoluteY="521dp" />
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/accYTextView"
+                    <TextView
+                        android:id="@+id/accXTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="accX : "
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        tools:layout_editor_absoluteX="0dp"
+                        tools:layout_editor_absoluteY="521dp" />
+
+                    <TextView
+                        android:id="@+id/accYTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="accY : "
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        tools:layout_editor_absoluteX="0dp"
+                        tools:layout_editor_absoluteY="541dp" />
+
+                    <TextView
+                        android:id="@+id/accZTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="accZ : "
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        tools:layout_editor_absoluteX="0dp"
+                        tools:layout_editor_absoluteY="561dp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:text="accY : "
-                    android:textColor="@color/black"
-                    android:textSize="15dp"
-                    android:textStyle="bold"
-                    tools:layout_editor_absoluteX="0dp"
-                    tools:layout_editor_absoluteY="541dp" />
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/accZTextView"
+                    <TextView
+                        android:id="@+id/angleXZTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="angleXZ : "
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        tools:layout_editor_absoluteX="0dp"
+                        tools:layout_editor_absoluteY="581dp" />
+
+                    <TextView
+                        android:id="@+id/angleYZTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="angleYZ : "
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/afStateTxtView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="AF state : "
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:text="accZ : "
-                    android:textColor="@color/black"
-                    android:textSize="15dp"
-                    android:textStyle="bold"
-                    tools:layout_editor_absoluteX="0dp"
-                    tools:layout_editor_absoluteY="561dp" />
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/sqr_h_txtView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="sqr_h : "
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        tools:layout_editor_absoluteX="0dp"
+                        tools:layout_editor_absoluteY="581dp" />
+
+                    <TextView
+                        android:id="@+id/fbh_txtView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="fbh : "
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/bh_txtView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="bh : "
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/angleXZTextView"
+                android:layout_gravity="center_horizontal"
+                android:orientation="horizontal">
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:text="angleXZ : "
-                    android:textColor="@color/black"
-                    android:textSize="15dp"
-                    android:textStyle="bold"
-                    tools:layout_editor_absoluteX="0dp"
-                    tools:layout_editor_absoluteY="581dp" />
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/angleYZTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:text="angleYZ : "
-                    android:textColor="@color/black"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/afStateTxtView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:text="AF state : "
-                    android:textColor="@color/black"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/image_type"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:text="imageType : DNG"
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        tools:layout_editor_absoluteX="0dp"
+                        tools:layout_editor_absoluteY="581dp" />
+                </LinearLayout>
             </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/sqr_h_txtView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:text="sqr_h : "
-                    android:textColor="@color/black"
-                    android:textSize="15dp"
-                    android:textStyle="bold"
-                    tools:layout_editor_absoluteX="0dp"
-                    tools:layout_editor_absoluteY="581dp" />
-
-                <TextView
-                    android:id="@+id/fbh_txtView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:text="fbh : "
-                    android:textColor="@color/black"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/bh_txtView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:text="bh : "
-                    android:textColor="@color/black"
-                    android:textSize="15dp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
 
         </LinearLayout>
 

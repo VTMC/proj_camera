@@ -100,7 +100,7 @@ class ResultActivity : AppCompatActivity() {
 
     private lateinit var viewBinding: ResultActivityBinding
     private var resultImages_1 : List<Bitmap>? = null
-    private var resultBmp2 : Bitmap? = null
+    private var resultImages_2 : List<Bitmap>? = null
     private var croppedCheckImg : Array<Bitmap>? = null
     private var suitabilityList : BooleanArray? = null
     private var croppedImgList : Array<String>? = null
@@ -216,10 +216,10 @@ class ResultActivity : AppCompatActivity() {
             try{
                 resultImages_1 = findContours.update()
                 if(resultImages_1!![0] != null){
-                    resultBmp2 = findContours.sqr
+                    resultImages_2 = findContours.sqr
                 }
 
-                if(resultBmp2 != null){
+                if(resultImages_2!![0] != null){
                     croppedCheckImg = findContours.checkCropImg()
                     suitabilityList = findContours.getSuitabilityList()
                     croppedImgList = findContours.getCropImgFileList()
@@ -244,7 +244,7 @@ class ResultActivity : AppCompatActivity() {
                             })
                         .show()
 
-                }else if(resultBmp2 == null){
+                }else if(resultImages_2!![0] == null){
                     progressDialog.dismiss()
 
                     dialogBuilder.setTitle("이미지 처리 오류 발생 (2)")
@@ -283,6 +283,10 @@ class ResultActivity : AppCompatActivity() {
                     //add LogText String
                     logText += "----- 2. Image process Info -----\n" //LOGTEXT
                     logText += "sqr_h : $sqr_h\nfbh : $fbh\nbh : $bh\n" //LOGTEXT
+
+                    var imageProcessingLogText = findContours.getLogText()
+                    logText += imageProcessingLogText+"\n" //LOGTEXT
+
                     logText += "---------------------------\n\n" //LOGTEXT
                     logText += "----- 3. RGB Distance Log -----\n" //LOGTEXT
 
@@ -297,7 +301,11 @@ class ResultActivity : AppCompatActivity() {
                     viewBinding.resultImages6.setImageBitmap(resultImages_1!![5])
 
                     //set Bitmaps [getSqr()]
-                    viewBinding.resultImages7.setImageBitmap(resultBmp2)
+                    viewBinding.resultImages7.setImageBitmap(resultImages_2!![0])
+                    viewBinding.resultImages8.setImageBitmap(resultImages_2!![1])
+                    viewBinding.resultImages9.setImageBitmap(resultImages_2!![2])
+                    viewBinding.resultImages10.setImageBitmap(resultImages_2!![3])
+                    viewBinding.resultImages11.setImageBitmap(resultImages_2!![4])
 
 
                     for (i in selectedRGB!!.indices) {
@@ -380,6 +388,7 @@ class ResultActivity : AppCompatActivity() {
         }
 
         viewBinding.apply{
+            //Constants ~ update()
             resultImages1.setOnClickListener {
                 resultImages1.visibility = View.INVISIBLE
                 resultImages2.visibility = View.VISIBLE
@@ -408,6 +417,32 @@ class ResultActivity : AppCompatActivity() {
             resultImages6.setOnClickListener {
                 resultImages6.visibility = View.INVISIBLE
                 resultImages1.visibility = View.VISIBLE
+            }
+
+            // getSqr()
+            resultImages7.setOnClickListener {
+                resultImages7.visibility = View.INVISIBLE
+                resultImages8.visibility = View.VISIBLE
+            }
+
+            resultImages8.setOnClickListener {
+                resultImages8.visibility = View.INVISIBLE
+                resultImages9.visibility = View.VISIBLE
+            }
+
+            resultImages9.setOnClickListener {
+                resultImages9.visibility = View.INVISIBLE
+                resultImages10.visibility = View.VISIBLE
+            }
+
+            resultImages10.setOnClickListener {
+                resultImages10.visibility = View.INVISIBLE
+                resultImages11.visibility = View.VISIBLE
+            }
+
+            resultImages11.setOnClickListener {
+                resultImages11.visibility = View.INVISIBLE
+                resultImages7.visibility = View.VISIBLE
             }
         }
     }
@@ -502,7 +537,7 @@ class ResultActivity : AppCompatActivity() {
         Log.d("KSM", "RGB1_Lab : [L : ${doubleLab1[0]} / a : ${doubleLab1[1]} / b : ${doubleLab1[2]}]")
         logText += "RGB1_Lab : [L : ${doubleLab1[0]} / a : ${doubleLab1[1]} / b : ${doubleLab1[2]}]\n" //LOGTEXT
         Log.d("KSM", "RGB2_Lab : [L : ${doubleLab2[0]} / a : ${doubleLab2[1]} / b : ${doubleLab2[2]}]")
-        logText += "RGB2_Lab : [L : ${doubleLab2[0]} / a : ${doubleLab2[1]} / b : ${doubleLab2[2]}]\n" //LOGTEXT
+        logText += "RGB2_Lab : [L : ${doubleLab2[0]} / a : ${doubleLab2[1]} / b : ${doubleLab2[2]}]\n\n" //LOGTEXT
 
         val L_dis = (doubleLab1[0] - doubleLab2[0]).pow(2.0)
         val A_dis = (doubleLab1[1] - doubleLab2[1]).pow(2.0)

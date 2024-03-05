@@ -73,6 +73,7 @@ public class FindContours {
 
     //return resultImages1 (FindContours Constants ~ update())
     //src, enhancedSrc, srcGray, thresholdOutput, croppedImg, drawing, croppedSrc
+    List<Mat> resultImages1_Mat = new ArrayList<Mat>();
     List<Bitmap> resultImages1 = new ArrayList<Bitmap>();
 
     //return resultImages2 (getSqr())
@@ -98,12 +99,15 @@ public class FindContours {
             logText += "Cannot Read image : "+path+"\n\n"; //LOGTEXT
             System.exit(0);
         }
+        resultImages1_Mat.add(src); // 1
 
         //existing method - get contrast
 //        enhancedSrc = img_contrast(src);
-        enhancedSrc = changeSaturate(src, 0.5, 0);
+        enhancedSrc = changeSaturate(src, 1.0, 0);
+        resultImages1_Mat.add(enhancedSrc); // 2
 
         Imgproc.cvtColor(enhancedSrc, srcGray, Imgproc.COLOR_BGR2GRAY);
+        resultImages1_Mat.add(srcGray); // 3
 
 //        Imgproc.blur(srcGray, srcGray, new Size(3,3));
         var timeEnd = System.currentTimeMillis();
@@ -125,6 +129,7 @@ public class FindContours {
         Mat thresholdOutput = new Mat();
         //if background color is black
         Imgproc.threshold(srcGray, thresholdOutput, 130, 255, Imgproc.THRESH_BINARY);
+        resultImages1_Mat.add(thresholdOutput); // 4
 
         List<MatOfPoint> contoursSimple = new ArrayList<>();
         Mat hierarchy = new Mat();
@@ -140,37 +145,37 @@ public class FindContours {
         Core.add(drawing, src, drawing);
 
         Mat croppedImg = cropImg(src, contoursSimple, 70, 1200);
+        resultImages1_Mat.add(drawing); // 5
 
         if(croppedImg.width() > 500){
             Log.d("KSM", "DDDDDD~~!!~!");
             logText += "DDDDDD~~!!~!\n\n"; //LOGTEXT
             resultImages1.add(bmp);
+
+            for(Mat mat: resultImages1_Mat){
+                bmp = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(mat, bmp);
+                resultImages1.add(bmp);
+            }
+
             return resultImages1;
         }
 
         //Crop src like croppedImg
         Rect roi = new Rect(croppedImg_x, croppedImg_y, croppedImg_w, croppedImg_h);
         croppedSrc = new Mat(src, roi);
+        resultImages1_Mat.add(croppedSrc); // 6
 
         if(roi.empty()){
             Log.e("KSM", "Update() cropERROR!!! : "+croppedImg.width());
             logText += "Update() cropERROR!!! \n\n"; //LOGTEXT
             resultImages1.add(bmp);
 
-//            //FindContours Constants
-//            resultImages1_Mat.add(src);
-//            resultImages1_Mat.add(enhancedSrc);
-//            resultImages1_Mat.add(srcGray);
-//
-//            //FindContours updates()
-//            resultImages1_Mat.add(thresholdOutput);
-//            resultImages1_Mat.add(drawing);
-//
-//            for(Mat mat: resultImages1_Mat){
-//                Bitmap bitmap = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
-//                Utils.matToBitmap(mat, bitmap);
-//                resultImages1.add(bitmap);
-//            }
+            for(Mat mat: resultImages1_Mat){
+                Bitmap bitmap = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(mat, bitmap);
+                resultImages1.add(bitmap);
+            }
 
             var timeEnd = System.currentTimeMillis();
             var takeTime = timeEnd - timeStart;
@@ -179,40 +184,21 @@ public class FindContours {
             return resultImages1;
         }
 
+
+
         try{
-//            Imgproc.cvtColor(drawing, drawing, Imgproc.COLOR_BGR2RGB);
-            //FindContours constants
-            bmp = Bitmap.createBitmap(src.cols(), src.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(src, bmp);
-            resultImages1.add(bmp);
-            bmp = Bitmap.createBitmap(enhancedSrc.cols(), enhancedSrc.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(enhancedSrc, bmp);
-            resultImages1.add(bmp);
-            bmp = Bitmap.createBitmap(srcGray.cols(), srcGray.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(srcGray, bmp);
-            resultImages1.add(bmp);
-
-            //FindContours updates()
-            bmp = Bitmap.createBitmap(thresholdOutput.cols(), thresholdOutput.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(thresholdOutput, bmp);
-            resultImages1.add(bmp);
-//            bmp = Bitmap.createBitmap(croppedImg.cols(), croppedImg.rows(), Bitmap.Config.ARGB_8888);
-//            Utils.matToBitmap(croppedImg, bmp);
-//            resultImages1.add(bmp);
-            bmp = Bitmap.createBitmap(drawing.cols(), drawing.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(drawing, bmp);
-            resultImages1.add(bmp);
-            bmp = Bitmap.createBitmap(croppedSrc.cols(), croppedSrc.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(croppedSrc, bmp);
-            resultImages1.add(bmp);
-
+            for(Mat mat: resultImages1_Mat){
+                Bitmap bitmap = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(mat, bitmap);
+                resultImages1.add(bitmap);
+            }
         }catch(CvException e){
             Log.e("KSM", "OPENCV - update : Mat to bitmap Error!!", e);
             logText += "OPENCV - update : Mat to bitmap Error!!\n\n"; //LOGTEXT
         }
 
-        Log.d("KSM", "bmp width : "+bmp.getWidth()+" / height : "+bmp.getHeight());
-        logText += "bmp width : "+bmp.getWidth()+" / height : "+bmp.getHeight()+"\n"; //LOGTEXT
+//        Log.d("KSM", "bmp width : "+bmp.getWidth()+" / height : "+bmp.getHeight());
+//        logText += "bmp width : "+bmp.getWidth()+" / height : "+bmp.getHeight()+"\n"; //LOGTEXT
 
         var timeEnd = System.currentTimeMillis();
         var takeTime = timeEnd - timeStart;
@@ -446,9 +432,9 @@ public class FindContours {
             resultImages2_Mat.add(drawing);
 
             for(Mat mat : resultImages2_Mat){
-                bmp = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
-                Utils.matToBitmap(mat, bmp);
-                resultImages2.add(bmp);
+                Bitmap bitmap = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(mat, bitmap);
+                resultImages2.add(bitmap);
             }
 
 //            bmp = Bitmap.createBitmap(drawing.cols(), drawing.rows(), Bitmap.Config.ARGB_8888);

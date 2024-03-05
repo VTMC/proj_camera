@@ -116,6 +116,9 @@ class ResultActivity : AppCompatActivity() {
     private lateinit var RGBtoBitmap : List<ImageView>
     private lateinit var selectedImgList : List <ImageView>
 
+    private lateinit var resultsImageView1 : List <ImageView>
+    private lateinit var resultsImageView2 : List <ImageView>
+
     //show logText
     private lateinit var logText : String
 
@@ -173,6 +176,16 @@ class ResultActivity : AppCompatActivity() {
             viewBinding.selectedImg9, viewBinding.selectedImg10, viewBinding.selectedImg11
         )
 
+        resultsImageView1 = listOf(
+            viewBinding.resultImages1, viewBinding.resultImages2, viewBinding.resultImages3, viewBinding.resultImages4,
+            viewBinding.resultImages5, viewBinding.resultImages6, viewBinding.resultImages7
+        )
+
+        resultsImageView2 = listOf(
+            viewBinding.resultImages8, viewBinding.resultImages9, viewBinding.resultImages10, viewBinding.resultImages11,
+            viewBinding.resultImages12, viewBinding.resultImages13, viewBinding.resultImages14
+        )
+
 //        val cameraId = intent.getStringExtra("cameraId")
 //        val imgageFormat = intent.getStringExtra("imageFormat")
         val dngPath = intent.getStringExtra("dngPath")
@@ -215,8 +228,35 @@ class ResultActivity : AppCompatActivity() {
             val findContours = FindContours(bmpPath)
             try{
                 resultImages_1 = findContours.update()
+
+                Log.d("KSM", resultImages_1!!.toString())
+
+                runOnUiThread {
+                    if(resultImages_1!![0] == null) {
+                        for(i in 1 until resultImages_1!!.count()){
+                            resultsImageView1[i-1].setImageBitmap(resultImages_1!![i])
+                        }
+                    }else{
+                        for(i in 0 until resultImages_1!!.count()){
+                            resultsImageView1[i].setImageBitmap(resultImages_1!![i])
+                        }
+                    }
+                }
+
                 if(resultImages_1!![0] != null){
                     resultImages_2 = findContours.sqr
+
+                    runOnUiThread {
+                        if(resultImages_2!![0] == null) {
+                            for(i in 1 until resultImages_2!!.count()){
+                                resultsImageView2[i-1].setImageBitmap(resultImages_2!![i])
+                            }
+                        }else{
+                            for(i in 0 until resultImages_2!!.count()){
+                                resultsImageView2[i].setImageBitmap(resultImages_2!![i])
+                            }
+                        }
+                    }
                 }
 
                 if(resultImages_2!![0] != null){
@@ -374,6 +414,34 @@ class ResultActivity : AppCompatActivity() {
                         }
                     }
 
+                    for(i in 0 until resultImages_1!!.count()){
+                        if(i == resultImages_1!!.count() - 1){
+                            resultsImageView1[i].setOnClickListener {
+                                resultsImageView1[0].visibility = View.VISIBLE
+                                resultsImageView1[i].visibility = View.INVISIBLE
+                            }
+                        }else{
+                            resultsImageView1[i].setOnClickListener {
+                                resultsImageView1[i+1].visibility = View.VISIBLE
+                                resultsImageView1[i].visibility = View.INVISIBLE
+                            }
+                        }
+                    }
+
+                    for(i in 0 until resultImages_2!!.count()){
+                        if(i == resultImages_2!!.count() - 1){
+                            resultsImageView2[i].setOnClickListener {
+                                resultsImageView2[0].visibility = View.VISIBLE
+                                resultsImageView2[i].visibility = View.INVISIBLE
+                            }
+                        }else{
+                            resultsImageView2[i].setOnClickListener {
+                                resultsImageView2[i+1].visibility = View.VISIBLE
+                                resultsImageView2[i].visibility = View.INVISIBLE
+                            }
+                        }
+                    }
+
                     progressDialog.dismiss()
                 }
 
@@ -385,65 +453,6 @@ class ResultActivity : AppCompatActivity() {
             val intent = Intent(this@ResultActivity, RawActivity::class.java)
             startActivity(intent)
             finish()
-        }
-
-        viewBinding.apply{
-            //Constants ~ update()
-            resultImages1.setOnClickListener {
-                resultImages1.visibility = View.INVISIBLE
-                resultImages2.visibility = View.VISIBLE
-            }
-
-            resultImages2.setOnClickListener {
-                resultImages2.visibility = View.INVISIBLE
-                resultImages3.visibility = View.VISIBLE
-            }
-
-            resultImages3.setOnClickListener {
-                resultImages3.visibility = View.INVISIBLE
-                resultImages4.visibility = View.VISIBLE
-            }
-
-            resultImages4.setOnClickListener {
-                resultImages4.visibility = View.INVISIBLE
-                resultImages5.visibility = View.VISIBLE
-            }
-
-            resultImages5.setOnClickListener {
-                resultImages5.visibility = View.INVISIBLE
-                resultImages6.visibility = View.VISIBLE
-            }
-
-            resultImages6.setOnClickListener {
-                resultImages6.visibility = View.INVISIBLE
-                resultImages1.visibility = View.VISIBLE
-            }
-
-            // getSqr()
-            resultImages7.setOnClickListener {
-                resultImages7.visibility = View.INVISIBLE
-                resultImages8.visibility = View.VISIBLE
-            }
-
-            resultImages8.setOnClickListener {
-                resultImages8.visibility = View.INVISIBLE
-                resultImages9.visibility = View.VISIBLE
-            }
-
-            resultImages9.setOnClickListener {
-                resultImages9.visibility = View.INVISIBLE
-                resultImages10.visibility = View.VISIBLE
-            }
-
-            resultImages10.setOnClickListener {
-                resultImages10.visibility = View.INVISIBLE
-                resultImages11.visibility = View.VISIBLE
-            }
-
-            resultImages11.setOnClickListener {
-                resultImages11.visibility = View.INVISIBLE
-                resultImages7.visibility = View.VISIBLE
-            }
         }
     }
 
